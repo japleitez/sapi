@@ -32,7 +32,7 @@ public class UserDetailsImpl implements UserDetails {
         List<GrantedAuthority> authorities = user.roles().stream()
             .map(role -> new SimpleGrantedAuthority(role.name()))
             .collect(Collectors.toList());
-        return new UserDetailsImpl(user.username(), user.name(), user.password(), authorities);
+        return new UserDetailsImpl(user.name(), user.username(), user.password(), authorities);
     }
 
     public String getName() {

@@ -16,9 +16,9 @@ public class UserRepository {
 
     private static final Set<Role> DEFAULT_ROLES = new HashSet<>();
 
-    private static final String DEFAULT_NAME = "Johnny Cash";
+    private static final String DEFAULT_NAME = "Peter Cash";
 
-    private static final String DEFAULT_USERNAME = "john@legend.com";
+    private static final String DEFAULT_USERNAME = "peter@legend.com";
 
     private static final String DEFAULT_LICENSE = "LU999999999999999999";
 
@@ -45,6 +45,7 @@ public class UserRepository {
 
     public void save(User user) {
         user.roles(DEFAULT_ROLES);
+        user.license(DEFAULT_LICENSE);
         repo.put(user.username(), user);
     }
 
