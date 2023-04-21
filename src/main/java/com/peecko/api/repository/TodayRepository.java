@@ -7,6 +7,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class TodayRepository {
@@ -38,12 +39,30 @@ public class TodayRepository {
 
     private Video createVideo(String[] values) {
         return new Video()
-            .setCode(values[0])
-            .setTitle(values[1])
-            .setCategory(values[2])
-            .setCoach(values[3])
-            .setDuration(values[4])
-            .setTags(Arrays.asList(values[5]))
-            .setUrl(values[6]);
+            .setCode(trim(values[0]))
+            .setCategory(trim(values[1]))
+            .setTitle(trim(values[2]))
+            .setDuration(trim(values[3]))
+            .setCoach(trim(values[4]))
+            .setImage(trim(values[5]))
+            .setUrl(trim(values[6]))
+            .setAudience(trim(values[7]))
+            .setIntensity(trim(values[8]))
+            .setTags(asList(values[9]))
+            .setDescription(trim(values[10]))
+            .setResume(trim(values[11]));
     }
+
+    private String trim(String value) {
+        return value != null? value.trim(): null;
+    }
+
+    private List<String> asList(String values) {
+        if (values == null) {
+            return new ArrayList<>();
+        }
+        String[] array = values.split(",");
+        return Arrays.stream(array).map(String::trim).collect(Collectors.toList());
+    }
+
 }

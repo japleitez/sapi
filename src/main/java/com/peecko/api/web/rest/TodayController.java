@@ -1,16 +1,9 @@
 package com.peecko.api.web.rest;
 
-import com.peecko.api.domain.User;
 import com.peecko.api.domain.Video;
 import com.peecko.api.repository.TodayRepository;
-import com.peecko.api.repository.UserRepository;
-import com.peecko.api.web.payload.request.ActivationRequest;
-import com.peecko.api.web.payload.response.MessageResponse;
-import jakarta.validation.Valid;
+import com.peecko.api.web.payload.response.TodayResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,8 +20,10 @@ public class TodayController {
 
     @GetMapping("/videos")
     public ResponseEntity<?> getVideos() {
+        String greeting = "Here is your weekly dose of Wellness support. Check back next week for more updates";
+        List<String> tags = List.of("all", "energy", "endurance", "relax", "learn");
         List<Video> videos = todayRepository.getVideos();
-        return ResponseEntity.ok(videos);
+        return ResponseEntity.ok(new TodayResponse(greeting, tags, videos));
     }
 
 }

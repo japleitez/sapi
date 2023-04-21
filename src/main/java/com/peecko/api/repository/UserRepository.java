@@ -20,7 +20,7 @@ public class UserRepository {
 
     private static final String DEFAULT_USERNAME = "peter@legend.com";
 
-    private static final String DEFAULT_LICENSE = "LU999999999999999999";
+    private static final String DEFAULT_LICENSE = "AAAA0000111122223333";
 
     static {
         DEFAULT_ROLES.add(Role.USER);

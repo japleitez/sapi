@@ -3,7 +3,7 @@ package com.peecko.api.web.rest;
 import java.util.stream.Collectors;
 
 import com.peecko.api.domain.User;
-import com.peecko.api.domain.UserDetailsImpl;
+import com.peecko.api.security.UserDetailsImpl;
 import com.peecko.api.repository.UserRepository;
 import com.peecko.api.security.JwtUtils;
 import com.peecko.api.web.payload.request.LoginRequest;
@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -47,7 +48,7 @@ public class AuthController {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
-            .map(item -> item.getAuthority())
+            .map(GrantedAuthority::getAuthority)
             .collect(Collectors.toList());
 
         JwtResponse ret = new JwtResponse();

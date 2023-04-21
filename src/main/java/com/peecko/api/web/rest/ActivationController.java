@@ -9,10 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/membership")
@@ -24,7 +21,7 @@ public class ActivationController {
         this.userRepository = userRepository;
     }
 
-    @PostMapping("/activate")
+    @PutMapping("/activate")
     public ResponseEntity<?> activate(@Valid @RequestBody ActivationRequest activationRequest) {
         String license = activationRequest.getLicense();
         if (!StringUtils.hasLength(license)) {

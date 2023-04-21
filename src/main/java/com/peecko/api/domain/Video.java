@@ -11,11 +11,15 @@ import java.util.List;
 @Setter @Getter @Accessors(chain = true)
 public class Video {
     private String code;
-    private String title;
     private String category;
-    private String coach;
+    private String title;
     private String duration;
+    private String coach;
+    private String image;
     private String url;
+    private String audience;
+    private String intensity;
     private List<String> tags;
-
+    private String description;
+    private String resume;
 }

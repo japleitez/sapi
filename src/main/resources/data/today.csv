@@ -1,6 +1,6 @@
-code;title;category;coach;duration;tags;url
-V0010;Yoga Leg Stretching for the evening;YOGA;Julia Hernandez;12;energy;url
-V0020;Early morning pilates;PILATES;Tatiana Mendoza;12;energy;url
-V0030;Soft Abs Calisthenics;CALISTHENICS;Robert Roca;7;energy;url
-V0040;Meditation before bed;MEDITATION;Angelica Muller;10;relax;url
-V0040;Risk of zinc deficiency;MEDITATION;Angelica Muller;10;relax;url
+CODE ;CATEGORY    ;TITLE                ;DURATION;COACH          ;IMAGE;URL;AUDIENCE   ;INTENSITY             ;TAGS            ;DESCRIPTION                                                                                                                             ;RESUME;
+V0010;YOGA        ;Yoga Leg Stretching  ;12      ;Julia Hernandez;IMAGE;URL;Women      ;Beginner, Intermediate;energy,endurance;This is a quick routine that is focused mainly on hips and hamstrings. Perfect for recovery/sore muscles and working on your flexibility;She is a LA-based yoga trainer who specialises in yoga therapeutics for scoliosis, stress, anxiety, depression, and many other modern day imbalances and health issues;
+V0020;PILATES     ;Morning pilates      ;10      ;Tatiana Mendoza;IMAGE;URL;All Genders;Beginner              ;energy,endurance;This is a quick routine that is focused mainly on hips and hamstrings. Perfect for recovery/sore muscles and working on your flexibility; ;
+V0030;CALISTHENICS;Easy Abs Calisthenics;7       ;Robert Roca    ;IMAGE;URL;Men        ;Beginner, Intermediate;endurance       ;                                                                                                                                        ;Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua;
+V0040;MEDITATION  ;Meditation for sleep ;10      ;Tom Hollwege   ;IMAGE;URL;All Genders;                      ;relax           ;Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat                              ; ;
+V0050;NUTRITION   ;Zinc deficiency risks;2:30    ;Angelica Muller;IMAGE;URL;All Genders;                      ;learn           ;Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua              ;Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit;
