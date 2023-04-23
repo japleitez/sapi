@@ -1,32 +1,27 @@
-package com.peecko.api.repository;
+package com.peecko.api.utils;
 
 import com.peecko.api.domain.Video;
-import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
-public class TodayRepository {
+public class VideoLoader {
+
     private static final String SEMICOLON = ";";
-    private static final List<Video> videos = new ArrayList<>();
 
-    public List<Video> getVideos() {
-        if (videos.isEmpty()) {
-            loadVideos();
-        }
-        return videos;
-    }
-
-    private void loadVideos()  {
-        InputStream is = getClass().getResourceAsStream("/data/today.csv");
+    public List<Video> loadVideos(int max, String filename) {
+        List<Video> videos = new ArrayList<>();
+        InputStream is = getClass().getResourceAsStream(filename);
         try (BufferedReader br =  new BufferedReader(new InputStreamReader(is))) {
             int row = 0;
             String line;
-            while ((line = br.readLine()) != null) {
+            while ((line = br.readLine()) != null && row <= max) {
                 if (row > 0) {
                     videos.add(createVideo(line.split(SEMICOLON)));
                 }
@@ -35,6 +30,7 @@ public class TodayRepository {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return videos;
     }
 
     private Video createVideo(String[] values) {

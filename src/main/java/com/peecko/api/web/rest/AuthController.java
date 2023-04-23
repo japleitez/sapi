@@ -69,6 +69,7 @@ public class AuthController {
         User user = new User()
             .name(signUpRequest.getName())
             .username(signUpRequest.getUsername())
+            .language(signUpRequest.getLanguage().toUpperCase())
             .password(encoder.encode(signUpRequest.getPassword()));
 
         userRepository.save(user);

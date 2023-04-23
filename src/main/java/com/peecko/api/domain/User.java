@@ -13,5 +13,6 @@ public class User {
     private String username;
     private String password;
     private String license;
+    private String language;
     private Set<Role> roles = new HashSet<>();
 }

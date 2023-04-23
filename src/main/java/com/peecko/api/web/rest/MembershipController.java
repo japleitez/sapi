@@ -6,33 +6,30 @@ import com.peecko.api.web.payload.request.ActivationRequest;
 import com.peecko.api.web.payload.response.MessageResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/membership")
-public class ActivationController {
+public class MembershipController extends BaseController {
 
     final UserRepository userRepository;
 
-    public ActivationController(UserRepository userRepository) {
+    public MembershipController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @PutMapping("/activate")
     public ResponseEntity<?> activate(@Valid @RequestBody ActivationRequest activationRequest) {
         String license = activationRequest.getLicense();
-        if (!StringUtils.hasLength(license)) {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "License must be provided"));
+        if (!StringUtils.hasLength(license) && license.length() != 20) {
+            return ResponseEntity.ok(new MessageResponse("ERROR", "License must be 20 char length"));
         }
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userRepository.findByUsername(userDetails.getUsername()).get();
+        User user = getActiveUser(userRepository);
         if (user.license().equals(license)) {
             return ResponseEntity.ok(new MessageResponse("OK", "License activated successfully!"));
         } else {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "License is not valid"));
+            return ResponseEntity.ok(new MessageResponse("ERROR", "License is wrong, please try again"));
         }
     }
 

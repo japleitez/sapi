@@ -1,4 +1,4 @@
-package com.peecko.api.domain;
+package com.peecko.api.web.payload.response;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,7 @@ import java.time.Instant;
 @RequiredArgsConstructor
 @Accessors(fluent = true)
 @Getter
-public class LoginResult {
+public class LoginResponse {
     private final Instant loginTs;
     private final String authToken;
     private final Duration tokenValidity;
