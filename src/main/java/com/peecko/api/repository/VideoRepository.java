@@ -5,9 +5,7 @@ import com.peecko.api.domain.Video;
 import com.peecko.api.utils.VideoLoader;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 public class VideoRepository {
@@ -15,6 +13,10 @@ public class VideoRepository {
     private static final List<Video> TODAY_VIDEOS = new ArrayList<>();
     private static final List<Category> CATEGORIES = new ArrayList<>();
     private static final List<CategoryData> CATEGORY_DATA = new ArrayList<>();
+
+    public static final HashMap<String, List<Video>> FAVORITES =  new HashMap<>();
+
+    public static final Set<Video> ALL_VIDEOS = new HashSet<>();
 
     static {
         CATEGORY_DATA.add(new CategoryData("C1", "Health Risks", "/data/today.csv"));
@@ -57,7 +59,30 @@ public class VideoRepository {
         category.setCode(entry.code);
         category.setTitle(entry.title);
         category.setVideos(new ArrayList<>(new VideoLoader().loadVideos(3, entry.filename)));
+        ALL_VIDEOS.addAll(category.getVideos());
         return category;
     }
 
+    public void addFavorite(String user, String code) {
+        Optional<Video> optional = ALL_VIDEOS.stream().filter(video -> video.getCode().equals(code)).findFirst();
+        if (optional.isPresent()) {
+            List<Video> userFavorites = FAVORITES.get(user);
+            if (userFavorites == null) {
+                userFavorites = new ArrayList<>();
+            }
+            userFavorites.add(optional.get());
+            FAVORITES.put(user, userFavorites);
+        }
+    }
+
+    public void removeFavorite(String user, String code) {
+        Optional<Video> optional = ALL_VIDEOS.stream().filter(video -> video.getCode().equals(code)).findFirst();
+        if (optional.isPresent()) {
+            List<Video> userFavorites = FAVORITES.get(user);
+            if (userFavorites != null) {
+                userFavorites.remove(optional.get());
+                FAVORITES.put(user, userFavorites);
+            }
+        }
+    }
 }

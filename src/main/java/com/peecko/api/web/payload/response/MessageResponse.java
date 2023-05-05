@@ -8,6 +8,6 @@ import lombok.Setter;
 @Data
 @AllArgsConstructor @Setter @Getter
 public class MessageResponse {
-    String type;
+    String code;
     String message;
 }

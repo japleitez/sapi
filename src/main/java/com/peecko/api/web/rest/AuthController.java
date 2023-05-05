@@ -6,8 +6,10 @@ import com.peecko.api.domain.User;
 import com.peecko.api.security.UserDetailsImpl;
 import com.peecko.api.repository.UserRepository;
 import com.peecko.api.security.JwtUtils;
+import com.peecko.api.utils.Common;
 import com.peecko.api.web.payload.request.LoginRequest;
 import com.peecko.api.web.payload.request.SignupRequest;
+import com.peecko.api.web.payload.request.ValidateUserRequest;
 import com.peecko.api.web.payload.response.MessageResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -75,6 +78,19 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok(new MessageResponse("OK", "User registered successfully!"));
+    }
+
+    @GetMapping("/account")
+    public ResponseEntity<?> verifyAccount(@Valid @RequestBody ValidateUserRequest request) {
+        if (!StringUtils.hasText(request.getEmail())) {
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Email is required"));
+        }
+        Common.sleep(1);
+        if (Common.getRandomNum() < 5) {
+            return ResponseEntity.ok(new MessageResponse("OK", "Account verified successfully!"));
+        } else {
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Account not verified yet, please try again"));
+        }
     }
 
 }
