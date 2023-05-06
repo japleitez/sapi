@@ -35,16 +35,17 @@ public class VideoController extends BaseController {
 
     @GetMapping("/favorites")
     public ResponseEntity<?> getFavorites() {
+        User user = getActiveUser(userRepository);
         String greeting = "Here is your weekly dose of Wellness support. Check back next week for more updates";
         List<String> tags = List.of("all", "energy", "endurance", "relax", "learn");
-        List<Video> videos = videoRepository.getTodayVideos();
+        List<Video> videos = videoRepository.getFavorites(user.username());
         return ResponseEntity.ok(new TodayResponse(greeting, tags, videos));
     }
 
     @GetMapping("/categories")
     public ResponseEntity<?> getLibrary() {
         String greeting = "All our video content under one roof, organized into wellness & fitness categories";
-        List<Category> categories = videoRepository.getCategories();
+        List<Category> categories = videoRepository.getLibrary();
         return ResponseEntity.ok(new LibraryResponse(greeting, categories));
     }
 

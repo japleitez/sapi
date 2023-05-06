@@ -3,64 +3,43 @@ package com.peecko.api.repository;
 import com.peecko.api.domain.Category;
 import com.peecko.api.domain.Video;
 import com.peecko.api.utils.VideoLoader;
+import org.apache.commons.text.CaseUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class VideoRepository {
 
-    private static final List<Video> TODAY_VIDEOS = new ArrayList<>();
-    private static final List<Category> CATEGORIES = new ArrayList<>();
-    private static final List<CategoryData> CATEGORY_DATA = new ArrayList<>();
-
-    public static final HashMap<String, List<Video>> FAVORITES =  new HashMap<>();
-
+    private static final List<Video> TODAY_VIDEOS = new LinkedList<>();
+    private static final List<Category> CATEGORIES = new LinkedList<>();
+    private static final List<Category> LIBRARY = new LinkedList<>();
+    public static final HashMap<String, List<Video>> FAVORITES =  new LinkedHashMap<>();
     public static final Set<Video> ALL_VIDEOS = new HashSet<>();
 
     static {
-        CATEGORY_DATA.add(new CategoryData("C1", "Health Risks", "/data/today.csv"));
-        CATEGORY_DATA.add(new CategoryData("C2", "Yoga", "/data/today.csv"));
-        CATEGORY_DATA.add(new CategoryData("C3", "Pilates", "/data/today.csv"));
-        CATEGORY_DATA.add(new CategoryData("C4", "Calisthenics", "/data/today.csv"));
+        loadVideos();
     }
 
     public List<Video> getTodayVideos() {
-        loadVideos();
         return TODAY_VIDEOS;
     }
 
-    private void loadVideos()  {
-        if (TODAY_VIDEOS.isEmpty()) {
-            TODAY_VIDEOS.addAll(new VideoLoader().loadVideos(Integer.MAX_VALUE, "/data/today.csv"));
-        }
-    }
-    public List<Category> getCategories() {
-        loadCategories();
-        return CATEGORIES;
-    }
-
-    private void loadCategories() {
-        if (CATEGORIES.isEmpty()) {
-            CATEGORIES.addAll(CATEGORY_DATA.stream().map(this::loadCategory).toList());
-        }
+    public List<Category> getLibrary() {
+        return LIBRARY;
     }
 
     public Optional<Category> getCategory(String code) {
-        return CATEGORY_DATA
-            .stream()
-            .filter(e -> code.equals(e.code))
-            .findFirst()
-            .map(this::loadCategory);
+        return CATEGORIES.stream().filter(category -> category.getCode().equals(code)).findFirst();
     }
 
-    private Category loadCategory(CategoryData entry) {
-        Category category = new Category();
-        category.setCode(entry.code);
-        category.setTitle(entry.title);
-        category.setVideos(new ArrayList<>(new VideoLoader().loadVideos(3, entry.filename)));
-        ALL_VIDEOS.addAll(category.getVideos());
-        return category;
+    public List<Video> getFavorites(String user) {
+        if (FAVORITES.containsKey(user)) {
+            return FAVORITES.get(user);
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     public void addFavorite(String user, String code) {
@@ -84,5 +63,35 @@ public class VideoRepository {
                 FAVORITES.put(user, userFavorites);
             }
         }
+    }
+
+    private static void loadVideos() {
+        List<String> vc = List.of("YOGA", "PILATES", "CALISTHENICS", "MEDITATION", "HEALTH RISK");
+        ALL_VIDEOS.addAll(new VideoLoader().loadVideos("/data/videos.csv"));
+        for(String categoryName: vc) {
+            Category ca1 = new Category();
+            ca1.setCode(categoryName.substring(0,2).toLowerCase());
+            ca1.setTitle(CaseUtils.toCamelCase(categoryName, true, null));
+            ca1.setVideos(videosByCategory(categoryName));
+            CATEGORIES.add(ca1);
+            TODAY_VIDEOS.add(ca1.getVideos().get(0));
+            Category ca2 = new Category();
+            ca2.setCode(ca1.getCode());
+            ca2.setTitle(ca1.getTitle());
+            ca2.setVideos(copyVideos(ca1.getVideos(), 3));
+            LIBRARY.add(ca2);
+        }
+    }
+
+    private static List<Video> videosByCategory(String category) {
+        return new ArrayList<>(ALL_VIDEOS.stream().filter(v -> v.getCategory().equals(category)).collect(Collectors.toList()));
+    }
+
+    private static List<Video> copyVideos(List<Video> from, int num) {
+        List<Video> list = new LinkedList<>();
+        for(int i = 0; i < num; i++) {
+            list.add(from.get(i));
+        }
+        return list;
     }
 }

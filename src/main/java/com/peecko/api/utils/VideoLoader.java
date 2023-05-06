@@ -14,14 +14,16 @@ import java.util.stream.Collectors;
 public class VideoLoader {
 
     private static final String SEMICOLON = ";";
+    private static final String YOUTUBE = "youtube";
+    private static final String PEECKO = "peecko";
 
-    public List<Video> loadVideos(int max, String filename) {
+    public List<Video> loadVideos(String filename) {
         List<Video> videos = new ArrayList<>();
         InputStream is = getClass().getResourceAsStream(filename);
         try (BufferedReader br =  new BufferedReader(new InputStreamReader(is))) {
             int row = 0;
             String line;
-            while ((line = br.readLine()) != null && row <= max) {
+            while ((line = br.readLine()) != null) {
                 if (row > 0) {
                     videos.add(createVideo(line.split(SEMICOLON)));
                 }
@@ -34,6 +36,7 @@ public class VideoLoader {
     }
 
     private Video createVideo(String[] values) {
+        String player = values[6].contains(YOUTUBE)? YOUTUBE: PEECKO;
         return new Video()
             .setCode(trim(values[0]))
             .setCategory(trim(values[1]))
@@ -46,7 +49,8 @@ public class VideoLoader {
             .setIntensity(trim(values[8]))
             .setTags(asList(values[9]))
             .setDescription(trim(values[10]))
-            .setResume(trim(values[11]));
+            .setResume(trim(values[11]))
+            .setPlayer(player);
     }
 
     private String trim(String value) {
