@@ -34,32 +34,33 @@ public class VideoRepository {
         return CATEGORIES.stream().filter(category -> category.getCode().equals(code)).findFirst();
     }
 
-    public List<Video> getFavorites(String user) {
-        if (FAVORITES.containsKey(user)) {
-            return FAVORITES.get(user);
-        } else {
-            return new ArrayList<>();
+    public List<Video> getUserFavorites(String user) {
+        List<Video> userFavorites = FAVORITES.get(user);
+        if (userFavorites == null) {
+            userFavorites = new LinkedList<>();
         }
+        return userFavorites;
     }
 
     public void addFavorite(String user, String code) {
         Optional<Video> optional = ALL_VIDEOS.stream().filter(video -> video.getCode().equals(code)).findFirst();
         if (optional.isPresent()) {
-            List<Video> userFavorites = FAVORITES.get(user);
-            if (userFavorites == null) {
-                userFavorites = new ArrayList<>();
+            Video video = optional.get();
+            List<Video> userFavorites = getUserFavorites(user);
+            if (!userFavorites.contains(video)) {
+                userFavorites.add(video);
+                FAVORITES.put(user, userFavorites);
             }
-            userFavorites.add(optional.get());
-            FAVORITES.put(user, userFavorites);
         }
     }
 
     public void removeFavorite(String user, String code) {
         Optional<Video> optional = ALL_VIDEOS.stream().filter(video -> video.getCode().equals(code)).findFirst();
         if (optional.isPresent()) {
-            List<Video> userFavorites = FAVORITES.get(user);
-            if (userFavorites != null) {
-                userFavorites.remove(optional.get());
+            Video video = optional.get();
+            List<Video> userFavorites = getUserFavorites(user);
+            if (userFavorites.contains(video)) {
+                userFavorites.remove(video);
                 FAVORITES.put(user, userFavorites);
             }
         }
@@ -94,4 +95,5 @@ public class VideoRepository {
         }
         return list;
     }
+
 }

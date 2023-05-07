@@ -5,6 +5,7 @@ import com.peecko.api.domain.User;
 import com.peecko.api.domain.Video;
 import com.peecko.api.repository.UserRepository;
 import com.peecko.api.repository.VideoRepository;
+import com.peecko.api.utils.Common;
 import com.peecko.api.web.payload.response.LibraryResponse;
 import com.peecko.api.web.payload.response.TodayResponse;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +29,8 @@ public class VideoController extends BaseController {
     @GetMapping("/today")
     public ResponseEntity<?> getTodayVideos() {
         String greeting = "Here is your weekly dose of Wellness support. Check back next week for more updates";
-        List<String> tags = List.of("all", "energy", "endurance", "relax", "learn");
         List<Video> videos = videoRepository.getTodayVideos();
+        List<String> tags = Common.getVideoTags(videos);
         return ResponseEntity.ok(new TodayResponse(greeting, tags, videos));
     }
 
@@ -37,10 +38,12 @@ public class VideoController extends BaseController {
     public ResponseEntity<?> getFavorites() {
         User user = getActiveUser(userRepository);
         String greeting = "Here is your weekly dose of Wellness support. Check back next week for more updates";
-        List<String> tags = List.of("all", "energy", "endurance", "relax", "learn");
-        List<Video> videos = videoRepository.getFavorites(user.username());
+        List<Video> videos = videoRepository.getUserFavorites(user.username());
+        List<String> tags = Common.getVideoTags(videos);
         return ResponseEntity.ok(new TodayResponse(greeting, tags, videos));
     }
+
+
 
     @GetMapping("/categories")
     public ResponseEntity<?> getLibrary() {

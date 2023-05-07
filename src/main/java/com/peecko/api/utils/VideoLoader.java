@@ -58,7 +58,7 @@ public class VideoLoader {
     }
 
     private List<String> asList(String values) {
-        if (values == null) {
+        if (values == null || values == "") {
             return new ArrayList<>();
         }
         String[] array = values.split(",");

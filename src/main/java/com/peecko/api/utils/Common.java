@@ -1,6 +1,11 @@
 package com.peecko.api.utils;
 
+import com.peecko.api.domain.Video;
+
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class Common {
@@ -20,5 +25,13 @@ public class Common {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static List<String> getVideoTags(List<Video> videos) {
+        Set<String> set = new LinkedHashSet<>();
+        for(Video v: videos) {
+            set.addAll(v.getTags());
+        }
+        return set.stream().toList();
     }
 }
