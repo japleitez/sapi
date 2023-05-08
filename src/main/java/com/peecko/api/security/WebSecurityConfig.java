@@ -60,7 +60,10 @@ public class WebSecurityConfig {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.authorizeHttpRequests()
-            .requestMatchers(new AntPathRequestMatcher("/api/auth/**"), new AntPathRequestMatcher("/api/test/**")).permitAll()
+            .requestMatchers(
+                    new AntPathRequestMatcher("/api/auth/**"),
+                    new AntPathRequestMatcher("/api/test/**"),
+                    new AntPathRequestMatcher("/videos/**")).permitAll()
             .anyRequest().authenticated();
 
         http.authenticationProvider(authenticationProvider());

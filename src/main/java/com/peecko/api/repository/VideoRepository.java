@@ -67,9 +67,9 @@ public class VideoRepository {
     }
 
     private static void loadVideos() {
-        List<String> vc = List.of("YOGA", "PILATES", "CALISTHENICS", "MEDITATION", "HEALTH RISK");
+        List<String> videoCategories = List.of("YOGA", "PILATES", "CALISTHENICS", "MEDITATION", "HEALTH RISK");
         ALL_VIDEOS.addAll(new VideoLoader().loadVideos("/data/videos.csv"));
-        for(String categoryName: vc) {
+        for(String categoryName: videoCategories) {
             Category ca1 = new Category();
             ca1.setCode(categoryName.substring(0,2).toLowerCase());
             ca1.setTitle(CaseUtils.toCamelCase(categoryName, true, null));
@@ -82,6 +82,8 @@ public class VideoRepository {
             ca2.setVideos(copyVideos(ca1.getVideos(), 3));
             LIBRARY.add(ca2);
         }
+        List<Video> plist =  ALL_VIDEOS.stream().filter(video -> video.getPlayer().equals("peecko")).collect(Collectors.toList());
+        TODAY_VIDEOS.addAll(plist);
     }
 
     private static List<Video> videosByCategory(String category) {
