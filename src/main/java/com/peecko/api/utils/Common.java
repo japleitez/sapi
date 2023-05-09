@@ -1,6 +1,8 @@
 package com.peecko.api.utils;
 
+import com.peecko.api.domain.Device;
 import com.peecko.api.domain.Video;
+import com.peecko.api.web.payload.request.LoginRequest;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -49,6 +51,14 @@ public class Common {
         nv.setPlayer(v.getPlayer());
         nv.setFavorite(v.isFavorite());
         return nv;
+    }
+
+    public static Device getDevice(LoginRequest r) {
+        Device d = new Device();
+        d.setDeviceId(r.getDeviceId());
+        d.setPhoneModel(r.getPhoneModel());
+        d.setOsVersion(r.getOsVersion());
+        return d;
     }
 
 }

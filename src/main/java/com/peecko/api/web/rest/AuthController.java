@@ -2,6 +2,7 @@ package com.peecko.api.web.rest;
 
 import java.util.stream.Collectors;
 
+import com.peecko.api.domain.Device;
 import com.peecko.api.domain.User;
 import com.peecko.api.security.UserDetailsImpl;
 import com.peecko.api.repository.UserRepository;
@@ -9,7 +10,6 @@ import com.peecko.api.security.JwtUtils;
 import com.peecko.api.utils.Common;
 import com.peecko.api.web.payload.request.LoginRequest;
 import com.peecko.api.web.payload.request.SignupRequest;
-import com.peecko.api.web.payload.request.ValidateUserRequest;
 import com.peecko.api.web.payload.response.MessageResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -54,6 +55,8 @@ public class AuthController {
             .map(GrantedAuthority::getAuthority)
             .collect(Collectors.toList());
 
+        userRepository.addDevice(loginRequest);
+
         JwtResponse ret = new JwtResponse();
         ret.setToken(jwt);
         ret.setName(userDetails.getName());
@@ -80,16 +83,27 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("OK", "User registered successfully!"));
     }
 
-    @GetMapping("/account")
-    public ResponseEntity<?> verifyAccount(@Valid @RequestBody ValidateUserRequest request) {
-        if (!StringUtils.hasText(request.getEmail())) {
+    @GetMapping("/installations")
+    public ResponseEntity<?> getInstallations() {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<Device> installations = userRepository.getUserDevices(userDetails.getUsername());
+        return ResponseEntity.ok(installations);
+    }
+
+    @GetMapping("/active/{username}")
+    public ResponseEntity<?> verifyAccount(@PathVariable String username) {
+        if (!StringUtils.hasText(username)) {
             return ResponseEntity.ok(new MessageResponse("ERROR", "Email is required"));
         }
-        Common.sleep(1);
-        if (Common.getRandomNum() < 5) {
-            return ResponseEntity.ok(new MessageResponse("OK", "Account verified successfully!"));
+        if (!userRepository.existsByUsername(username)) {
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Email is not registered"));
+        }
+        Common.sleep(2);
+        int num = Common.getRandomNum();
+        if (num < 5) {
+            return ResponseEntity.ok(new MessageResponse("OK", "Email verified successfully!"));
         } else {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "Account not verified yet, please try again"));
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Email not verified yet, please try again"));
         }
     }
 
