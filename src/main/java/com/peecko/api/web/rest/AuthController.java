@@ -98,7 +98,6 @@ public class AuthController {
         if (!userRepository.existsByUsername(username)) {
             return ResponseEntity.ok(new MessageResponse("ERROR", "Email is not registered"));
         }
-        Common.sleep(2);
         int num = Common.getRandomNum();
         if (num < 5) {
             return ResponseEntity.ok(new MessageResponse("OK", "Email verified successfully!"));
