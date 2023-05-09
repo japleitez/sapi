@@ -2,6 +2,7 @@ package com.peecko.api.repository;
 
 import com.peecko.api.domain.Category;
 import com.peecko.api.domain.Video;
+import com.peecko.api.utils.Common;
 import com.peecko.api.utils.VideoLoader;
 import org.apache.commons.text.CaseUtils;
 import org.springframework.stereotype.Component;
@@ -15,41 +16,45 @@ public class VideoRepository {
     private static final List<Video> TODAY_VIDEOS = new LinkedList<>();
     private static final List<Category> CATEGORIES = new LinkedList<>();
     private static final List<Category> LIBRARY = new LinkedList<>();
-    public static final HashMap<String, List<Video>> FAVORITES =  new LinkedHashMap<>();
+    public static final HashMap<String, List<String>> FAVORITES =  new LinkedHashMap<>();
     public static final Set<Video> ALL_VIDEOS = new HashSet<>();
 
     static {
         loadVideos();
     }
 
-    public List<Video> getTodayVideos() {
-        return TODAY_VIDEOS;
+    public List<Video> getTodayVideos(String user) {
+        return decorate(TODAY_VIDEOS, user);
     }
 
-    public List<Category> getLibrary() {
-        return LIBRARY;
+    public List<Category> getLibrary(String user) {
+        return LIBRARY.stream().map(category -> decorate(category, user)).collect(Collectors.toList());
     }
 
-    public Optional<Category> getCategory(String code) {
-        return CATEGORIES.stream().filter(category -> category.getCode().equals(code)).findFirst();
+    public Optional<Category> getCategory(String code, String user) {
+        return CATEGORIES.stream().filter(category -> category.getCode().equals(code)).map(category -> decorate(category, user)).findFirst();
     }
 
     public List<Video> getUserFavorites(String user) {
-        List<Video> userFavorites = FAVORITES.get(user);
-        if (userFavorites == null) {
-            userFavorites = new LinkedList<>();
-        }
-        return userFavorites;
+        List<String> videoCodes = getUserVideoCodes(user);
+        return ALL_VIDEOS.stream()
+            .filter(video -> videoCodes.contains(video.getCode()))
+            .map(video -> {
+                Video clone = Common.clone(video);
+                clone.setFavorite(true);
+                return clone;
+            })
+            .collect(Collectors.toList());
     }
 
     public void addFavorite(String user, String code) {
         Optional<Video> optional = ALL_VIDEOS.stream().filter(video -> video.getCode().equals(code)).findFirst();
         if (optional.isPresent()) {
             Video video = optional.get();
-            List<Video> userFavorites = getUserFavorites(user);
-            if (!userFavorites.contains(video)) {
-                userFavorites.add(video);
-                FAVORITES.put(user, userFavorites);
+            List<String> videoCodes = getUserVideoCodes(user);
+            if (!videoCodes.contains(video.getCode())) {
+                videoCodes.add(video.getCode());
+                FAVORITES.put(user, videoCodes);
             }
         }
     }
@@ -58,10 +63,10 @@ public class VideoRepository {
         Optional<Video> optional = ALL_VIDEOS.stream().filter(video -> video.getCode().equals(code)).findFirst();
         if (optional.isPresent()) {
             Video video = optional.get();
-            List<Video> userFavorites = getUserFavorites(user);
-            if (userFavorites.contains(video)) {
-                userFavorites.remove(video);
-                FAVORITES.put(user, userFavorites);
+            List<String> videoCodes = getUserVideoCodes(user);
+            if (videoCodes.contains(video.getCode())) {
+                videoCodes.remove(video.getCode());
+                FAVORITES.put(user, videoCodes);
             }
         }
     }
@@ -70,17 +75,17 @@ public class VideoRepository {
         List<String> videoCategories = List.of("YOGA", "PILATES", "CALISTHENICS", "MEDITATION", "HEALTH RISK");
         ALL_VIDEOS.addAll(new VideoLoader().loadVideos("/data/videos.csv"));
         for(String categoryName: videoCategories) {
-            Category ca1 = new Category();
-            ca1.setCode(categoryName.substring(0,2).toLowerCase());
-            ca1.setTitle(CaseUtils.toCamelCase(categoryName, true, null));
-            ca1.setVideos(videosByCategory(categoryName));
-            CATEGORIES.add(ca1);
-            TODAY_VIDEOS.add(ca1.getVideos().get(0));
-            Category ca2 = new Category();
-            ca2.setCode(ca1.getCode());
-            ca2.setTitle(ca1.getTitle());
-            ca2.setVideos(copyVideos(ca1.getVideos(), 3));
-            LIBRARY.add(ca2);
+            Category c1 = new Category();
+            c1.setCode(categoryName.substring(0,2).toLowerCase());
+            c1.setTitle(CaseUtils.toCamelCase(categoryName, true, null));
+            c1.setVideos(videosByCategory(categoryName));
+            CATEGORIES.add(c1);
+            TODAY_VIDEOS.add(c1.getVideos().get(0));
+            Category c2 = new Category();
+            c2.setCode(c1.getCode());
+            c2.setTitle(c1.getTitle());
+            c2.setVideos(copyVideos(c1.getVideos(), 3));
+            LIBRARY.add(c2);
         }
         List<Video> plist =  ALL_VIDEOS.stream().filter(video -> video.getPlayer().equals("peecko")).collect(Collectors.toList());
         TODAY_VIDEOS.addAll(plist);
@@ -93,9 +98,34 @@ public class VideoRepository {
     private static List<Video> copyVideos(List<Video> from, int num) {
         List<Video> list = new LinkedList<>();
         for(int i = 0; i < num; i++) {
-            list.add(from.get(i));
+            Video clone = Common.clone(from.get(i));
+            list.add(clone);
         }
         return list;
     }
 
+    public static List<String> getUserVideoCodes(String user) {
+        List<String> userFavorites = FAVORITES.get(user);
+        if (userFavorites == null) {
+            userFavorites = new LinkedList<>();
+        }
+        return userFavorites;
+    }
+
+    private List<Video> decorate(List<Video> videos, String user) {
+        List<String> videoCodes = getUserVideoCodes(user);
+        return videos.stream().map(video -> {
+            Video clone = Common.clone(video);
+            clone.setFavorite(videoCodes.contains(video.getCode()));
+            return clone;
+        }).collect(Collectors.toList());
+    }
+
+    private Category decorate(Category category, String user) {
+        Category nc = new Category();
+        nc.setCode(category.getCode());
+        nc.setTitle(category.getTitle());
+        nc.setVideos(decorate(category.getVideos(), user));
+        return nc;
+    }
 }

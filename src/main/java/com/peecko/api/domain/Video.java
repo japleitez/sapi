@@ -26,4 +26,5 @@ public class Video {
     private String description;
     private String resume;
     private String player;
+    private boolean favorite;
 }

@@ -29,7 +29,8 @@ public class VideoController extends BaseController {
     @GetMapping("/today")
     public ResponseEntity<?> getTodayVideos() {
         String greeting = "Here is your weekly dose of Wellness support. Check back next week for more updates";
-        List<Video> videos = videoRepository.getTodayVideos();
+        User user = getActiveUser(userRepository);
+        List<Video> videos = videoRepository.getTodayVideos(user.username());
         List<String> tags = Common.getVideoTags(videos);
         return ResponseEntity.ok(new TodayResponse(greeting, tags, videos));
     }
@@ -43,18 +44,18 @@ public class VideoController extends BaseController {
         return ResponseEntity.ok(new TodayResponse(greeting, tags, videos));
     }
 
-
-
     @GetMapping("/categories")
     public ResponseEntity<?> getLibrary() {
         String greeting = "All our video content under one roof, organized into wellness & fitness categories";
-        List<Category> categories = videoRepository.getLibrary();
+        User user = getActiveUser(userRepository);
+        List<Category> categories = videoRepository.getLibrary(user.username());
         return ResponseEntity.ok(new LibraryResponse(greeting, categories));
     }
 
     @GetMapping("/categories/{code}")
     public ResponseEntity<?> getCategory(@PathVariable String code) {
-        return ResponseEntity.ofNullable(videoRepository.getCategory(code)); // 404 Not Found
+        User user = getActiveUser(userRepository);
+        return ResponseEntity.ofNullable(videoRepository.getCategory(code, user.username())); // 404 Not Found
     }
 
     @PutMapping("/favorites/{code}")
@@ -69,6 +70,10 @@ public class VideoController extends BaseController {
         User user = getActiveUser(userRepository);
         videoRepository.removeFavorite(user.username(), code);
         return ResponseEntity.ok().build();
+    }
+
+    private void setFavoriteFlag(List<Video> videos) {
+
     }
 
 }

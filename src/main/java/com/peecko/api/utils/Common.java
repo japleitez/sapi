@@ -2,10 +2,7 @@ package com.peecko.api.utils;
 
 import com.peecko.api.domain.Video;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class Common {
@@ -34,4 +31,24 @@ public class Common {
         }
         return set.stream().toList();
     }
+
+    public static Video clone(Video v) {
+        Video nv = new Video();
+        nv.setCode(v.getCode());
+        nv.setCategory(v.getCategory());
+        nv.setTitle(v.getTitle());
+        nv.setDuration(v.getDuration());
+        nv.setCoach(v.getCoach());
+        nv.setImage(v.getImage());
+        nv.setUrl(v.getUrl());
+        nv.setAudience(v.getAudience());
+        nv.setIntensity(v.getIntensity());
+        nv.setTags(v.getTags());
+        nv.setDescription(v.getDescription());
+        nv.setResume(v.getResume());
+        nv.setPlayer(v.getPlayer());
+        nv.setFavorite(v.isFavorite());
+        return nv;
+    }
+
 }
