@@ -1,5 +1,7 @@
 package com.peecko.api.web.rest;
 
+import java.util.ArrayList;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.peecko.api.domain.Device;
@@ -8,10 +10,7 @@ import com.peecko.api.security.UserDetailsImpl;
 import com.peecko.api.repository.UserRepository;
 import com.peecko.api.security.JwtUtils;
 import com.peecko.api.utils.Common;
-import com.peecko.api.web.payload.request.PinValidationRequest;
-import com.peecko.api.web.payload.request.SignInRequest;
-import com.peecko.api.web.payload.request.SignOutRequest;
-import com.peecko.api.web.payload.request.SignUpRequest;
+import com.peecko.api.web.payload.request.*;
 import com.peecko.api.web.payload.response.MessageResponse;
 import com.peecko.api.web.payload.response.PinCodeResponse;
 import jakarta.validation.Valid;
@@ -94,8 +93,7 @@ public class AuthController {
 
     @GetMapping("/installations")
     public ResponseEntity<?> getInstallations() {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        List<Device> installations = userRepository.getUserDevices(userDetails.getUsername());
+        List<Device> installations =userRepository.getUserDevices(getUsername());
         return ResponseEntity.ok(installations);
     }
 
@@ -116,19 +114,26 @@ public class AuthController {
     }
 
     @PostMapping("/pincode")
-    public ResponseEntity<?> pinCode() {
+    public ResponseEntity<?> pinCode(@Valid @RequestBody PinCodeRequest request) {
+        if (!userRepository.existsByUsername(request.getUsername())) {
+            ResponseEntity.badRequest();
+        }
         String requestId = userRepository.generatePinCode();
         PinCodeResponse response = new PinCodeResponse(requestId);
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/pincode/{request-id}")
+    @PutMapping("/pincode/{requestId}")
     public ResponseEntity<?> pinCodeValidate(@PathVariable String requestId, @Valid @RequestBody PinValidationRequest request) {
         if (userRepository.validatePinCode(requestId, request.getPinCode())) {
-            return ResponseEntity.ok(new MessageResponse("OK", "Email verified successfully!"));
+            return ResponseEntity.ok(new MessageResponse("OK", "Pin code verified successfully!"));
         } else {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "Email not verified yet, please try again"));
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Pin code is invalid or expired, please request a new pin code!"));
         }
     }
 
+    private String getUsername() {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userDetails.getUsername();
+    }
 }

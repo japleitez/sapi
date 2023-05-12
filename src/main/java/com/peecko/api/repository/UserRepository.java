@@ -1,6 +1,7 @@
 package com.peecko.api.repository;
 
 import com.peecko.api.domain.Device;
+import com.peecko.api.domain.PinCode;
 import com.peecko.api.domain.Role;
 import com.peecko.api.domain.User;
 import com.peecko.api.utils.Common;
@@ -9,8 +10,10 @@ import com.peecko.api.web.payload.request.SignInRequest;
 import com.peecko.api.web.payload.request.SignOutRequest;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Component
@@ -20,7 +23,7 @@ public class UserRepository {
 
     private static final HashMap<String, List<Device>> DEVICES = new HashMap<>();
 
-    private static final HashMap<String, String> PIN_CODES = new HashMap<>();
+    private static final HashMap<String, PinCode> PIN_CODES = new HashMap<>();
 
     private static final Set<Role> DEFAULT_ROLES = new HashSet<>();
 
@@ -92,16 +95,27 @@ public class UserRepository {
 
     public String generatePinCode() {
         String requestId = UUID.randomUUID().toString();
-        PIN_CODES.put(requestId, Common.generatePinCode());
+        PinCode pinCode = new PinCode();
+        pinCode.setRequestId(requestId);
+        pinCode.setPinCode("1234");
+        pinCode.setExpireAt(LocalDateTime.now().plus(5, ChronoUnit.MINUTES));
+        PIN_CODES.put(requestId, pinCode);
+        cleanExpiredPinCodes();
         return requestId;
     }
 
     public boolean validatePinCode(String requestId, String pinCode) {
-        String savedPinCode = "";
+        cleanExpiredPinCodes();
         if (PIN_CODES.containsKey(requestId)) {
-            savedPinCode = PIN_CODES.get(requestId);
+            PinCode saved = PIN_CODES.get(requestId);
+            return saved.getPinCode().equals(pinCode);
         }
-        return savedPinCode.equals(pinCode);
+        return false;
+    }
+
+    private void cleanExpiredPinCodes() {
+        LocalDateTime now = LocalDateTime.now();
+        PIN_CODES.entrySet().removeIf(entry -> entry.getValue().getExpireAt().isBefore(now));
     }
 
 }

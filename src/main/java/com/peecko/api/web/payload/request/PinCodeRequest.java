@@ -6,6 +6,6 @@ import lombok.Setter;
 
 @Data
 @Setter @Getter
-public class PinRequest {
+public class PinCodeRequest {
     String username;
 }
