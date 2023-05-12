@@ -8,9 +8,12 @@ import com.peecko.api.security.UserDetailsImpl;
 import com.peecko.api.repository.UserRepository;
 import com.peecko.api.security.JwtUtils;
 import com.peecko.api.utils.Common;
-import com.peecko.api.web.payload.request.LoginRequest;
-import com.peecko.api.web.payload.request.SignupRequest;
+import com.peecko.api.web.payload.request.PinValidationRequest;
+import com.peecko.api.web.payload.request.SignInRequest;
+import com.peecko.api.web.payload.request.SignOutRequest;
+import com.peecko.api.web.payload.request.SignUpRequest;
 import com.peecko.api.web.payload.response.MessageResponse;
+import com.peecko.api.web.payload.response.PinCodeResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,9 +46,9 @@ public class AuthController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> signInUser(@Valid @RequestBody SignInRequest signInRequest) {
         Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+            new UsernamePasswordAuthenticationToken(signInRequest.getUsername(), signInRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
@@ -55,7 +58,7 @@ public class AuthController {
             .map(GrantedAuthority::getAuthority)
             .collect(Collectors.toList());
 
-        userRepository.addDevice(loginRequest);
+        userRepository.addDevice(signInRequest);
 
         JwtResponse ret = new JwtResponse();
         ret.setToken(jwt);
@@ -65,8 +68,14 @@ public class AuthController {
         return ResponseEntity.ok(ret);
     }
 
+    @PostMapping("/signout")
+    public ResponseEntity<?> signOutUser(@Valid @RequestBody SignOutRequest signOutRequest) {
+        userRepository.removeDevice(signOutRequest);
+        return ResponseEntity.ok(new MessageResponse("OK", "User sign out successfully!"));
+    }
+
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+    public ResponseEntity<?> signUpUser(@Valid @RequestBody SignUpRequest signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity
                 .badRequest()
@@ -98,8 +107,24 @@ public class AuthController {
         if (!userRepository.existsByUsername(username)) {
             return ResponseEntity.ok(new MessageResponse("ERROR", "Email is not registered"));
         }
-        int num = Common.getRandomNum();
+        int num = Common.generateDigit();
         if (num < 5) {
+            return ResponseEntity.ok(new MessageResponse("OK", "Email verified successfully!"));
+        } else {
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Email not verified yet, please try again"));
+        }
+    }
+
+    @PostMapping("/pincode")
+    public ResponseEntity<?> pinCode() {
+        String requestId = userRepository.generatePinCode();
+        PinCodeResponse response = new PinCodeResponse(requestId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/pincode/{request-id}")
+    public ResponseEntity<?> pinCodeValidate(@PathVariable String requestId, @Valid @RequestBody PinValidationRequest request) {
+        if (userRepository.validatePinCode(requestId, request.getPinCode())) {
             return ResponseEntity.ok(new MessageResponse("OK", "Email verified successfully!"));
         } else {
             return ResponseEntity.ok(new MessageResponse("ERROR", "Email not verified yet, please try again"));

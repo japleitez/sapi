@@ -2,20 +2,34 @@ package com.peecko.api.utils;
 
 import com.peecko.api.domain.Device;
 import com.peecko.api.domain.Video;
-import com.peecko.api.web.payload.request.LoginRequest;
+import com.peecko.api.web.payload.request.SignInRequest;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class Common {
 
-    private static final int MAX = 10;
-    private static final int MIN = 1;
+    private static final int MAX = 9;
+    private static final int MIN = 0;
 
     private static final Random RANDOM = new Random();
 
-    public static int getRandomNum() {
+    public static void main(String[] args) {
+        for(int i = 0; i < 10; i++) {
+            System.out.println(generateDigit());
+        }
+    }
+
+    public static int generateDigit() {
         return RANDOM.nextInt((MAX - MIN) + 1) + MIN;
+    }
+
+    public static String generatePinCode() {
+        StringBuilder pin = new StringBuilder();
+        for (int i = 0; i < 4; i++) {
+            pin.append(generateDigit());
+        }
+        return pin.toString();
     }
 
     public static void sleep(long seconds) {
@@ -53,7 +67,7 @@ public class Common {
         return nv;
     }
 
-    public static Device getDevice(LoginRequest r) {
+    public static Device mapToDevice(SignInRequest r) {
         Device d = new Device();
         d.setDeviceId(r.getDeviceId());
         d.setPhoneModel(r.getPhoneModel());

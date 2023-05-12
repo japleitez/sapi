@@ -4,7 +4,9 @@ import com.peecko.api.domain.Device;
 import com.peecko.api.domain.Role;
 import com.peecko.api.domain.User;
 import com.peecko.api.utils.Common;
-import com.peecko.api.web.payload.request.LoginRequest;
+import com.peecko.api.web.payload.request.PinValidationRequest;
+import com.peecko.api.web.payload.request.SignInRequest;
+import com.peecko.api.web.payload.request.SignOutRequest;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -17,6 +19,9 @@ public class UserRepository {
     private static final HashMap<String, User> REPO = new HashMap<>();
 
     private static final HashMap<String, List<Device>> DEVICES = new HashMap<>();
+
+    private static final HashMap<String, String> PIN_CODES = new HashMap<>();
+
     private static final Set<Role> DEFAULT_ROLES = new HashSet<>();
 
     private static final String DEFAULT_NAME = "Peter Cash";
@@ -54,10 +59,18 @@ public class UserRepository {
         REPO.put(user.username(), user);
     }
 
-    public void addDevice(LoginRequest loginRequest) {
-        String username = loginRequest.getUsername();
+    public List<Device> getUserDevices(String username) {
+        if (DEVICES.containsKey(username)) {
+            return DEVICES.get(username);
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    public void addDevice(SignInRequest signInRequest) {
+        String username = signInRequest.getUsername();
         List<Device> userDevices = getUserDevices(username);
-        Device device = Common.getDevice(loginRequest);
+        Device device = Common.mapToDevice(signInRequest);
         if (!userDevices.contains(device)) {
             LocalDateTime ldt = LocalDateTime.now();
             device.setInstalled(ldt.format(CUSTOM_FORMATTER));
@@ -66,12 +79,29 @@ public class UserRepository {
         }
     }
 
-    public List<Device> getUserDevices(String username) {
-        if (DEVICES.containsKey(username)) {
-            return DEVICES.get(username);
-        } else {
-            return new ArrayList<>();
+    public void removeDevice(SignOutRequest signOutRequest) {
+        Device device = new Device();
+        device.setDeviceId(signOutRequest.getDeviceId());
+        String username = signOutRequest.getUsername();
+        List<Device> userDevices = getUserDevices(username);
+        if (userDevices.contains(device)) {
+            userDevices.remove(device);
+            DEVICES.put(username, userDevices);
         }
+    }
+
+    public String generatePinCode() {
+        String requestId = UUID.randomUUID().toString();
+        PIN_CODES.put(requestId, Common.generatePinCode());
+        return requestId;
+    }
+
+    public boolean validatePinCode(String requestId, String pinCode) {
+        String savedPinCode = "";
+        if (PIN_CODES.containsKey(requestId)) {
+            savedPinCode = PIN_CODES.get(requestId);
+        }
+        return savedPinCode.equals(pinCode);
     }
 
 }

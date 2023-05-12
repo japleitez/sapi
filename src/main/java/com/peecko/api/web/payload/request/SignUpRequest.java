@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Data
 @Setter @Getter
-public class SignupRequest {
+public class SignUpRequest {
     String name;
     String username;
     String password;

@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Data
 @Setter @Getter
-public class LoginRequest {
+public class SignInRequest {
     String username;
     String password;
     @JsonProperty("phone-model")
