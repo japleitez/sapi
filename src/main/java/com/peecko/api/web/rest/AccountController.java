@@ -1,13 +1,16 @@
 package com.peecko.api.web.rest;
 
+import com.peecko.api.domain.User;
 import com.peecko.api.repository.HelpRepository;
 import com.peecko.api.repository.LanguageRepository;
 import com.peecko.api.repository.NotificationRepository;
 import com.peecko.api.repository.UserRepository;
 import com.peecko.api.web.payload.request.ChangePasswordRequest;
 import com.peecko.api.web.payload.response.LanguageResponse;
+import com.peecko.api.web.payload.response.MessageResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,17 +25,26 @@ public class AccountController extends BaseController {
 
     final NotificationRepository notificationRepository;
 
-    public AccountController(UserRepository userRepository, HelpRepository helpRepository, LanguageRepository languageRepository, NotificationRepository notificationRepository) {
+    final PasswordEncoder encoder;
+
+    public AccountController(UserRepository userRepository, HelpRepository helpRepository, LanguageRepository languageRepository, NotificationRepository notificationRepository, PasswordEncoder encoder) {
         this.userRepository = userRepository;
         this.helpRepository = helpRepository;
         this.languageRepository = languageRepository;
         this.notificationRepository = notificationRepository;
+        this.encoder = encoder;
     }
 
-    @PostMapping("/")
-    @GetMapping("/change-password")
+    @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
-        return ResponseEntity.ok(request);
+        if (userRepository.isPinCodeValid(request.getRequestId(), request.getPinCode())) {
+            User user = getActiveUser(userRepository);
+            user.password(encoder.encode(request.getPassword()));
+            userRepository.save(user);
+            return ResponseEntity.ok(new MessageResponse("OK", "Password changed successfully!"));
+        } else {
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Cannot change password, token expired or invalid"));
+        }
     }
 
     @GetMapping("/help")

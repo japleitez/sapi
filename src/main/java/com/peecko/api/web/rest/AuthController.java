@@ -1,7 +1,5 @@
 package com.peecko.api.web.rest;
 
-import java.util.ArrayList;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.peecko.api.domain.Device;
@@ -11,6 +9,7 @@ import com.peecko.api.repository.UserRepository;
 import com.peecko.api.security.JwtUtils;
 import com.peecko.api.utils.Common;
 import com.peecko.api.web.payload.request.*;
+import com.peecko.api.web.payload.response.InstallationsResponse;
 import com.peecko.api.web.payload.response.MessageResponse;
 import com.peecko.api.web.payload.response.PinCodeResponse;
 import jakarta.validation.Valid;
@@ -70,7 +69,7 @@ public class AuthController {
     @PostMapping("/signout")
     public ResponseEntity<?> signOutUser(@Valid @RequestBody SignOutRequest signOutRequest) {
         userRepository.removeDevice(signOutRequest);
-        return ResponseEntity.ok(new MessageResponse("OK", "User sign out successfully!"));
+        return ResponseEntity.ok(new MessageResponse("OK", "User signed out successfully!"));
     }
 
     @PostMapping("/signup")
@@ -94,7 +93,8 @@ public class AuthController {
     @GetMapping("/installations")
     public ResponseEntity<?> getInstallations() {
         List<Device> installations =userRepository.getUserDevices(getUsername());
-        return ResponseEntity.ok(installations);
+        InstallationsResponse response = new InstallationsResponse(3, installations);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/active/{username}")
@@ -116,7 +116,7 @@ public class AuthController {
     @PostMapping("/pincode")
     public ResponseEntity<?> pinCode(@Valid @RequestBody PinCodeRequest request) {
         if (!userRepository.existsByUsername(request.getUsername())) {
-            ResponseEntity.badRequest();
+            return ResponseEntity.badRequest().build();
         }
         String requestId = userRepository.generatePinCode();
         PinCodeResponse response = new PinCodeResponse(requestId);
@@ -125,10 +125,10 @@ public class AuthController {
 
     @PutMapping("/pincode/{requestId}")
     public ResponseEntity<?> pinCodeValidate(@PathVariable String requestId, @Valid @RequestBody PinValidationRequest request) {
-        if (userRepository.validatePinCode(requestId, request.getPinCode())) {
-            return ResponseEntity.ok(new MessageResponse("OK", "Pin code verified successfully!"));
+        if (userRepository.isPinCodeValid(requestId, request.getPinCode())) {
+            return ResponseEntity.ok(new MessageResponse("OK", "Verification code is valid!"));
         } else {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "Pin code is invalid or expired, please request a new pin code!"));
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Verification code is invalid"));
         }
     }
 

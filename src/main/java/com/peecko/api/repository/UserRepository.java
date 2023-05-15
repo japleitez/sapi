@@ -100,17 +100,17 @@ public class UserRepository {
         pinCode.setPinCode("1234");
         pinCode.setExpireAt(LocalDateTime.now().plus(5, ChronoUnit.MINUTES));
         PIN_CODES.put(requestId, pinCode);
-        cleanExpiredPinCodes();
         return requestId;
     }
 
-    public boolean validatePinCode(String requestId, String pinCode) {
-        cleanExpiredPinCodes();
+    public boolean isPinCodeValid(String requestId, String pinCode) {
+        boolean isValid = false;
         if (PIN_CODES.containsKey(requestId)) {
             PinCode saved = PIN_CODES.get(requestId);
-            return saved.getPinCode().equals(pinCode);
+            isValid = saved.getPinCode().equals(pinCode);
         }
-        return false;
+        cleanExpiredPinCodes();
+        return isValid;
     }
 
     private void cleanExpiredPinCodes() {
