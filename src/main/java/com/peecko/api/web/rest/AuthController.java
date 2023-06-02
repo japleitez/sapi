@@ -58,11 +58,16 @@ public class AuthController {
 
         userRepository.addDevice(signInRequest);
 
+        List<Device> installations = userRepository.getUserDevices(userDetails.getUsername());
+
         JwtResponse ret = new JwtResponse();
         ret.setToken(jwt);
         ret.setName(userDetails.getName());
         ret.setUsername(userDetails.getUsername());
         ret.setRoles(roles);
+        ret.setMaxAllowed(3);
+        ret.setInstallations(installations);
+
         return ResponseEntity.ok(ret);
     }
 
