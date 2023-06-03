@@ -67,7 +67,11 @@ public class AuthController {
         ret.setRoles(roles);
         ret.setMaxAllowed(3);
         ret.setInstallations(installations);
-
+        ret.setInstallationsCount(installations.size());
+        ret.setAccountStatus("OK"); // OK, ERROR
+        ret.setAccountMessage("Account is verified");
+        ret.setMembershipStatus("OK"); // OK, ERROR
+        ret.setMembershipMessage("Membership is active");
         return ResponseEntity.ok(ret);
     }
 

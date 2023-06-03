@@ -17,5 +17,16 @@ public class JwtResponse {
     List<String> roles;
     @JsonProperty("max-allowed")
     int maxAllowed;
+    @JsonProperty("installations")
     List<Device> installations;
+    @JsonProperty("installations-count")
+    Integer installationsCount;
+    @JsonProperty("membership-status")
+    String membershipStatus;
+    @JsonProperty("membership-message")
+    String membershipMessage;
+    @JsonProperty("account-status")
+    String accountStatus;
+    @JsonProperty("account-message")
+    String accountMessage;
 }

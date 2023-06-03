@@ -6,11 +6,18 @@ import com.peecko.api.domain.Video;
 import com.peecko.api.repository.UserRepository;
 import com.peecko.api.repository.VideoRepository;
 import com.peecko.api.utils.Common;
+import com.peecko.api.utils.FileDownloadUtil;
 import com.peecko.api.web.payload.response.LibraryResponse;
 import com.peecko.api.web.payload.response.TodayResponse;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -21,9 +28,12 @@ public class VideoController extends BaseController {
 
     final UserRepository userRepository;
 
-    public VideoController(VideoRepository videoRepository, UserRepository userRepository) {
+    final ResourceLoader resourceLoader;
+
+    public VideoController(VideoRepository videoRepository, UserRepository userRepository, ResourceLoader resourceLoader) {
         this.videoRepository = videoRepository;
         this.userRepository = userRepository;
+        this.resourceLoader = resourceLoader;
     }
 
     @GetMapping("/today")
@@ -72,8 +82,26 @@ public class VideoController extends BaseController {
         return ResponseEntity.ok().build();
     }
 
-    private void setFavoriteFlag(List<Video> videos) {
+    @GetMapping("/fetch/{fileCode}")
+    public ResponseEntity<?> downloadFile(@PathVariable("fileCode") String fileCode) {
+        FileDownloadUtil util = new FileDownloadUtil();
+        Resource resource;
+        try {
+            resource = util.getFileAsResource(fileCode);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+        if (resource == null) {
+            return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
+        }
+        String contentType = "application/octet-stream";
+        String headerValue = "attachment; filename=\"" + resource.getFilename() + "\"";
 
+        return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(contentType))
+            .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
+            .body(resource);
     }
+
 
 }

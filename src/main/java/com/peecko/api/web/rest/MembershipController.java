@@ -29,7 +29,7 @@ public class MembershipController extends BaseController {
         if (user.license().equals(license)) {
             return ResponseEntity.ok(new MessageResponse("OK", "License activated successfully!"));
         } else {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "License is wrong, please try again"));
+            return ResponseEntity.ok(new MessageResponse("ERROR", "License is invalid or expired, please try again"));
         }
     }
 
