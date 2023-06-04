@@ -103,5 +103,4 @@ public class VideoController extends BaseController {
             .body(resource);
     }
 
-
 }

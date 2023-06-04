@@ -14,9 +14,11 @@ public class FileDownloadUtil {
     Path foundFile;
     public Resource getFileAsResource(String fileCode) throws IOException {
 
-        Path dirPath = Paths.get("videos");
+        String dir = System.getenv("videos.dir");
 
-        Files.list(dirPath).forEach(file -> {
+        Path path = Paths.get("/home/videos");
+
+        Files.list(path).forEach(file -> {
             if (file.getFileName().toString().startsWith(fileCode)) {
                 foundFile = file;
             }
@@ -28,4 +30,10 @@ public class FileDownloadUtil {
 
         return null;
     }
+
+    public String getVideoPath() {
+        String dir = System.getenv("videos.dir");
+        return "videos.dir:" + dir;
+    }
+
 }
