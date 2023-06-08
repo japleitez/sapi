@@ -18,5 +18,6 @@ public class PinCode {
     @EqualsAndHashCode.Include
     String requestId;
     String pinCode;
+    String email;
     LocalDateTime expireAt;
 }

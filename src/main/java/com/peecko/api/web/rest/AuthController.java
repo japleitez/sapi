@@ -127,7 +127,7 @@ public class AuthController {
         if (!userRepository.existsByUsername(request.getUsername())) {
             return ResponseEntity.badRequest().build();
         }
-        String requestId = userRepository.generatePinCode();
+        String requestId = userRepository.generatePinCode(request.getUsername());
         PinCodeResponse response = new PinCodeResponse(requestId);
         return ResponseEntity.ok(response);
     }
@@ -138,6 +138,19 @@ public class AuthController {
             return ResponseEntity.ok(new MessageResponse("OK", "Verification code is valid!"));
         } else {
             return ResponseEntity.ok(new MessageResponse("ERROR", "Verification code is invalid"));
+        }
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        if (userRepository.isPinCodeValid(request.getRequestId(), request.getPinCode())) {
+            String email = userRepository.getPinCode(request.getRequestId()).getEmail();
+            User user = userRepository.findByUsername(email).get();
+            user.password(encoder.encode(request.getPassword()));
+            userRepository.save(user);
+            return ResponseEntity.ok(new MessageResponse("OK", "Password changed successfully!"));
+        } else {
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Cannot change password, token expired or invalid"));
         }
     }
 

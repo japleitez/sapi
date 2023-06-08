@@ -93,11 +93,12 @@ public class UserRepository {
         }
     }
 
-    public String generatePinCode() {
+    public String generatePinCode(String email) {
         String requestId = UUID.randomUUID().toString();
         PinCode pinCode = new PinCode();
         pinCode.setRequestId(requestId);
         pinCode.setPinCode("1234");
+        pinCode.setEmail(email);
         pinCode.setExpireAt(LocalDateTime.now().plus(5, ChronoUnit.MINUTES));
         PIN_CODES.put(requestId, pinCode);
         return requestId;
@@ -109,8 +110,11 @@ public class UserRepository {
             PinCode saved = PIN_CODES.get(requestId);
             isValid = saved.getPinCode().equals(pinCode);
         }
-        cleanExpiredPinCodes();
         return isValid;
+    }
+
+    public PinCode getPinCode(String requestId) {
+        return PIN_CODES.get(requestId);
     }
 
     private void cleanExpiredPinCodes() {

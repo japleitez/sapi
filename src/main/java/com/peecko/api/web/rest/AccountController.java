@@ -35,18 +35,6 @@ public class AccountController extends BaseController {
         this.encoder = encoder;
     }
 
-    @PostMapping("/change-password")
-    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
-        if (userRepository.isPinCodeValid(request.getRequestId(), request.getPinCode())) {
-            User user = getActiveUser(userRepository);
-            user.password(encoder.encode(request.getPassword()));
-            userRepository.save(user);
-            return ResponseEntity.ok(new MessageResponse("OK", "Password changed successfully!"));
-        } else {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "Cannot change password, token expired or invalid"));
-        }
-    }
-
     @GetMapping("/help")
     public ResponseEntity<?> getHelp() {
         return ResponseEntity.ok(helpRepository.getHelp());
