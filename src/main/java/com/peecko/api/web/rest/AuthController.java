@@ -8,6 +8,9 @@ import com.peecko.api.security.UserDetailsImpl;
 import com.peecko.api.repository.UserRepository;
 import com.peecko.api.security.JwtUtils;
 import com.peecko.api.utils.Common;
+import com.peecko.api.utils.EmailUtils;
+import com.peecko.api.utils.NameUtils;
+import com.peecko.api.utils.PasswordUtils;
 import com.peecko.api.web.payload.request.*;
 import com.peecko.api.web.payload.response.InstallationsResponse;
 import com.peecko.api.web.payload.response.MessageResponse;
@@ -83,14 +86,28 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signUpUser(@Valid @RequestBody SignUpRequest signUpRequest) {
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+        boolean isValidEmail = EmailUtils.isValid(signUpRequest.getUsername());
+        if (!isValidEmail) {
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Email is invalid!"));
+        }
+        boolean isValidPassword = PasswordUtils.isValid(signUpRequest.getPassword());
+        if (!isValidPassword) {
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Password is invalid, it must contain only letters, digits and symbols !@#$%&*+"));
+        }
+        boolean isValidName = NameUtils.isValid(signUpRequest.getName());
+        if (!isValidName) {
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Name is invalid, it must contain 2 words minimum without symbols"));
+        }
+        String email = signUpRequest.getUsername().toLowerCase();
+        if (userRepository.existsByUsername(email)) {
             return ResponseEntity
                 .badRequest()
                 .body(new MessageResponse("ERROR", "Error: Username is already registered!"));
         }
+        String name = NameUtils.camel(signUpRequest.getName());
         User user = new User()
-            .name(signUpRequest.getName())
-            .username(signUpRequest.getUsername())
+            .name(name)
+            .username(email)
             .language(signUpRequest.getLanguage().toUpperCase())
             .password(encoder.encode(signUpRequest.getPassword()));
 
@@ -154,8 +171,39 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/password/validate")
+    public ResponseEntity<?> validatePassword(@Valid @RequestBody PasswordValidationRequest request) {
+        boolean isValid = PasswordUtils.isValid(request.getPassword());
+        if (isValid) {
+            return ResponseEntity.ok(new MessageResponse("OK", "Password is valid!"));
+        } else {
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Invalid Password, it must contain only letters, digits and symbols !@#$%&*+"));
+        }
+    }
+
+    @PostMapping("/username/validate")
+    public ResponseEntity<?> validateUsername(@Valid @RequestBody EmailValidationRequest request) {
+        boolean isValid = EmailUtils.isValid(request.getUsername());
+        if (isValid) {
+            return ResponseEntity.ok(new MessageResponse("OK", "Email is valid!"));
+        } else {
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Email is not valid!"));
+        }
+    }
+
+    @PostMapping("/name/validate")
+    public ResponseEntity<?> validateNname(@Valid @RequestBody NameValidationRequest request) {
+        boolean isValid = NameUtils.isValid(request.getName());
+        if (isValid) {
+            return ResponseEntity.ok(new MessageResponse("OK", "Name is valid!"));
+        } else {
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Name is invalid, it must contain 2 words minimum without symbols"));
+        }
+    }
+
     private String getUsername() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userDetails.getUsername();
     }
+
 }

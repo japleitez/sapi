@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class VideoLoader {
-
     private static final String SEMICOLON = ";";
     private static final String YOUTUBE = "youtube";
     private static final String PEECKO = "peecko";

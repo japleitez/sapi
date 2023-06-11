@@ -7,7 +7,7 @@ import com.peecko.api.web.payload.request.SignInRequest;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class Common {
+public abstract class Common {
 
     private static final int MAX = 9;
     private static final int MIN = 0;
