@@ -25,11 +25,13 @@ public class MembershipController extends BaseController {
         if (!StringUtils.hasLength(license) && license.length() != 20) {
             return ResponseEntity.ok(new MessageResponse("ERROR", "License must be 20 char length"));
         }
-        User user = getActiveUser(userRepository);
-        if (user.license().equals(license)) {
+        if (UserRepository.DEFAULT_LICENSE.equals(license)) {
+            User user = getActiveUser(userRepository);
+            user.license(license);
+            userRepository.save(user);
             return ResponseEntity.ok(new MessageResponse("OK", "License activated successfully!"));
         } else {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "License is invalid or expired, please try again"));
+            return ResponseEntity.ok(new MessageResponse("ERROR", "License is invalid or expired."));
         }
     }
 

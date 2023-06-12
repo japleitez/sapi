@@ -7,7 +7,7 @@ public abstract class PasswordUtils {
     static int MIN_LENGTH = 6;
     static String UPPER_CASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     static String LOWER_CASE = "abcdefghijklmnopqrstuvwxyz";
-    static String SYMBOL = "!@#$%&*+";
+    static String SYMBOL = "&@?!#$%&";
     static String DIGIT = "0123456789";
 
     public static boolean isValid(String password) {

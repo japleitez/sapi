@@ -1,5 +1,6 @@
 package com.peecko.api.web.rest;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.peecko.api.domain.Device;
@@ -7,14 +8,11 @@ import com.peecko.api.domain.User;
 import com.peecko.api.security.UserDetailsImpl;
 import com.peecko.api.repository.UserRepository;
 import com.peecko.api.security.JwtUtils;
-import com.peecko.api.utils.Common;
 import com.peecko.api.utils.EmailUtils;
 import com.peecko.api.utils.NameUtils;
 import com.peecko.api.utils.PasswordUtils;
 import com.peecko.api.web.payload.request.*;
-import com.peecko.api.web.payload.response.InstallationsResponse;
-import com.peecko.api.web.payload.response.MessageResponse;
-import com.peecko.api.web.payload.response.PinCodeResponse;
+import com.peecko.api.web.payload.response.*;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,7 +26,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import com.peecko.api.web.payload.response.JwtResponse;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -38,6 +35,8 @@ public class AuthController {
     final UserRepository userRepository;
     final PasswordEncoder encoder;
     final JwtUtils jwtUtils;
+
+    final static int MAX_ALLOWED = 1;
 
     public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder encoder, JwtUtils jwtUtils) {
         this.authenticationManager = authenticationManager;
@@ -68,7 +67,7 @@ public class AuthController {
         ret.setName(userDetails.getName());
         ret.setUsername(userDetails.getUsername());
         ret.setRoles(roles);
-        ret.setMaxAllowed(3);
+        ret.setMaxAllowed(MAX_ALLOWED);
         ret.setInstallations(installations);
         ret.setInstallationsCount(installations.size());
         ret.setAccountStatus("OK"); // OK, ERROR
@@ -92,7 +91,7 @@ public class AuthController {
         }
         boolean isValidPassword = PasswordUtils.isValid(signUpRequest.getPassword());
         if (!isValidPassword) {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "Password is invalid, it must contain only letters, digits and symbols !@#$%&*+"));
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Password is invalid, it must contain only letters, digits and symbols &@?!#$%&"));
         }
         boolean isValidName = NameUtils.isValid(signUpRequest.getName());
         if (!isValidName) {
@@ -131,8 +130,11 @@ public class AuthController {
         if (!userRepository.existsByUsername(username)) {
             return ResponseEntity.ok(new MessageResponse("ERROR", "Email is not registered"));
         }
-        int num = Common.generateDigit();
-        if (num < 5) {
+        boolean verified = !username.contains("not.verified@");
+        if (verified) {
+            User user = userRepository.findByUsername(username).get();
+            user.verified(true);
+            userRepository.save(user);
             return ResponseEntity.ok(new MessageResponse("OK", "Email verified successfully!"));
         } else {
             return ResponseEntity.ok(new MessageResponse("ERROR", "Email not verified yet, please try again"));
@@ -177,7 +179,7 @@ public class AuthController {
         if (isValid) {
             return ResponseEntity.ok(new MessageResponse("OK", "Password is valid!"));
         } else {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "Invalid Password, it must contain only letters, digits and symbols !@#$%&*+"));
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Password is invalid, it must contain only letters, digits and symbols &@?!#$%&"));
         }
     }
 
@@ -187,12 +189,12 @@ public class AuthController {
         if (isValid) {
             return ResponseEntity.ok(new MessageResponse("OK", "Email is valid!"));
         } else {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "Email is not valid!"));
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Email is invalid!"));
         }
     }
 
     @PostMapping("/name/validate")
-    public ResponseEntity<?> validateNname(@Valid @RequestBody NameValidationRequest request) {
+    public ResponseEntity<?> validateName(@Valid @RequestBody NameValidationRequest request) {
         boolean isValid = NameUtils.isValid(request.getName());
         if (isValid) {
             return ResponseEntity.ok(new MessageResponse("OK", "Name is valid!"));
@@ -200,6 +202,26 @@ public class AuthController {
             return ResponseEntity.ok(new MessageResponse("ERROR", "Name is invalid, it must contain 2 words minimum without symbols"));
         }
     }
+
+    @PostMapping("/profile")
+    public ResponseEntity<?> getProfile(@Valid @RequestBody EmailValidationRequest request) {
+        String username = request.getUsername();
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            boolean exceededInstallations = userRepository.getUserDevices(username).size() > MAX_ALLOWED;
+            boolean activeMembership = StringUtils.hasText(user.license()) && UserRepository.DEFAULT_LICENSE.equals(user.license());
+            boolean emailVerified = user.verified();
+            ProfileResponse profile = new ProfileResponse();
+            profile.setExceededInstallations(exceededInstallations);
+            profile.setActiveMembership(activeMembership);
+            profile.setEmailVerified(emailVerified);
+            return ResponseEntity.ok(profile);
+        } else {
+            return ResponseEntity.ok(new MessageResponse("ERROR", "User is not registered."));
+        }
+    }
+
 
     private String getUsername() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

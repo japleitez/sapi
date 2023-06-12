@@ -5,12 +5,10 @@ import com.peecko.api.domain.PinCode;
 import com.peecko.api.domain.Role;
 import com.peecko.api.domain.User;
 import com.peecko.api.utils.Common;
-import com.peecko.api.web.payload.request.PinValidationRequest;
 import com.peecko.api.web.payload.request.SignInRequest;
 import com.peecko.api.web.payload.request.SignOutRequest;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -31,7 +29,7 @@ public class UserRepository {
 
     private static final String DEFAULT_USERNAME = "peter@legend.com";
 
-    private static final String DEFAULT_LICENSE = "AAAA0000111122223333";
+    public static final String DEFAULT_LICENSE = "11111111111111111111";
 
     final static DateTimeFormatter CUSTOM_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -58,7 +56,6 @@ public class UserRepository {
 
     public void save(User user) {
         user.roles(DEFAULT_ROLES);
-        user.license(DEFAULT_LICENSE);
         REPO.put(user.username(), user);
     }
 
