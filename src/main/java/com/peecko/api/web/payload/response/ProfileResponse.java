@@ -14,7 +14,10 @@ public class ProfileResponse {
     private boolean activeMembership;
     @JsonProperty("email-verified")
     private boolean emailVerified;
-    @JsonProperty("exceeded-installations")
-    private boolean exceededInstallations;
-
+    @JsonProperty("installations-exceeded")
+    private boolean installationsExceeded;
+    @JsonProperty("installations")
+    private int installations;
+    @JsonProperty("maxAllowed")
+    private int maxAllowed;
 }

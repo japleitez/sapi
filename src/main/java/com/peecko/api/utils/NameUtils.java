@@ -12,8 +12,12 @@ import java.util.regex.Pattern;
 public abstract class NameUtils {
     private static String NAME_REGEX = "^\\p{L}+[\\p{L}\\p{Z}\\p{P}]{0,}";
     private static String INVALID_CHARS = "!#$%&()*+/0123456789:;<=>?@[\\]^_{|},~`";
+
     public static boolean isValid(String name) {
         if (!StringUtils.hasText(name)) {
+            return false;
+        }
+        if (split(name).size() < 2) {
             return false;
         }
         boolean isInvalid = name.chars().anyMatch(ch -> isInvalidChar(ch));

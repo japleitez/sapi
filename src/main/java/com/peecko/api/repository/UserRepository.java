@@ -91,6 +91,7 @@ public class UserRepository {
     }
 
     public String generatePinCode(String email) {
+        cleanExpiredPinCodes();
         String requestId = UUID.randomUUID().toString();
         PinCode pinCode = new PinCode();
         pinCode.setRequestId(requestId);
@@ -102,6 +103,7 @@ public class UserRepository {
     }
 
     public boolean isPinCodeValid(String requestId, String pinCode) {
+        cleanExpiredPinCodes();
         boolean isValid = false;
         if (PIN_CODES.containsKey(requestId)) {
             PinCode saved = PIN_CODES.get(requestId);

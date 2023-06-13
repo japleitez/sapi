@@ -118,7 +118,7 @@ public class AuthController {
     @GetMapping("/installations")
     public ResponseEntity<?> getInstallations() {
         List<Device> installations =userRepository.getUserDevices(getUsername());
-        InstallationsResponse response = new InstallationsResponse(3, installations);
+        InstallationsResponse response = new InstallationsResponse(MAX_ALLOWED, installations);
         return ResponseEntity.ok(response);
     }
 
@@ -163,6 +163,10 @@ public class AuthController {
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
         if (userRepository.isPinCodeValid(request.getRequestId(), request.getPinCode())) {
+            boolean isValidPassword = PasswordUtils.isValid(request.getPassword());
+            if (!isValidPassword) {
+                return ResponseEntity.ok(new MessageResponse("ERROR", "Password is invalid, it must contain only letters, digits and symbols &@?!#$%&"));
+            }
             String email = userRepository.getPinCode(request.getRequestId()).getEmail();
             User user = userRepository.findByUsername(email).get();
             user.password(encoder.encode(request.getPassword()));
@@ -179,7 +183,7 @@ public class AuthController {
         if (isValid) {
             return ResponseEntity.ok(new MessageResponse("OK", "Password is valid!"));
         } else {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "Password is invalid, it must contain only letters, digits and symbols &@?!#$%&"));
+            return ResponseEntity.ok(new MessageResponse("ERROR", "Password is invalid, it must be 6 characters minimum of letters, digits and symbols &@?!#$%&"));
         }
     }
 
@@ -212,10 +216,13 @@ public class AuthController {
             boolean exceededInstallations = userRepository.getUserDevices(username).size() > MAX_ALLOWED;
             boolean activeMembership = StringUtils.hasText(user.license()) && UserRepository.DEFAULT_LICENSE.equals(user.license());
             boolean emailVerified = user.verified();
+            int installations = userRepository.getUserDevices(username).size();
             ProfileResponse profile = new ProfileResponse();
-            profile.setExceededInstallations(exceededInstallations);
+            profile.setInstallationsExceeded(exceededInstallations);
             profile.setActiveMembership(activeMembership);
             profile.setEmailVerified(emailVerified);
+            profile.setInstallations(installations);
+            profile.setMaxAllowed(MAX_ALLOWED);
             return ResponseEntity.ok(profile);
         } else {
             return ResponseEntity.ok(new MessageResponse("ERROR", "User is not registered."));
