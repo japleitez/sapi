@@ -1,5 +1,6 @@
 package com.peecko.api.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,4 +25,6 @@ public class Device {
     String osVersion;
     @JsonProperty("installed-on")
     String installed;
+    @JsonIgnore
+    String jwt;
 }

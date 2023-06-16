@@ -1,6 +1,8 @@
 package com.peecko.api.web.rest;
 
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.peecko.api.domain.Device;
@@ -58,9 +60,10 @@ public class AuthController {
             .map(GrantedAuthority::getAuthority)
             .collect(Collectors.toList());
 
-        userRepository.addDevice(signInRequest);
+        userRepository.addDevice(signInRequest, jwt);
 
-        List<Device> installations = userRepository.getUserDevices(userDetails.getUsername());
+        List<Device> installations = new ArrayList<>();
+        installations.addAll(userRepository.getUserDevices(userDetails.getUsername()));
 
         JwtResponse ret = new JwtResponse();
         ret.setToken(jwt);
@@ -117,7 +120,8 @@ public class AuthController {
 
     @GetMapping("/installations")
     public ResponseEntity<?> getInstallations() {
-        List<Device> installations =userRepository.getUserDevices(getUsername());
+        List<Device> installations = new ArrayList<>();
+        installations.addAll(userRepository.getUserDevices(getUsername()));
         InstallationsResponse response = new InstallationsResponse(MAX_ALLOWED, installations);
         return ResponseEntity.ok(response);
     }

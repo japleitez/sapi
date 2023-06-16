@@ -1,5 +1,6 @@
 package com.peecko.api.security;
 
+import com.peecko.api.repository.UserRepository;
 import com.peecko.api.service.UserDetailsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.util.StringUtils;
 import java.io.IOException;
 
+
+//google: SpringBoot how to invalidate JWT Token such as logout or reset all active tokens
+
 public class AuthTokenFilter extends OncePerRequestFilter {
 
     @Autowired
@@ -25,13 +29,16 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     UserDetailsServiceImpl userDetailsService;
 
+    @Autowired
+    UserRepository userRepository;
+
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);
-            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+            if (jwt != null && jwtUtils.validateJwtToken(jwt) && notInBlackList(jwt)) {
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -54,4 +61,13 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
         return null;
     }
+
+    private boolean notInBlackList(String jwt) {
+        if (userRepository.isInvalidJwt(jwt)) {
+            logger.info("JWT was in logged out list");
+            return false;
+        }
+        return true;
+    }
+
 }
