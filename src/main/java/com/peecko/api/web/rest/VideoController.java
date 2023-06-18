@@ -5,6 +5,7 @@ import com.peecko.api.domain.User;
 import com.peecko.api.domain.Video;
 import com.peecko.api.repository.UserRepository;
 import com.peecko.api.repository.VideoRepository;
+import com.peecko.api.security.Licensed;
 import com.peecko.api.utils.Common;
 import com.peecko.api.utils.FileDownloadUtil;
 import com.peecko.api.web.payload.response.LibraryResponse;
@@ -36,6 +37,7 @@ public class VideoController extends BaseController {
         this.resourceLoader = resourceLoader;
     }
 
+    @Licensed
     @GetMapping("/today")
     public ResponseEntity<?> getTodayVideos() {
         String greeting = "Here is your weekly dose of Wellness support. Check back next week for more updates";
