@@ -5,6 +5,7 @@ import com.peecko.api.utils.Common;
 import com.peecko.api.web.payload.request.SignInRequest;
 import com.peecko.api.web.payload.request.SignOutRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -48,6 +49,14 @@ public class UserRepository {
         } else {
             return Optional.empty();
         }
+    }
+
+    public boolean hasActiveLicense(String username) {
+        if (REPO.containsKey(username)) {
+            User user = REPO.get(username);
+            return StringUtils.hasText(user.license()) && UserRepository.DEFAULT_LICENSE.equals(user.license());
+        }
+        return false;
     }
 
     public boolean existsByUsername(String username) {
