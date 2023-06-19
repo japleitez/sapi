@@ -25,7 +25,7 @@ public class MembershipController extends BaseController {
         if (!StringUtils.hasLength(license) && license.length() != 20) {
             return ResponseEntity.ok(new MessageResponse("ERROR", "License must be 20 char length"));
         }
-        if (UserRepository.DEFAULT_LICENSE.equals(license)) {
+        if (UserRepository.isValidLicense(license)) {
             User user = getActiveUser(userRepository);
             user.license(license);
             userRepository.save(user);

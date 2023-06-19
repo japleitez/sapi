@@ -2,7 +2,6 @@ package com.peecko.api.web.rest;
 
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.peecko.api.domain.Device;
@@ -231,6 +230,15 @@ public class AuthController {
         } else {
             return ResponseEntity.ok(new MessageResponse("ERROR", "User is not registered."));
         }
+    }
+
+    @PutMapping("/deactivate/{license}")
+    public ResponseEntity<?> deactivateMembership(@PathVariable String license) {
+        if (!StringUtils.hasLength(license) && license.length() != 20) {
+            return ResponseEntity.ok(new MessageResponse("ERROR", "License must be 20 char length"));
+        }
+        UserRepository.deactivateLicense(license);
+        return ResponseEntity.ok(new MessageResponse("OK", "License inactivated successfully!"));
     }
 
 

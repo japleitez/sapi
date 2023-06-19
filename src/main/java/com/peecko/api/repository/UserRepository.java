@@ -23,6 +23,10 @@ public class UserRepository {
 
     public static final Set<String> INVALID_JWT = new HashSet<>();
 
+    public static final Set<String> INVALID_LICENSE = new HashSet<>();
+
+    public static final Set<String> VALID_LICENSE = new HashSet<>();
+
     public static final Set<Role> DEFAULT_ROLES = new HashSet<>();
 
     private static final String DEFAULT_NAME = "Peter Cash";
@@ -43,6 +47,21 @@ public class UserRepository {
             .roles(DEFAULT_ROLES));
     }
 
+    public static boolean isValidLicense(String license) {
+        if (StringUtils.hasText(license)) {
+            return license.startsWith("1111") && !INVALID_LICENSE.contains(license);
+        }
+        return false;
+    }
+
+    public static void deactivateLicense(String license) {
+        if (StringUtils.hasText(license)) {
+            if (!INVALID_LICENSE.contains(license)) {
+                INVALID_LICENSE.add(license);
+            }
+        }
+    }
+
     public Optional<User> findByUsername(String username) {
         if (REPO.containsKey(username)) {
             return Optional.of(REPO.get(username));
@@ -54,7 +73,7 @@ public class UserRepository {
     public boolean hasActiveLicense(String username) {
         if (REPO.containsKey(username)) {
             User user = REPO.get(username);
-            return StringUtils.hasText(user.license()) && UserRepository.DEFAULT_LICENSE.equals(user.license());
+            return UserRepository.isValidLicense(user.license());
         }
         return false;
     }
