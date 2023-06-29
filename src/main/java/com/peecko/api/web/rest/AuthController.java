@@ -2,6 +2,7 @@ package com.peecko.api.web.rest;
 
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.peecko.api.domain.Device;
@@ -28,6 +29,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.peecko.api.utils.Common.MAX_ALLOWED;
+
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
@@ -36,8 +39,6 @@ public class AuthController {
     final UserRepository userRepository;
     final PasswordEncoder encoder;
     final JwtUtils jwtUtils;
-
-    final static int MAX_ALLOWED = 3;
 
     public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder encoder, JwtUtils jwtUtils) {
         this.authenticationManager = authenticationManager;
@@ -214,19 +215,8 @@ public class AuthController {
     @PostMapping("/profile")
     public ResponseEntity<?> getProfile(@Valid @RequestBody EmailValidationRequest request) {
         String username = request.getUsername();
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            boolean exceededInstallations = userRepository.getUserDevices(username).size() > MAX_ALLOWED;
-            boolean activeMembership = UserRepository.isValidLicense(user.license());
-            boolean emailVerified = user.verified();
-            int installations = userRepository.getUserDevices(username).size();
-            ProfileResponse profile = new ProfileResponse();
-            profile.setInstallationsExceeded(exceededInstallations);
-            profile.setActiveMembership(activeMembership);
-            profile.setEmailVerified(emailVerified);
-            profile.setInstallations(installations);
-            profile.setMaxAllowed(MAX_ALLOWED);
+        ProfileResponse profile = privateProfile(username);
+        if (profile != null) {
             return ResponseEntity.ok(profile);
         } else {
             return ResponseEntity.ok(new MessageResponse("ERROR", "User is not registered."));
@@ -234,28 +224,17 @@ public class AuthController {
     }
 
     private ProfileResponse privateProfile(String username) {
-        ProfileResponse profile = new ProfileResponse();
         Optional<User> optionalUser = userRepository.findByUsername(username);
+        ProfileResponse profile = new ProfileResponse();
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            boolean exceededInstallations = userRepository.getUserDevices(username).size() > MAX_ALLOWED;
-            boolean activeMembership = UserRepository.isValidLicense(user.license());
-            boolean emailVerified = user.verified();
-            int installations = userRepository.getUserDevices(username).size();
-            profile.setInstallationsExceeded(exceededInstallations);
-            profile.setActiveMembership(activeMembership);
-            profile.setEmailVerified(emailVerified);
-            profile.setInstallations(installations);
-            profile.setMaxAllowed(MAX_ALLOWED);
-            return profile;
-        } else {
-            profile.setInstallationsExceeded(false);
-            profile.setActiveMembership(false);
-            profile.setEmailVerified(false);
-            profile.setInstallations(0);
-            profile.setMaxAllowed(MAX_ALLOWED);
-            return profile;
+            int numberOfDevices = userRepository.getUserDevices(username).size();
+            profile.setEmailVerified(user.verified());
+            profile.setInstallations(numberOfDevices);
+            profile.setActiveMembership(UserRepository.isValidLicense(user.license()));
+            profile.setInstallationsExceeded(UserRepository.isInstallationExceeded(numberOfDevices));
         }
+        return profile;
     }
 
     @PutMapping("/deactivate/{license}")

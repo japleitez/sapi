@@ -12,6 +12,8 @@ public abstract class Common {
     private static final int MAX = 9;
     private static final int MIN = 0;
 
+    public static final int MAX_ALLOWED = 3;
+
     private static final Random RANDOM = new Random();
 
     public static void main(String[] args) {

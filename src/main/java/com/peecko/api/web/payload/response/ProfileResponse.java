@@ -2,7 +2,8 @@ package com.peecko.api.web.payload.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-import lombok.experimental.Accessors;
+
+import static com.peecko.api.utils.Common.MAX_ALLOWED;
 
 @Data
 @AllArgsConstructor
@@ -19,5 +20,5 @@ public class ProfileResponse {
     @JsonProperty("installations")
     private int installations;
     @JsonProperty("maxAllowed")
-    private int maxAllowed;
+    private int maxAllowed = MAX_ALLOWED;
 }

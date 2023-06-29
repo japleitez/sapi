@@ -12,6 +12,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import static com.peecko.api.utils.Common.MAX_ALLOWED;
+
 @Component
 public class UserRepository {
 
@@ -79,6 +81,14 @@ public class UserRepository {
         } else {
             return new HashSet<>();
         }
+    }
+
+    public boolean isInstallationExceeded(String username) {
+        return getUserDevices(username).size() > MAX_ALLOWED;
+    }
+
+    public static boolean isInstallationExceeded(int current) {
+        return current > MAX_ALLOWED;
     }
 
     public void addDevice(SignInRequest signInRequest, String jwt) {
