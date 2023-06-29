@@ -37,7 +37,7 @@ public class AuthController {
     final PasswordEncoder encoder;
     final JwtUtils jwtUtils;
 
-    final static int MAX_ALLOWED = 1;
+    final static int MAX_ALLOWED = 3;
 
     public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder encoder, JwtUtils jwtUtils) {
         this.authenticationManager = authenticationManager;
@@ -60,9 +60,10 @@ public class AuthController {
             .collect(Collectors.toList());
 
         userRepository.addDevice(signInRequest, jwt);
-
         List<Device> installations = new ArrayList<>();
         installations.addAll(userRepository.getUserDevices(userDetails.getUsername()));
+
+        ProfileResponse profile = privateProfile(userDetails.getUsername());
 
         JwtResponse ret = new JwtResponse();
         ret.setToken(jwt);
@@ -72,10 +73,10 @@ public class AuthController {
         ret.setMaxAllowed(MAX_ALLOWED);
         ret.setInstallations(installations);
         ret.setInstallationsCount(installations.size());
-        ret.setAccountStatus("OK"); // OK, ERROR
-        ret.setAccountMessage("Account is verified");
-        ret.setMembershipStatus("OK"); // OK, ERROR
-        ret.setMembershipMessage("Membership is active");
+        ret.setAccountStatus(profile.isEmailVerified()? "OK": "ERROR");
+        ret.setAccountMessage(profile.isEmailVerified()? "Account is verified": "Account is not verified");
+        ret.setMembershipStatus(profile.isActiveMembership()? "OK": "ERROR");
+        ret.setMembershipMessage(profile.isActiveMembership()? "Membership is active": "Membership is not active");
         return ResponseEntity.ok(ret);
     }
 
@@ -217,7 +218,7 @@ public class AuthController {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             boolean exceededInstallations = userRepository.getUserDevices(username).size() > MAX_ALLOWED;
-            boolean activeMembership = StringUtils.hasText(user.license()) && UserRepository.DEFAULT_LICENSE.equals(user.license());
+            boolean activeMembership = UserRepository.isValidLicense(user.license());
             boolean emailVerified = user.verified();
             int installations = userRepository.getUserDevices(username).size();
             ProfileResponse profile = new ProfileResponse();
@@ -229,6 +230,31 @@ public class AuthController {
             return ResponseEntity.ok(profile);
         } else {
             return ResponseEntity.ok(new MessageResponse("ERROR", "User is not registered."));
+        }
+    }
+
+    private ProfileResponse privateProfile(String username) {
+        ProfileResponse profile = new ProfileResponse();
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            boolean exceededInstallations = userRepository.getUserDevices(username).size() > MAX_ALLOWED;
+            boolean activeMembership = UserRepository.isValidLicense(user.license());
+            boolean emailVerified = user.verified();
+            int installations = userRepository.getUserDevices(username).size();
+            profile.setInstallationsExceeded(exceededInstallations);
+            profile.setActiveMembership(activeMembership);
+            profile.setEmailVerified(emailVerified);
+            profile.setInstallations(installations);
+            profile.setMaxAllowed(MAX_ALLOWED);
+            return profile;
+        } else {
+            profile.setInstallationsExceeded(false);
+            profile.setActiveMembership(false);
+            profile.setEmailVerified(false);
+            profile.setInstallations(0);
+            profile.setMaxAllowed(MAX_ALLOWED);
+            return profile;
         }
     }
 

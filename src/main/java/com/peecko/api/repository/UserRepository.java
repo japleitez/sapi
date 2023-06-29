@@ -25,13 +25,7 @@ public class UserRepository {
 
     public static final Set<String> INVALID_LICENSE = new HashSet<>();
 
-    public static final Set<String> VALID_LICENSE = new HashSet<>();
-
     public static final Set<Role> DEFAULT_ROLES = new HashSet<>();
-
-    private static final String DEFAULT_NAME = "Peter Cash";
-
-    public static final String DEFAULT_USERNAME = "peter@legend.com";
 
     public static final String DEFAULT_LICENSE = "11111111111111111111";
 
@@ -40,18 +34,10 @@ public class UserRepository {
 
     static {
         DEFAULT_ROLES.add(Role.USER);
-        REPO.put(DEFAULT_USERNAME, new User()
-            .name(DEFAULT_NAME)
-            .username(DEFAULT_USERNAME)
-            .license(DEFAULT_LICENSE)
-            .roles(DEFAULT_ROLES));
     }
 
     public static boolean isValidLicense(String license) {
-        if (StringUtils.hasText(license)) {
-            return license.startsWith("1111") && !INVALID_LICENSE.contains(license);
-        }
-        return false;
+        return StringUtils.hasLength(license) && license.length() == 20 && license.startsWith("1111") && !INVALID_LICENSE.contains(license);
     }
 
     public static void deactivateLicense(String license) {
