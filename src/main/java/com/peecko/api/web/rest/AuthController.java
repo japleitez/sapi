@@ -84,37 +84,25 @@ public class AuthController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest signInRequest) {
+    public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest req) {
         Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(signInRequest.getUsername(), signInRequest.getPassword()));
+            new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
 
+        // roles not used but code remains for future reference
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
             .collect(Collectors.toList());
 
-        userRepository.addDevice(signInRequest, jwt);
-        List<Device> installations = new ArrayList<>();
-        installations.addAll(userRepository.getUserDevices(userDetails.getUsername()));
+        userRepository.addDevice(req, jwt);
 
-        ProfileResponse profile = privateProfile(userDetails.getUsername());
+        LoginResponse login = userRepository.findByUsername(req.getUsername()).map(this::userToLogin).orElse(new LoginResponse());
+        login.setToken(jwt);
 
-        JwtResponse ret = new JwtResponse();
-        ret.setToken(jwt);
-        ret.setName(userDetails.getName());
-        ret.setUsername(userDetails.getUsername());
-        ret.setRoles(roles);
-        ret.setMaxAllowed(MAX_ALLOWED);
-        ret.setInstallations(installations);
-        ret.setInstallationsCount(installations.size());
-        ret.setAccountStatus(profile.isEmailVerified()? "OK": "ERROR");
-        ret.setAccountMessage(profile.isEmailVerified()? getMessage("email.verified.ok"): getMessage("email.verified.nok"));
-        ret.setMembershipStatus(profile.isActiveMembership()? "OK": "ERROR");
-        ret.setMembershipMessage(profile.isActiveMembership()? getMessage("membership.activated.ok"): getMessage("membership.activated.nok"));
-        return ResponseEntity.ok(ret);
+        return ResponseEntity.ok(login);
     }
 
     @PostMapping("/signout")
@@ -219,27 +207,27 @@ public class AuthController {
 
     @PostMapping("/profile")
     public ResponseEntity<?> getProfile(@Valid @RequestBody EmailValidationRequest request) {
-        String username = request.getUsername();
-        ProfileResponse profile = privateProfile(username);
-        if (profile != null) {
-            return ResponseEntity.ok(profile);
-        } else {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "User is not registered."));
-        }
+        return ResponseEntity.ok(privateProfile(request.getUsername()));
     }
 
-    private ProfileResponse privateProfile(String username) {
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-        ProfileResponse profile = new ProfileResponse();
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            int numberOfDevices = userRepository.getUserDevices(username).size();
-            profile.setEmailVerified(user.verified());
-            profile.setInstallations(numberOfDevices);
-            profile.setActiveMembership(UserRepository.isValidLicense(user.license()));
-            profile.setInstallationsExceeded(UserRepository.isInstallationExceeded(numberOfDevices));
-        }
-        return profile;
+    private LoginResponse privateProfile(String username) {
+        LoginResponse notFound = new LoginResponse();
+        notFound.setUsername(username);
+        notFound.setEmailVerified(false);
+        notFound.setMembershipActivated(false);
+        return userRepository.findByUsername(username).map(this::userToLogin).orElse(notFound);
+    }
+
+    private LoginResponse userToLogin(User user) {
+        int devicesCount = userRepository.getUserDevices(user.username()).size();
+        LoginResponse login = new LoginResponse();
+        login.setUsername(user.username());
+        login.setName(user.name());
+        login.setEmailVerified(user.verified());
+        login.setDevicesCount(devicesCount);
+        login.setMembershipActivated(UserRepository.isValidLicense(user.license()));
+        login.setDevicesExceeded(UserRepository.isInstallationExceeded(devicesCount));
+        return login;
     }
 
     @PutMapping("/deactivate/{license}")
