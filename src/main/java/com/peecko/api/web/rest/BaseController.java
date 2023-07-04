@@ -5,6 +5,8 @@ import com.peecko.api.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Locale;
+
 public abstract class BaseController {
 
     protected String getActiveLanguage(UserRepository userRepository) {
@@ -14,6 +16,10 @@ public abstract class BaseController {
     protected User getActiveUser(UserRepository userRepository) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userRepository.findByUsername(userDetails.getUsername()).get();
+    }
+
+    protected Locale geActiveLocale(UserRepository userRepository) {
+        return Locale.ENGLISH;
     }
 
 }

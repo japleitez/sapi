@@ -1,17 +1,16 @@
 package com.peecko.api.web.rest;
 
-import com.peecko.api.domain.User;
 import com.peecko.api.repository.HelpRepository;
 import com.peecko.api.repository.LanguageRepository;
 import com.peecko.api.repository.NotificationRepository;
 import com.peecko.api.repository.UserRepository;
-import com.peecko.api.web.payload.request.ChangePasswordRequest;
 import com.peecko.api.web.payload.response.LanguageResponse;
-import com.peecko.api.web.payload.response.MessageResponse;
-import jakarta.validation.Valid;
+import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/api/account")
