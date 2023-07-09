@@ -38,6 +38,7 @@ public class MembershipController extends BaseController {
             User user = getActiveUser(userRepository);
             user.license(license);
             userRepository.save(user);
+            userRepository.setupMembership(user.license()); // set fake company and expiration date
             return ResponseEntity.ok(new MessageResponse(OK, message("membership.activate.ok")));
         } else {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("membership.activate.nok")));
