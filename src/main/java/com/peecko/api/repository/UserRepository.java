@@ -31,15 +31,13 @@ public class UserRepository {
 
     public static final Set<Role> DEFAULT_ROLES = new HashSet<>();
 
-    static final DateTimeFormatter CUSTOM_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-    static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
     static final List<String> SPONSORS = SponsorUtils.getSponsors();
 
-    private int sponsorIndex = 0;
-
     static final Map<String, Membership> MEMBERSHIPS = new HashMap<>();
+
+    static final DateTimeFormatter CUSTOM_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    static final DateTimeFormatter DAY_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     static {
         DEFAULT_ROLES.add(Role.USER);
@@ -47,6 +45,10 @@ public class UserRepository {
 
     public static boolean isValidLicense(String license) {
         return StringUtils.hasLength(license) && license.length() == 20 && license.startsWith("1111") && !INVALID_LICENSE.contains(license);
+    }
+
+    public static boolean isActiveLicense(String license) {
+        return !INVALID_LICENSE.contains(license);
     }
 
     public static void deactivateLicense(String license) {
@@ -82,23 +84,20 @@ public class UserRepository {
         REPO.put(user.username(), user);
     }
 
-    public void setupMembership(String license) {
-        if (MEMBERSHIPS.get(license) == null) {
-            sponsorIndex = sponsorIndex < SPONSORS.size() - 1? sponsorIndex + 1: 0;
-            LocalDate expire = LocalDate.now().plusMonths(3);
-            Membership membership = new Membership();
-            membership.setMembership(license);
-            membership.setSponsor(SPONSORS.get(sponsorIndex));
-            membership.setExpire(expire.format(DATE_FORMATTER));
-            MEMBERSHIPS.put(license, membership);
-        }
-    }
+    private int sponsorIndex = 0;
 
-    public Membership getMembership(String license) {
+    public Membership retrieveMembership(String license) {
         Membership membership = MEMBERSHIPS.get(license);
         if (membership == null) {
+            int index = sponsorIndex < SPONSORS.size() - 1? sponsorIndex: 0;
+            String sponsor = SPONSORS.get(index);
+            LocalDate expire = LocalDate.now().plusMonths(3);
             membership = new Membership();
-            membership.setMembership(license);
+            membership.setLicense(license);
+            membership.setSponsor(sponsor);
+            membership.setExpiration(expire.format(DAY_FORMATTER));
+            MEMBERSHIPS.put(license, membership);
+            sponsorIndex = sponsorIndex + 1;
         }
         return membership;
     }

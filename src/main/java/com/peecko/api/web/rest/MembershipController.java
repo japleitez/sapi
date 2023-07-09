@@ -1,5 +1,6 @@
 package com.peecko.api.web.rest;
 
+import com.peecko.api.domain.Membership;
 import com.peecko.api.domain.User;
 import com.peecko.api.repository.UserRepository;
 import com.peecko.api.web.payload.request.ActivationRequest;
@@ -35,10 +36,11 @@ public class MembershipController extends BaseController {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("membership.valid.nok")));
         }
         if (UserRepository.isValidLicense(license)) {
+            Membership membership = userRepository.retrieveMembership(license);
             User user = getActiveUser(userRepository);
             user.license(license);
+            user.membership(membership);
             userRepository.save(user);
-            userRepository.setupMembership(user.license()); // set fake company and expiration date
             return ResponseEntity.ok(new MessageResponse(OK, message("membership.activate.ok")));
         } else {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("membership.activate.nok")));

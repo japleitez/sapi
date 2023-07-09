@@ -71,6 +71,14 @@ public class VideoRepository {
         }
     }
 
+    public void removeFavorites(String user) {
+        List<String> videos = FAVORITES.get(user);
+        if (videos != null && !videos.isEmpty()) {
+            videos.clear();
+            FAVORITES.put(user, videos);
+        }
+    }
+
     private static void loadVideos() {
         List<String> videoCategories = List.of("YOGA", "PILATES", "CALISTHENICS", "MEDITATION", "HEALTH RISK");
         ALL_VIDEOS.addAll(new VideoLoader().loadVideos("/data/videos.csv"));

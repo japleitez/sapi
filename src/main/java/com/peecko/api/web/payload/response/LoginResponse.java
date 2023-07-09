@@ -23,21 +23,6 @@ public class LoginResponse {
     @JsonProperty("username")
     String username;
 
-    @JsonProperty("membership-number")
-    String membership = "";
-
-    @JsonProperty("membership-expire-date")
-    String membershipExpireDate = "";
-
-    @JsonProperty("membership-activated") //active-membership
-    boolean membershipActivated = false;
-
-    @JsonProperty("membership-sponsor")
-    String membershipSponsor = "";
-
-    @JsonProperty("membership-sponsor-logo")
-    String membershipSponsorLogo = "";
-
     @JsonProperty("email-verified") //email-verified
     boolean emailVerified = true;
 
@@ -49,5 +34,20 @@ public class LoginResponse {
 
     @JsonProperty("devices-max") // maxAllowed
     int devicesMax = MAX_ALLOWED;
+
+    @JsonProperty("membership")
+    String membership = "";
+
+    @JsonProperty("membership-activated") //active-membership
+    boolean membershipActivated = false;
+
+    @JsonProperty("membership-expiration")
+    String membershipExpiration = "";
+
+    @JsonProperty("membership-sponsor")
+    String membershipSponsor = "";
+
+    @JsonProperty("membership-sponsor-logo")
+    String membershipSponsorLogo = "";
 
 }

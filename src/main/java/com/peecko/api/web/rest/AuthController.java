@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import com.peecko.api.domain.Device;
+import com.peecko.api.domain.Membership;
 import com.peecko.api.domain.User;
 import com.peecko.api.repository.UserRepository;
 import com.peecko.api.security.JwtUtils;
@@ -214,8 +215,17 @@ public class AuthController extends BaseController {
         login.setName(user.name());
         login.setEmailVerified(user.verified());
         login.setDevicesCount(devicesCount);
-        login.setMembershipActivated(UserRepository.isValidLicense(user.license()));
         login.setDevicesExceeded(UserRepository.isInstallationExceeded(devicesCount));
+        if (user.membership() != null) {
+            Membership membership = user.membership();
+            login.setMembership(membership.getLicense());
+            login.setMembershipSponsor(membership.getSponsor());
+            login.setMembershipSponsorLogo(membership.getLogo());
+            login.setMembershipExpiration(membership.getExpiration());
+            login.setMembershipActivated(UserRepository.isActiveLicense(membership.getLicense()));
+        } else {
+
+        }
         return login;
     }
 

@@ -50,7 +50,7 @@ public class VideoController extends BaseController {
     @GetMapping("/favorites")
     public ResponseEntity<?> getFavorites() {
         User user = getActiveUser(userRepository);
-        String greeting = "Here is your weekly dose of Wellness support. Check back next week for more updates";
+        String greeting = "Here is your list of favorite videos, we are glad to know you keep up the good work!";
         List<Video> videos = videoRepository.getUserFavorites(user.username());
         List<String> tags = Common.getVideoTags(videos);
         return ResponseEntity.ok(new TodayResponse(greeting, tags, videos));
@@ -81,6 +81,13 @@ public class VideoController extends BaseController {
     public ResponseEntity<?> removeFavorite(@PathVariable String code) {
         User user = getActiveUser(userRepository);
         videoRepository.removeFavorite(user.username(), code);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/favorites")
+    public ResponseEntity<?> removeFavorites() {
+        User user = getActiveUser(userRepository);
+        videoRepository.removeFavorites(user.username());
         return ResponseEntity.ok().build();
     }
 
