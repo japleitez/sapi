@@ -2,11 +2,13 @@ package com.peecko.api.repository;
 
 import com.peecko.api.domain.*;
 import com.peecko.api.utils.Common;
+import com.peecko.api.utils.SponsorUtils;
 import com.peecko.api.web.payload.request.SignInRequest;
 import com.peecko.api.web.payload.request.SignOutRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -29,10 +31,13 @@ public class UserRepository {
 
     public static final Set<Role> DEFAULT_ROLES = new HashSet<>();
 
-    public static final String DEFAULT_LICENSE = "11111111111111111111";
+    static final List<String> SPONSORS = SponsorUtils.getSponsors();
 
-    final static DateTimeFormatter CUSTOM_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    static final Map<String, Membership> MEMBERSHIPS = new HashMap<>();
 
+    static final DateTimeFormatter CUSTOM_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    static final DateTimeFormatter DAY_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     static {
         DEFAULT_ROLES.add(Role.USER);
@@ -40,6 +45,10 @@ public class UserRepository {
 
     public static boolean isValidLicense(String license) {
         return StringUtils.hasLength(license) && license.length() == 20 && license.startsWith("1111") && !INVALID_LICENSE.contains(license);
+    }
+
+    public static boolean isActiveLicense(String license) {
+        return !INVALID_LICENSE.contains(license);
     }
 
     public static void deactivateLicense(String license) {
@@ -75,16 +84,30 @@ public class UserRepository {
         REPO.put(user.username(), user);
     }
 
+    private int sponsorIndex = 0;
+
+    public Membership retrieveMembership(String license) {
+        Membership membership = MEMBERSHIPS.get(license);
+        if (membership == null) {
+            int index = sponsorIndex < SPONSORS.size() - 1? sponsorIndex: 0;
+            String sponsor = SPONSORS.get(index);
+            LocalDate expire = LocalDate.now().plusMonths(3);
+            membership = new Membership();
+            membership.setLicense(license);
+            membership.setSponsor(sponsor);
+            membership.setExpiration(expire.format(DAY_FORMATTER));
+            MEMBERSHIPS.put(license, membership);
+            sponsorIndex = sponsorIndex + 1;
+        }
+        return membership;
+    }
+
     public Set<Device> getUserDevices(String username) {
         if (DEVICES.containsKey(username)) {
             return DEVICES.get(username);
         } else {
             return new HashSet<>();
         }
-    }
-
-    public boolean isInstallationExceeded(String username) {
-        return getUserDevices(username).size() > MAX_ALLOWED;
     }
 
     public static boolean isInstallationExceeded(int current) {
@@ -152,5 +175,6 @@ public class UserRepository {
         LocalDateTime now = LocalDateTime.now();
         PIN_CODES.entrySet().removeIf(entry -> entry.getValue().getExpireAt().isBefore(now));
     }
+
 
 }

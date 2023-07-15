@@ -2,12 +2,10 @@ package com.peecko.api.web.rest;
 
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.peecko.api.domain.Device;
+import com.peecko.api.domain.Membership;
 import com.peecko.api.domain.User;
-import com.peecko.api.security.UserDetailsImpl;
 import com.peecko.api.repository.UserRepository;
 import com.peecko.api.security.JwtUtils;
 import com.peecko.api.utils.EmailUtils;
@@ -21,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,12 +27,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.peecko.api.utils.Common.MAX_ALLOWED;
+import static com.peecko.api.utils.Common.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
-public class AuthController {
+public class AuthController extends BaseController {
 
     final MessageSource messageSource;
     final AuthenticationManager authenticationManager;
@@ -55,21 +52,21 @@ public class AuthController {
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
         boolean isValidEmail = EmailUtils.isValid(signUpRequest.getUsername());
         if (!isValidEmail) {
-            return ResponseEntity.ok(new MessageResponse("ERROR", getMessage("email.valid.nok")));
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("email.valid.nok")));
         }
         boolean isValidPassword = PasswordUtils.isValid(signUpRequest.getPassword());
         if (!isValidPassword) {
-            return ResponseEntity.ok(new MessageResponse("ERROR", getMessage("password.valid.nok")));
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("password.valid.ok")));
         }
         boolean isValidName = NameUtils.isValid(signUpRequest.getName());
         if (!isValidName) {
-            return ResponseEntity.ok(new MessageResponse("ERROR", getMessage("name.valid.nok")));
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("name.valid.nok")));
         }
         String email = signUpRequest.getUsername().toLowerCase();
         if (userRepository.existsByUsername(email)) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("ERROR", getMessage("email.duplicated")));
+                    .body(new MessageResponse(ERROR, message("email.duplicated")));
         }
         String name = NameUtils.camel(signUpRequest.getName());
         User user = new User()
@@ -80,47 +77,28 @@ public class AuthController {
 
         userRepository.save(user);
 
-        return ResponseEntity.ok(new MessageResponse("OK", getMessage("user.signup.ok")));
+        return ResponseEntity.ok(new MessageResponse(OK, message("user.signup.ok")));
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest signInRequest) {
+    public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest req) {
         Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(signInRequest.getUsername(), signInRequest.getPassword()));
+                new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
+        userRepository.addDevice(req, jwt);
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.toList());
+        LoginResponse login = userRepository.findByUsername(req.getUsername()).map(this::userToLogin).orElse(new LoginResponse());
+        login.setToken(jwt);
 
-        userRepository.addDevice(signInRequest, jwt);
-        List<Device> installations = new ArrayList<>();
-        installations.addAll(userRepository.getUserDevices(userDetails.getUsername()));
-
-        ProfileResponse profile = privateProfile(userDetails.getUsername());
-
-        JwtResponse ret = new JwtResponse();
-        ret.setToken(jwt);
-        ret.setName(userDetails.getName());
-        ret.setUsername(userDetails.getUsername());
-        ret.setRoles(roles);
-        ret.setMaxAllowed(MAX_ALLOWED);
-        ret.setInstallations(installations);
-        ret.setInstallationsCount(installations.size());
-        ret.setAccountStatus(profile.isEmailVerified()? "OK": "ERROR");
-        ret.setAccountMessage(profile.isEmailVerified()? getMessage("email.verified.ok"): getMessage("email.verified.nok"));
-        ret.setMembershipStatus(profile.isActiveMembership()? "OK": "ERROR");
-        ret.setMembershipMessage(profile.isActiveMembership()? getMessage("membership.activated.ok"): getMessage("membership.activated.nok"));
-        return ResponseEntity.ok(ret);
+        return ResponseEntity.ok(login);
     }
 
     @PostMapping("/signout")
     public ResponseEntity<?> signOut(@Valid @RequestBody SignOutRequest signOutRequest) {
         userRepository.removeDevice(signOutRequest);
-        return ResponseEntity.ok(new MessageResponse("OK", getMessage("user.logoff.ok")));
+        return ResponseEntity.ok(new MessageResponse(OK, message("user.logoff.ok")));
     }
 
 
@@ -135,19 +113,19 @@ public class AuthController {
     @GetMapping("/active/{username}")
     public ResponseEntity<?> verifyAccount(@PathVariable String username) {
         if (!StringUtils.hasText(username)) {
-            return ResponseEntity.ok(new MessageResponse("ERROR", getMessage("email.required")));
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("email.required")));
         }
         if (!userRepository.existsByUsername(username)) {
-            return ResponseEntity.ok(new MessageResponse("ERROR", getMessage("email.notfound")));
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("email.notfound")));
         }
         boolean verified = !username.contains("not.verified@");
         if (verified) {
             User user = userRepository.findByUsername(username).get();
             user.verified(true);
             userRepository.save(user);
-            return ResponseEntity.ok(new MessageResponse("OK", getMessage("account.verified.ok")));
+            return ResponseEntity.ok(new MessageResponse(OK, message("email.verified.ok")));
         } else {
-            return ResponseEntity.ok(new MessageResponse("ERROR", getMessage("account.verified.nok")));
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("email.verified.nok")));
         }
     }
 
@@ -164,9 +142,9 @@ public class AuthController {
     @PutMapping("/pincode/{requestId}")
     public ResponseEntity<?> pinCodeValidate(@PathVariable String requestId, @Valid @RequestBody PinValidationRequest request) {
         if (userRepository.isPinCodeValid(requestId, request.getPinCode())) {
-            return ResponseEntity.ok(new MessageResponse("OK", getMessage("pin.valid.ok")));
+            return ResponseEntity.ok(new MessageResponse(OK, message("pin.valid.ok")));
         } else {
-            return ResponseEntity.ok(new MessageResponse("ERROR", getMessage("pin.valid.nok")));
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("pin.valid.nok")));
         }
     }
 
@@ -175,15 +153,15 @@ public class AuthController {
         if (userRepository.isPinCodeValid(request.getRequestId(), request.getPinCode())) {
             boolean isValidPassword = PasswordUtils.isValid(request.getPassword());
             if (!isValidPassword) {
-                return ResponseEntity.ok(new MessageResponse("ERROR", "Password is invalid, it must contain only letters, digits and symbols &@?!#$%&"));
+                return ResponseEntity.ok(new MessageResponse(ERROR, message("password.valid.nok")));
             }
             String email = userRepository.getPinCode(request.getRequestId()).getEmail();
             User user = userRepository.findByUsername(email).get();
             user.password(encoder.encode(request.getPassword()));
             userRepository.save(user);
-            return ResponseEntity.ok(new MessageResponse("OK", "Password changed successfully!"));
+            return ResponseEntity.ok(new MessageResponse(OK, message("password.change.ok")));
         } else {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "Cannot change password, token expired or invalid"));
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("password.change.nok")));
         }
     }
 
@@ -191,9 +169,9 @@ public class AuthController {
     public ResponseEntity<?> validatePassword(@Valid @RequestBody PasswordValidationRequest request) {
         boolean isValid = PasswordUtils.isValid(request.getPassword());
         if (isValid) {
-            return ResponseEntity.ok(new MessageResponse("OK", "Password is valid!"));
+            return ResponseEntity.ok(new MessageResponse(OK, message("password.valid.ok")));
         } else {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "Password is invalid, it must be 6 characters minimum of letters, digits and symbols &@?!#$%&"));
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("password.valid.nok")));
         }
     }
 
@@ -201,9 +179,9 @@ public class AuthController {
     public ResponseEntity<?> validateUsername(@Valid @RequestBody EmailValidationRequest request) {
         boolean isValid = EmailUtils.isValid(request.getUsername());
         if (isValid) {
-            return ResponseEntity.ok(new MessageResponse("OK", "Email is valid!"));
+            return ResponseEntity.ok(new MessageResponse(OK, message("email.valid.ok")));
         } else {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "Email is invalid!"));
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("email.valid.nok")));
         }
     }
 
@@ -211,44 +189,53 @@ public class AuthController {
     public ResponseEntity<?> validateName(@Valid @RequestBody NameValidationRequest request) {
         boolean isValid = NameUtils.isValid(request.getName());
         if (isValid) {
-            return ResponseEntity.ok(new MessageResponse("OK", "Name is valid!"));
+            return ResponseEntity.ok(new MessageResponse(OK, message("name.valid.ok")));
         } else {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "Name is invalid, it must contain 2 words minimum without symbols"));
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("name.valid.nok")));
         }
     }
 
     @PostMapping("/profile")
     public ResponseEntity<?> getProfile(@Valid @RequestBody EmailValidationRequest request) {
-        String username = request.getUsername();
-        ProfileResponse profile = privateProfile(username);
-        if (profile != null) {
-            return ResponseEntity.ok(profile);
-        } else {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "User is not registered."));
-        }
+        return ResponseEntity.ok(privateProfile(request.getUsername()));
     }
 
-    private ProfileResponse privateProfile(String username) {
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-        ProfileResponse profile = new ProfileResponse();
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            int numberOfDevices = userRepository.getUserDevices(username).size();
-            profile.setEmailVerified(user.verified());
-            profile.setInstallations(numberOfDevices);
-            profile.setActiveMembership(UserRepository.isValidLicense(user.license()));
-            profile.setInstallationsExceeded(UserRepository.isInstallationExceeded(numberOfDevices));
+    private LoginResponse privateProfile(String username) {
+        LoginResponse notFound = new LoginResponse();
+        notFound.setUsername(username);
+        notFound.setEmailVerified(false);
+        notFound.setMembershipActivated(false);
+        return userRepository.findByUsername(username).map(this::userToLogin).orElse(notFound);
+    }
+
+    private LoginResponse userToLogin(User user) {
+        int devicesCount = userRepository.getUserDevices(user.username()).size();
+        LoginResponse login = new LoginResponse();
+        login.setUsername(user.username());
+        login.setName(user.name());
+        login.setEmailVerified(user.verified());
+        login.setDevicesCount(devicesCount);
+        login.setDevicesExceeded(UserRepository.isInstallationExceeded(devicesCount));
+        if (user.membership() != null) {
+            Membership membership = user.membership();
+            login.setMembership(membership.getLicense());
+            login.setMembershipSponsor(membership.getSponsor());
+            login.setMembershipSponsorLogo(membership.getLogo());
+            login.setMembershipExpiration(membership.getExpiration());
+            login.setMembershipActivated(UserRepository.isActiveLicense(membership.getLicense()));
+        } else {
+
         }
-        return profile;
+        return login;
     }
 
     @PutMapping("/deactivate/{license}")
     public ResponseEntity<?> deactivateMembership(@PathVariable String license) {
         if (!StringUtils.hasLength(license) && license.length() != 20) {
-            return ResponseEntity.ok(new MessageResponse("ERROR", "License must be 20 char length"));
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("membership.valid.nok")));
         }
         UserRepository.deactivateLicense(license);
-        return ResponseEntity.ok(new MessageResponse("OK", "License inactivated successfully!"));
+        return ResponseEntity.ok(new MessageResponse(OK, message("membership.deactivate.ok")));
     }
 
 
@@ -257,8 +244,9 @@ public class AuthController {
         return userDetails.getUsername();
     }
 
-    private String getMessage(String code) {
-        return messageSource.getMessage(code, null, Locale.ENGLISH);
+    private String message(String code) {
+        Locale locale = geActiveLocale(userRepository);
+        return messageSource.getMessage(code, null, locale);
     }
 
 }

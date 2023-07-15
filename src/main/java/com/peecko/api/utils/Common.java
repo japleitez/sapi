@@ -10,9 +10,14 @@ import java.util.concurrent.TimeUnit;
 public abstract class Common {
 
     private static final int MAX = 9;
+
     private static final int MIN = 0;
 
     public static final int MAX_ALLOWED = 3;
+
+    public static final String OK = "OK";
+
+    public static final String ERROR = "ERROR";
 
     private static final Random RANDOM = new Random();
 

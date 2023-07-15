@@ -15,5 +15,6 @@ public class User {
     private String license;
     private String language;
     private boolean verified = true;
+    private Membership membership;
     private Set<Role> roles = new HashSet<>();
 }
