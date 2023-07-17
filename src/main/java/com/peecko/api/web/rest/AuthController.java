@@ -148,8 +148,8 @@ public class AuthController extends BaseController {
         }
     }
 
-    @PostMapping("/change-password")
-    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         if (userRepository.isPinCodeValid(request.getRequestId(), request.getPinCode())) {
             boolean isValidPassword = PasswordUtils.isValid(request.getPassword());
             if (!isValidPassword) {
@@ -162,6 +162,48 @@ public class AuthController extends BaseController {
             return ResponseEntity.ok(new MessageResponse(OK, message("password.change.ok")));
         } else {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("password.change.nok")));
+        }
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        String username = request.getUsername();
+        if (!StringUtils.hasText(username)) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("email.required")));
+        }
+        if (!userRepository.existsByUsername(username)) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("email.notfound")));
+        }
+        User user = userRepository.findByUsername(username).get();
+        String current = encoder.encode(request.getCurrent());
+        if (!user.password().equals(current)) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("password.old.mismatch")));
+        }
+        boolean isValidPassword = PasswordUtils.isValid(request.getPassword());
+        if (!isValidPassword) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("password.valid.nok")));
+        }
+        user.password(encoder.encode(request.getPassword()));
+        userRepository.save(user);
+        return ResponseEntity.ok(new MessageResponse(OK, message("password.change.ok")));
+    }
+
+    @PostMapping("/change-personal-info")
+    public ResponseEntity<?> changeUserInfo(@Valid @RequestBody ChangeUserInfoRequest request) {
+        if (!StringUtils.hasText(request.getUsername())) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("email.required")));
+        }
+        if (!userRepository.existsByUsername(request.getUsername())) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("email.notfound")));
+        }
+        User user = userRepository.findByUsername(request.getUsername()).get();
+        boolean isValid = NameUtils.isValid(request.getName());
+        if (isValid) {
+            user.name(request.getName());
+            userRepository.save(user);
+            return ResponseEntity.ok(new MessageResponse(OK, message("user.info.change.ok")));
+        } else {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("name.valid.nok")));
         }
     }
 

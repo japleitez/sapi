@@ -7,14 +7,13 @@ import lombok.Setter;
 
 @Data
 @Setter @Getter
-public class ChangePasswordRequest {
+public class ResetPasswordRequest {
 
-    String username;
+    @JsonProperty("request-id")
+    String requestId;
 
-    @JsonProperty("old-password")
-    String current;
+    @JsonProperty("pin-code")
+    String pinCode;
 
-    @JsonProperty("new-password")
     String password;
-
 }
