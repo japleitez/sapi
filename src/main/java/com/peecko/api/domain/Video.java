@@ -1,5 +1,6 @@
 package com.peecko.api.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -18,6 +19,12 @@ public class Video {
     private String title;
     private String duration;
     private String coach;
+    @JsonProperty("coach-website")
+    private String coachWebsite;
+    @JsonProperty("coach-email")
+    private String coachEmail;
+    @JsonProperty("coach-instagram")
+    private String coachInstagram;
     private String image;
     private String url;
     private String audience;

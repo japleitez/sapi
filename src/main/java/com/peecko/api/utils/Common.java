@@ -62,6 +62,9 @@ public abstract class Common {
         nv.setTitle(v.getTitle());
         nv.setDuration(v.getDuration());
         nv.setCoach(v.getCoach());
+        nv.setCoachWebsite(v.getCoachWebsite());
+        nv.setCoachInstagram(v.getCoachInstagram());
+        nv.setCoachEmail(v.getCoachEmail());
         nv.setImage(v.getImage());
         nv.setUrl(v.getUrl());
         nv.setAudience(v.getAudience());

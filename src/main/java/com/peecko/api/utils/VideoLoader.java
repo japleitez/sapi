@@ -1,6 +1,8 @@
 package com.peecko.api.utils;
 
+import com.peecko.api.domain.Coach;
 import com.peecko.api.domain.Video;
+import com.peecko.api.repository.CoachRepository;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class VideoLoader {
+
     private static final String SEMICOLON = ";";
     private static final String YOUTUBE = "youtube";
     private static final String PEECKO = "peecko";
@@ -36,7 +39,7 @@ public class VideoLoader {
 
     private Video createVideo(String[] values) {
         String player = values[6].contains(YOUTUBE)? YOUTUBE: PEECKO;
-        return new Video()
+        Video video = new Video()
             .setCode(trim(values[0]))
             .setCategory(trim(values[1]))
             .setTitle(trim(values[2]))
@@ -50,6 +53,11 @@ public class VideoLoader {
             .setDescription(trim(values[10]))
             .setResume(trim(values[11]))
             .setPlayer(player);
+        Coach coach = CoachRepository.find(video.getCoach());
+        video.setCoachEmail(coach.getEmail());
+        video.setCoachInstagram(coach.getInstagram());
+        video.setCoachWebsite(coach.getWebsite());
+        return video;
     }
 
     private String trim(String value) {

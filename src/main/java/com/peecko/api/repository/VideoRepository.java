@@ -5,6 +5,7 @@ import com.peecko.api.domain.Video;
 import com.peecko.api.utils.Common;
 import com.peecko.api.utils.VideoLoader;
 import org.apache.commons.text.CaseUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
