@@ -175,8 +175,7 @@ public class AuthController extends BaseController {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("email.notfound")));
         }
         User user = userRepository.findByUsername(username).get();
-        String current = encoder.encode(request.getCurrent());
-        if (!user.password().equals(current)) {
+        if (!encoder.matches(request.getCurrent(), user.password())) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("password.old.mismatch")));
         }
         boolean isValidPassword = PasswordUtils.isValid(request.getPassword());
