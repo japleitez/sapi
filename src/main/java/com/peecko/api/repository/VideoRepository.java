@@ -20,23 +20,27 @@ public class VideoRepository {
     public static final HashMap<String, List<String>> FAVORITES =  new LinkedHashMap<>();
     public static final Set<Video> ALL_VIDEOS = new HashSet<>();
 
-    static {
-        loadVideos();
-    }
+    private static boolean loaded = false;
+
+
 
     public List<Video> getTodayVideos(String user) {
+        loadVideos();
         return decorate(TODAY_VIDEOS, user);
     }
 
     public List<Category> getLibrary(String user) {
+        loadVideos();
         return LIBRARY.stream().map(category -> decorate(category, user)).collect(Collectors.toList());
     }
 
     public Optional<Category> getCategory(String code, String user) {
+        loadVideos();
         return CATEGORIES.stream().filter(category -> category.getCode().equals(code)).map(category -> decorate(category, user)).findFirst();
     }
 
     public List<Video> getUserFavorites(String user) {
+        loadVideos();
         List<String> videoCodes = getUserVideoCodes(user);
         return ALL_VIDEOS.stream()
             .filter(video -> videoCodes.contains(video.getCode()))
@@ -49,6 +53,7 @@ public class VideoRepository {
     }
 
     public void addFavorite(String user, String code) {
+        loadVideos();
         Optional<Video> optional = ALL_VIDEOS.stream().filter(video -> video.getCode().equals(code)).findFirst();
         if (optional.isPresent()) {
             Video video = optional.get();
@@ -61,6 +66,7 @@ public class VideoRepository {
     }
 
     public void removeFavorite(String user, String code) {
+        loadVideos();
         Optional<Video> optional = ALL_VIDEOS.stream().filter(video -> video.getCode().equals(code)).findFirst();
         if (optional.isPresent()) {
             Video video = optional.get();
@@ -73,6 +79,7 @@ public class VideoRepository {
     }
 
     public void removeFavorites(String user) {
+        loadVideos();
         List<String> videos = FAVORITES.get(user);
         if (videos != null && !videos.isEmpty()) {
             videos.clear();
@@ -80,8 +87,12 @@ public class VideoRepository {
         }
     }
 
-    private static void loadVideos() {
-        List<String> videoCategories = List.of("YOGA", "PILATES", "CALISTHENICS", "MEDITATION", "HEALTH RISK");
+    private void loadVideos() {
+        if (loaded) {
+            return;
+        }
+        loaded = true;
+        List<String> videoCategories = List.of("YOGA", "PILATES", "CONDITIONING", "MEDITATION", "HEALTH RISK");
         ALL_VIDEOS.addAll(new VideoLoader().loadVideos("/data/videos.csv"));
         for(String categoryName: videoCategories) {
             Category c1 = new Category();
