@@ -93,7 +93,8 @@ public class VideoController extends BaseController {
     @PutMapping("/playlists/{listId}/{videoCode}")
     public ResponseEntity<?> addPlaylistVideoItem(@PathVariable Long listId, @PathVariable String videoCode) {
         String username = getUsername(userRepository);
-        Playlist playlist = userRepository.addPlaylistVideoItem(username, listId, videoCode);
+        Video video = videoRepository.getVideo(username, videoCode);
+        Playlist playlist = userRepository.addPlaylistVideoItem(username, listId, video);
         return ResponseEntity.ok(playlist);
     }
 

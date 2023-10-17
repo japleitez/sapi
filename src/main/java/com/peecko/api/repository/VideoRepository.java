@@ -132,6 +132,17 @@ public class VideoRepository {
         return userFavorites;
     }
 
+    public Video getVideo(String user, String videoCode) {
+        Video video = ALL_VIDEOS.stream().filter(v -> videoCode.equals(v.getCode())).findAny().orElse(null);
+        if (video != null) {
+            List<String> videoCodes = getUserVideoCodes(user);
+            Video clone = Common.clone(video);
+            clone.setFavorite(videoCodes.contains(video.getCode()));
+            return clone;
+        }
+        return null;
+    }
+
     private List<Video> decorate(List<Video> videos, String user) {
         List<String> videoCodes = getUserVideoCodes(user);
         return videos.stream().map(video -> {

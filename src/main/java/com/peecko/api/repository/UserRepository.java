@@ -215,17 +215,21 @@ public class UserRepository {
         return Optional.ofNullable(playlist);
     }
 
-    public Playlist addPlaylistVideoItem(String username, Long listId, String videoCode) {
+    public Playlist addPlaylistVideoItem(String username, Long listId, Video video) {
         Playlist playlist = getPlaylist(username, listId).get();
+        if (video == null) {
+            return playlist;
+        }
         Optional<VideoItem> optionalLast = getLastVideoItem(playlist);
         VideoItem last = null;
         if (optionalLast.isPresent()) {
             last = optionalLast.get();
         }
         VideoItem toAdd = new VideoItem();
-        toAdd.setCode(videoCode);
+        toAdd.setVideo(video);
+        toAdd.setCode(video.getCode());
         if (last != null) {
-            last.setNext(videoCode);
+            last.setNext(video.getCode());
             toAdd.setPrevious(last.getCode());
         }
         List<VideoItem> videoItems = playlist.getVideoItems();
@@ -290,11 +294,10 @@ public class UserRepository {
             }
             moved = true;
         } catch (Exception e) {
-            // list items has an issue
-        } finally {
-            if (moved) {
-                playlist.setVideoItems(sortVideoItems(playlist.getVideoItems()));
-            }
+            e.printStackTrace();
+        }
+        if (moved) {
+            playlist.setVideoItems(sortVideoItems(playlist.getVideoItems()));
         }
         return playlist;
     }
@@ -328,11 +331,11 @@ public class UserRepository {
             return sources;
         }
         List<VideoItem> sorted =  new ArrayList<>();
-        VideoItem item = sources.stream().filter(v -> !StringUtils.hasText(v.getPrevious())).findFirst().get();
+        VideoItem item = sources.stream().filter(v -> !StringUtils.hasText(v.getPrevious())).findAny().get();
         sorted.add(item);
         while (StringUtils.hasText(item.getNext())) {
             String next = item.getNext();;
-            item = sources.stream().filter(v -> next.equals(v.getCode())).findFirst().get();
+            item = sources.stream().filter(v -> next.equals(v.getCode())).findAny().get();
             sorted.add(item);
         }
         return sorted;

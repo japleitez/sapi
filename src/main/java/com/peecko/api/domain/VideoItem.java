@@ -13,4 +13,5 @@ public class VideoItem {
     private String code;
     private String previous;
     private String next;
+    private Video video;
 }
