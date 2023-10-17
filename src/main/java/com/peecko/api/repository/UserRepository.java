@@ -35,6 +35,8 @@ public class UserRepository {
 
     static final Map<String, Membership> MEMBERSHIPS = new HashMap<>();
 
+    public static final HashMap<String, List<Playlist>> PLAYLISTS = new HashMap<>();
+
     static final DateTimeFormatter CUSTOM_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     static final DateTimeFormatter DAY_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy");
@@ -176,5 +178,164 @@ public class UserRepository {
         PIN_CODES.entrySet().removeIf(entry -> entry.getValue().getExpireAt().isBefore(now));
     }
 
+    /**
+     * Playlist
+     * ------------------------------------------------------------------------------------*/
+
+    private static Long PLAYLIST_NEXT_ID = 0L;
+
+    private static Long nextPlaylistId() {
+        return ++PLAYLIST_NEXT_ID;
+    }
+
+    public List<IdName> getPlaylists(String username) {
+        if (PLAYLISTS.containsKey(username)) {
+            return PLAYLISTS.get(username).stream().map(p -> new IdName(p.getId(), p.getName())).toList();
+        }
+        return new ArrayList<>();
+    }
+
+    public Optional<Playlist> getPlaylist(String username, Long id) {
+        Optional<Playlist> optionalPlaylist = PLAYLISTS.get(username).stream().filter(p -> id.equals(p.getId())).findAny();
+        if (optionalPlaylist.isPresent()) {
+            List<VideoItem> videoItems = optionalPlaylist.get().getVideoItems();
+            optionalPlaylist.get().setVideoItems(sortVideoItems(videoItems));
+        }
+        return optionalPlaylist;
+    }
+
+    public Optional<Playlist> createPlaylist(String username, String listName) {
+        Playlist playlist = new Playlist(username, nextPlaylistId(), listName, new ArrayList<>());
+        List<Playlist> userPlaylists = PLAYLISTS.get(username);
+        if (userPlaylists == null) {
+            userPlaylists = new ArrayList<>();
+        }
+        userPlaylists.add(playlist);
+        PLAYLISTS.put(username, userPlaylists);
+        return Optional.ofNullable(playlist);
+    }
+
+    public Playlist addPlaylistVideoItem(String username, Long listId, String videoCode) {
+        Playlist playlist = getPlaylist(username, listId).get();
+        Optional<VideoItem> optionalLast = getLastVideoItem(playlist);
+        VideoItem last = null;
+        if (optionalLast.isPresent()) {
+            last = optionalLast.get();
+        }
+        VideoItem toAdd = new VideoItem();
+        toAdd.setCode(videoCode);
+        if (last != null) {
+            last.setNext(videoCode);
+            toAdd.setPrevious(last.getCode());
+        }
+        List<VideoItem> videoItems = playlist.getVideoItems();
+        videoItems.add(toAdd);
+        playlist.setVideoItems(sortVideoItems(videoItems));
+        return playlist;
+    }
+
+    public Playlist removePlaylistVideoItem(String username, Long listId, String videoCode) {
+        Playlist playlist = getPlaylist(username, listId).get();
+        Optional<VideoItem> optionalVideoItem = playlist.getVideoItems().stream().filter(v -> videoCode.equals(v.getCode())).findAny();
+        if (optionalVideoItem.isPresent()) {
+            List<VideoItem> cleaned = new ArrayList<>();
+            VideoItem toRemove = optionalVideoItem.get();
+            if (playlist.getVideoItems().size() > 1) {
+                VideoItem previous = null;
+                VideoItem next = null;
+                if (StringUtils.hasText(toRemove.getPrevious())) {
+                    previous = playlist.getVideoItems().stream().filter(v -> toRemove.getPrevious().equals(v.getCode())).findAny().orElse(null);
+                }
+                if (StringUtils.hasText(toRemove.getNext())) {
+                    next = playlist.getVideoItems().stream().filter(v -> toRemove.getNext().equals(v.getCode())).findAny().orElse(null);
+                }
+                if (previous != null && next != null) {
+                    previous.setNext(next.getCode());
+                } else if (previous == null && next != null) {
+                    next.setPrevious(null);
+                } else if (previous != null && next == null) {
+                    previous.setNext(null);
+                }
+                cleaned = playlist.getVideoItems().stream().filter(v -> !videoCode.equals(v.getCode())).toList();
+            }
+            playlist.setVideoItems(sortVideoItems(cleaned));
+        }
+        return playlist;
+    }
+
+    public Playlist movePlaylistVideoItem(String username, Long listId, String videoCode, String newPreviousVideoCode) {
+        boolean moved = false;
+        Playlist playlist = getPlaylist(username, listId).get();
+        try {
+            VideoItem toMove = getVideoItem(playlist, videoCode);
+            // update items around video to be moved
+            VideoItem toMovePrevious = getVideoItem(playlist, toMove.getPrevious());
+            VideoItem toMoveNext = getVideoItem(playlist, toMove.getNext());
+            if (toMoveNext == null) {
+                toMovePrevious.setNext(null);
+            } else {
+                toMoveNext.setPrevious(toMove.getPrevious());
+                toMovePrevious.setNext(toMove.getNext());
+            }
+            // update items around video in its new position
+            if (StringUtils.hasText(newPreviousVideoCode)) {
+                VideoItem newPrevious = getVideoItem(playlist, newPreviousVideoCode);
+                toMove.setNext(newPrevious.getNext());
+                toMove.setPrevious(newPrevious.getCode());
+                newPrevious.setNext(toMove.getCode());
+            } else {
+                VideoItem fistVideo = getFirstVideoItem(playlist);
+                fistVideo.setPrevious(toMove.getCode());
+                toMove.setPrevious(null);
+            }
+            moved = true;
+        } catch (Exception e) {
+            // list items has an issue
+        } finally {
+            if (moved) {
+                playlist.setVideoItems(sortVideoItems(playlist.getVideoItems()));
+            }
+        }
+        return playlist;
+    }
+
+    private VideoItem getVideoItem(Playlist playlist, String code) {
+        if (!StringUtils.hasText(code)) {
+            return null;
+        }
+        return playlist.getVideoItems().stream().filter(v -> code.equals(v.getCode())).findAny().orElse(null);
+    }
+
+    private VideoItem getFirstVideoItem(Playlist playlist) {
+        return playlist.getVideoItems().stream().filter(v -> StringUtils.hasText(v.getPrevious())).findAny().orElse(null);
+    }
+    private Optional<VideoItem> getLastVideoItem(Playlist playlist) {
+        return playlist.getVideoItems().stream().filter(v -> !StringUtils.hasText(v.getNext())).findAny();
+    }
+
+    public boolean playlistExistsByName(String username, String playlistName) {
+        if (!StringUtils.hasText(playlistName)) {
+            return false;
+        }
+        if (PLAYLISTS.containsKey(username)) {
+            return PLAYLISTS.get(username).stream().anyMatch(playlist -> playlistName.equals(playlist.getName()));
+        }
+        return false;
+    }
+
+    private List<VideoItem> sortVideoItems(List<VideoItem> sources) {
+        if (sources.isEmpty()) {
+            return sources;
+        }
+        List<VideoItem> sorted =  new ArrayList<>();
+        VideoItem item = sources.stream().filter(v -> !StringUtils.hasText(v.getPrevious())).findFirst().get();
+        sorted.add(item);
+        while (StringUtils.hasText(item.getNext())) {
+            String next = item.getNext();;
+            item = sources.stream().filter(v -> next.equals(v.getCode())).findFirst().get();
+            sorted.add(item);
+        }
+        return sorted;
+    }
 
 }

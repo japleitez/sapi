@@ -13,6 +13,11 @@ public abstract class BaseController {
         User user = getActiveUser(userRepository);
         return user != null? user.language(): "EN";
     }
+
+    protected String getUsername(UserRepository userRepository) {
+        return getActiveUser(userRepository).username();
+    }
+
     protected User getActiveUser(UserRepository userRepository) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userRepository.findByUsername(userDetails.getUsername()).get();
