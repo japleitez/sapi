@@ -79,6 +79,7 @@ public class VideoController extends BaseController {
         return ResponseEntity.ofNullable(optionalPlaylist); // 404 Not Found
     }
 
+    @Licensed
     @PostMapping("/playlists/")
     public ResponseEntity<?> createPlaylist(@Valid @RequestBody CreatePlaylistRequest request) {
         String name = request.getName();

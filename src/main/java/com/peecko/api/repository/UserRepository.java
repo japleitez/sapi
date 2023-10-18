@@ -189,10 +189,12 @@ public class UserRepository {
     }
 
     public List<IdName> getPlaylists(String username) {
+        List<IdName> list = new ArrayList<>();
         if (PLAYLISTS.containsKey(username)) {
-            return PLAYLISTS.get(username).stream().map(p -> new IdName(p.getId(), p.getName())).toList();
+            list = PLAYLISTS.get(username).stream().map(p -> new IdName(p.getId(), p.getName())).toList();
+            list.sort(Comparator.comparing(IdName::getName));
         }
-        return new ArrayList<>();
+        return list;
     }
 
     public Optional<Playlist> getPlaylist(String username, Long id) {
@@ -212,7 +214,7 @@ public class UserRepository {
         }
         userPlaylists.add(playlist);
         PLAYLISTS.put(username, userPlaylists);
-        return Optional.ofNullable(playlist);
+        return Optional.of(playlist);
     }
 
     public Playlist addPlaylistVideoItem(String username, Long listId, Video video) {
