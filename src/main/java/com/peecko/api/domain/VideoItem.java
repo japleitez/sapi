@@ -10,8 +10,8 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VideoItem {
-    private String code;
     private String previous;
+    private String code;
     private String next;
     private Video video;
 }

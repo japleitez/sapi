@@ -5,7 +5,6 @@ import com.peecko.api.domain.Video;
 import com.peecko.api.utils.Common;
 import com.peecko.api.utils.VideoLoader;
 import org.apache.commons.text.CaseUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -26,22 +25,22 @@ public class VideoRepository {
 
     public List<Video> getTodayVideos(String user) {
         loadVideos();
-        return decorate(TODAY_VIDEOS, user);
+        return decorateVideo(TODAY_VIDEOS, user);
     }
 
     public List<Category> getLibrary(String user) {
         loadVideos();
-        return LIBRARY.stream().map(category -> decorate(category, user)).collect(Collectors.toList());
+        return LIBRARY.stream().map(category -> decorateCategory(category, user)).collect(Collectors.toList());
     }
 
     public Optional<Category> getCategory(String code, String user) {
         loadVideos();
-        return CATEGORIES.stream().filter(category -> category.getCode().equals(code)).map(category -> decorate(category, user)).findFirst();
+        return CATEGORIES.stream().filter(category -> category.getCode().equals(code)).map(category -> decorateCategory(category, user)).findFirst();
     }
 
     public List<Video> getUserFavorites(String user) {
         loadVideos();
-        List<String> videoCodes = getUserVideoCodes(user);
+        List<String> videoCodes = getUserFavoriteVideoCodes(user);
         return ALL_VIDEOS.stream()
             .filter(video -> videoCodes.contains(video.getCode()))
             .map(video -> {
@@ -57,7 +56,7 @@ public class VideoRepository {
         Optional<Video> optional = ALL_VIDEOS.stream().filter(video -> video.getCode().equals(code)).findFirst();
         if (optional.isPresent()) {
             Video video = optional.get();
-            List<String> videoCodes = getUserVideoCodes(user);
+            List<String> videoCodes = getUserFavoriteVideoCodes(user);
             if (!videoCodes.contains(video.getCode())) {
                 videoCodes.add(video.getCode());
                 FAVORITES.put(user, videoCodes);
@@ -70,7 +69,7 @@ public class VideoRepository {
         Optional<Video> optional = ALL_VIDEOS.stream().filter(video -> video.getCode().equals(code)).findFirst();
         if (optional.isPresent()) {
             Video video = optional.get();
-            List<String> videoCodes = getUserVideoCodes(user);
+            List<String> videoCodes = getUserFavoriteVideoCodes(user);
             if (videoCodes.contains(video.getCode())) {
                 videoCodes.remove(video.getCode());
                 FAVORITES.put(user, videoCodes);
@@ -87,7 +86,7 @@ public class VideoRepository {
         }
     }
 
-    private void loadVideos() {
+    private static void loadVideos() {
         if (loaded) {
             return;
         }
@@ -112,6 +111,7 @@ public class VideoRepository {
     }
 
     private static List<Video> videosByCategory(String category) {
+        loadVideos();
         return new ArrayList<>(ALL_VIDEOS.stream().filter(v -> v.getCategory().equals(category)).collect(Collectors.toList()));
     }
 
@@ -124,7 +124,8 @@ public class VideoRepository {
         return list;
     }
 
-    public static List<String> getUserVideoCodes(String user) {
+    public static List<String> getUserFavoriteVideoCodes(String user) {
+        loadVideos();
         List<String> userFavorites = FAVORITES.get(user);
         if (userFavorites == null) {
             userFavorites = new LinkedList<>();
@@ -133,9 +134,10 @@ public class VideoRepository {
     }
 
     public Video getVideo(String user, String videoCode) {
+        loadVideos();
         Video video = ALL_VIDEOS.stream().filter(v -> videoCode.equals(v.getCode())).findAny().orElse(null);
         if (video != null) {
-            List<String> videoCodes = getUserVideoCodes(user);
+            List<String> videoCodes = getUserFavoriteVideoCodes(user);
             Video clone = Common.clone(video);
             clone.setFavorite(videoCodes.contains(video.getCode()));
             return clone;
@@ -143,8 +145,8 @@ public class VideoRepository {
         return null;
     }
 
-    private List<Video> decorate(List<Video> videos, String user) {
-        List<String> videoCodes = getUserVideoCodes(user);
+    private List<Video> decorateVideo(List<Video> videos, String user) {
+        List<String> videoCodes = getUserFavoriteVideoCodes(user);
         return videos.stream().map(video -> {
             Video clone = Common.clone(video);
             clone.setFavorite(videoCodes.contains(video.getCode()));
@@ -152,11 +154,12 @@ public class VideoRepository {
         }).collect(Collectors.toList());
     }
 
-    private Category decorate(Category category, String user) {
+    private Category decorateCategory(Category category, String user) {
         Category nc = new Category();
         nc.setCode(category.getCode());
         nc.setTitle(category.getTitle());
-        nc.setVideos(decorate(category.getVideos(), user));
+        nc.setVideos(decorateVideo(category.getVideos(), user));
         return nc;
     }
+
 }
