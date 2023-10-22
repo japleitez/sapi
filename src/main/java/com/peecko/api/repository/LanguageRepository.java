@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Component
 public class LanguageRepository {
@@ -21,5 +22,4 @@ public class LanguageRepository {
     public List<Language> getLanguages() {
         return LANGUAGES;
     }
-
 }

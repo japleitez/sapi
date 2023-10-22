@@ -1,16 +1,14 @@
 package com.peecko.api.web.rest;
 
+import com.peecko.api.domain.User;
 import com.peecko.api.repository.HelpRepository;
 import com.peecko.api.repository.LanguageRepository;
 import com.peecko.api.repository.NotificationRepository;
 import com.peecko.api.repository.UserRepository;
 import com.peecko.api.web.payload.response.LanguageResponse;
-import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Locale;
 
 @RestController
 @RequestMapping("/api/account")
@@ -46,10 +44,17 @@ public class AccountController extends BaseController {
 
     @GetMapping("/languages")
     public ResponseEntity<?> getLanguages() {
-        return ResponseEntity.ok(new LanguageResponse(getLanguage(), languageRepository.getLanguages()));
+        return ResponseEntity.ok(new LanguageResponse(getActiveLanguage(), languageRepository.getLanguages()));
     }
 
-    private String getLanguage() {
+    @PutMapping("/languages/{lang}")
+    public ResponseEntity<?> setLanguage(@PathVariable("lang")  String lang) {
+        User user = getActiveUser(userRepository);
+        user.language(resolveLanguage(lang));
+        return ResponseEntity.ok().build();
+    }
+
+    private String getActiveLanguage() {
         return getActiveLanguage(userRepository);
     }
 
