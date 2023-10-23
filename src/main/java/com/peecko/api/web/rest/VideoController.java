@@ -106,10 +106,10 @@ public class VideoController extends BaseController {
         return ResponseEntity.ok(playlist);
     }
 
-    @PutMapping("/playlists/{listId}/{videoCode}/{previousVideoCode}")
-    public ResponseEntity<?> movePlaylistVideoItem(@PathVariable Long listId, @PathVariable String videoCode, @PathVariable String previousVideoCode) {
+    @PutMapping("/playlists/{listId}/{videoCode}/{direction}")
+    public ResponseEntity<?> movePlaylistVideoItem(@PathVariable Long listId, @PathVariable String videoCode, @PathVariable String direction) {
         String username = getUsername(userRepository);
-        Playlist playlist = userRepository.movePlaylistVideoItem(username, listId, videoCode, previousVideoCode);
+        Playlist playlist = userRepository.movePlaylistVideoItem(username, listId, videoCode, direction);
         return ResponseEntity.ok(playlist);
     }
     @GetMapping("/categories")
