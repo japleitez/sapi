@@ -183,6 +183,10 @@ public class UserRepository {
      * ------------------------------------------------------------------------------------*/
 
     private static Long PLAYLIST_NEXT_ID = 0L;
+    private static String UP = "up";
+    private static String DOWN = "down";
+    private static String TOP = "top";
+    private static String BOTTOM = "bottom";
 
     private static Long nextPlaylistId() {
         return ++PLAYLIST_NEXT_ID;
@@ -266,15 +270,28 @@ public class UserRepository {
 
     public Playlist movePlaylistVideoItem(String username, Long listId, String videoCode, String direction) {
         Playlist playlist = getPlaylist(username, listId).get();
-        VideoItem videoItem = getVideoItem(playlist, videoCode);
-        if (videoItem == null) {
+        if (playlist.getVideoItems().size() < 2) {
             return playlist;
         }
-        if ("up".equalsIgnoreCase(direction)) {
-            String newPreviousVideoCode = StringUtils.hasText(videoItem.getPrevious()) ? videoItem.getPrevious(): "top";
-            playlist = moveVideoItemUp(username, playlist, videoItem, newPreviousVideoCode);
-        } else if ("down".equalsIgnoreCase(direction)) {
-            String newNextVideoCode = StringUtils.hasText(videoItem.getNext())? videoItem.getNext(): "bottom";
+        VideoItem currentNode = getVideoItem(playlist, videoCode);
+        if (currentNode == null) {
+            return playlist;
+        }
+        if (UP.equalsIgnoreCase(direction)) {
+            if (StringUtils.hasText(currentNode.getPrevious())) {
+                VideoItem currentPrevious = getVideoItem(playlist, currentNode.getPrevious());
+                if (StringUtils.hasText(currentPrevious.getPrevious())) {
+                    String newPreviousVideoCode = currentPrevious.getPrevious();
+                    playlist = moveVideoItemUp(username, playlist, currentNode, newPreviousVideoCode);
+                } else {
+                    playlist = moveVideoItemUp(username, playlist, currentNode, TOP);
+                }
+            }
+        } else if (DOWN.equalsIgnoreCase(direction)) {
+            if (StringUtils.hasText(currentNode.getNext())) {
+                String newPreviousVideoCode = currentNode.getNext();
+                playlist = moveVideoItemDown(username, playlist, currentNode, newPreviousVideoCode);
+            }
         }
         return playlist;
     }
@@ -284,22 +301,22 @@ public class UserRepository {
         boolean moved = false;
         VideoItem previous = getVideoItem(playlist, current.getPrevious());
         VideoItem next = getVideoItem(playlist, current.getNext());
-        if (newPreviousVideoCode.equals(current.getPrevious())) {
-            playlist.setVideoItems(sortVideoItems(playlist.getVideoItems()));
-            return playlist;
+        VideoItem newPrevious = null;
+        if (TOP.equals(newPreviousVideoCode)) {
+            newPrevious = getFirstVideoItem(playlist);
+        } else {
+            newPrevious = getVideoItem(playlist, newPreviousVideoCode);
         }
         try {
             previous.setNext(current.getNext());
             if (next != null) {
                 next.setPrevious(previous.getCode());
             }
-            if ("top".equalsIgnoreCase(newPreviousVideoCode)) {
-                VideoItem first = getFirstVideoItem(playlist);
-                first.setPrevious(current.getCode());
+            if (TOP.equals(newPreviousVideoCode)) {
+                newPrevious.setPrevious(current.getCode());
                 current.setPrevious(null);
-                current.setNext(first.getCode());
+                current.setNext(newPrevious.getCode());
             } else {
-                VideoItem newPrevious = getVideoItem(playlist, newPreviousVideoCode);
                 current.setPrevious(newPrevious.getCode());
                 current.setNext(newPrevious.getNext());
                 VideoItem newNext = getVideoItem(playlist, newPrevious.getNext());
@@ -309,23 +326,63 @@ public class UserRepository {
             moved = true;
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (moved) {
-                playlist.setVideoItems(sortVideoItems(playlist.getVideoItems()));
-            }
         }
-        return playlist;
-    }
-
-    private Playlist moveVideoItemDown(String username, Playlist playlist, VideoItem current, String newNextVideoCode) {
-        boolean moved = false;
-        VideoItem previous = getVideoItem(playlist, current.getPrevious());
-        VideoItem next = getVideoItem(playlist, current.getNext());
         if (moved) {
             playlist.setVideoItems(sortVideoItems(playlist.getVideoItems()));
         }
         return playlist;
     }
+
+    private Playlist moveVideoItemDown(String username, Playlist playlist, VideoItem current, String newPreviousVideoCode) {
+        boolean moved = false;
+        VideoItem previous = getVideoItem(playlist, current.getPrevious());
+        VideoItem next = getVideoItem(playlist, current.getNext());
+        VideoItem newPrevious = null;
+        if (BOTTOM.equals(newPreviousVideoCode)) {
+            newPrevious = getLastVideoItem(playlist);
+        } else {
+            newPrevious = getVideoItem(playlist, newPreviousVideoCode);
+        }
+        try {
+            if (previous == null) {
+                next.setPrevious(null);
+            } else {
+                next.setPrevious(previous.getCode());
+                previous.setNext(next.getCode());
+            }
+            VideoItem nextNext = null;
+            if (newPrevious.getCode().equals(next.getCode())) {
+                if (StringUtils.hasText(next.getNext())) {
+                    nextNext = getVideoItem(playlist, next.getNext());
+                    nextNext.setPrevious(current.getCode());
+                    current.setNext(nextNext.getCode());
+                } else {
+                    current.setNext(null);
+                }
+                next.setNext(current.getCode());
+                current.setPrevious(next.getCode());
+            } else {
+                // move current more down
+                if (StringUtils.hasText(newPrevious.getNext())) {
+                    nextNext = getVideoItem(playlist, newPrevious.getNext());
+                    nextNext.setPrevious(current.getCode());
+                    current.setNext(nextNext.getCode());
+                } else {
+                    current.setNext(null);
+                }
+                newPrevious.setNext(current.getCode());
+                current.setPrevious(newPrevious.getCode());
+            }
+            moved = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (moved) {
+            playlist.setVideoItems(sortVideoItems(playlist.getVideoItems()));
+        }
+        return playlist;
+    }
+
 
     private VideoItem getVideoItem(Playlist playlist, String code) {
         if (!StringUtils.hasText(code)) {
