@@ -228,7 +228,7 @@ public class UserRepository {
         VideoItem last = getLastVideoItem(playlist);
         VideoItem toAdd = new VideoItem();
         toAdd.setCode(video.getCode());
-        // toAdd.setVideo(video); TODO restore when test is fine
+        toAdd.setVideo(video);
         if (last != null) {
             last.setNext(video.getCode());
             toAdd.setPrevious(last.getCode());
