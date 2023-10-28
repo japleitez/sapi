@@ -215,14 +215,11 @@ public class UserRepository {
         return optionalPlaylist;
     }
 
-    public List<Playlist> deletePlaylist(String username, Long id) {
+    public List<IdName> deletePlaylist(String username, Long id) {
         initUserPlaylist(username);
-        List<Playlist> playlists = new ArrayList<>();
-        Optional<Playlist> optionalPlaylist = PLAYLISTS.get(username).stream().filter(p -> id.equals(p.getId())).findAny();
-        if (optionalPlaylist.isPresent()) {
-            playlists = PLAYLISTS.get(username).stream().filter(p -> !id.equals(p.getId())).collect(Collectors.toList());
-        }
-        return playlists;
+        List<Playlist> playlists = PLAYLISTS.get(username).stream().filter(p -> !id.equals(p.getId())).collect(Collectors.toList());
+        PLAYLISTS.put(username, playlists);
+        return getPlaylistsIdNames(username);
     }
 
     public Optional<Playlist> createPlaylist(String username, String listName) {

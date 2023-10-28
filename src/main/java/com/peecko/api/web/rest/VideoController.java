@@ -82,8 +82,8 @@ public class VideoController extends BaseController {
     @DeleteMapping("/playlists/{listId}")
     public ResponseEntity<?> deletePlaylist(@PathVariable Long listId) {
         String username = getUsername(userRepository);
-        List<Playlist> playlists = userRepository.deletePlaylist(username, listId);
-        return ResponseEntity.ok(playlists);
+        List<IdName> list = userRepository.deletePlaylist(username, listId);
+        return ResponseEntity.ok(list);
     }
 
     @Licensed
