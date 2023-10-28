@@ -18,6 +18,7 @@ public class VideoLoader {
     private static final String SEMICOLON = ";";
     private static final String YOUTUBE = "youtube";
     private static final String PEECKO = "peecko";
+    private static final String AMAZON_VIDEO = "https://d2zumfut4741yc.cloudfront.net/0f74fab4-17a2-4bdf-ad51-c9a5cfcd29d2/AppleHLS1/KLYU_004_SHOOTING_SIDE.m3u8";
 
     public List<Video> loadVideos(String filename) {
         List<Video> videos = new ArrayList<>();
@@ -53,6 +54,9 @@ public class VideoLoader {
             .setDescription(trim(values[10]))
             .setResume(trim(values[11]))
             .setPlayer(player);
+        if (PEECKO.equals(video.getPlayer())) {
+            video.setUrl(AMAZON_VIDEO);
+        }
         Coach coach = CoachRepository.find(video.getCoach());
         video.setCoachEmail(coach.getEmail());
         video.setCoachInstagram(coach.getInstagram());

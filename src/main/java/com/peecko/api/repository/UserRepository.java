@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.peecko.api.utils.Common.MAX_ALLOWED;
 
@@ -192,15 +193,20 @@ public class UserRepository {
         return ++PLAYLIST_NEXT_ID;
     }
 
-    public List<IdName> getPlaylists(String username) {
-        List<IdName> list = new ArrayList<>();
-        if (PLAYLISTS.containsKey(username)) {
-            list = PLAYLISTS.get(username).stream().map(p -> new IdName(p.getId(), p.getName())).toList();
+    private void initUserPlaylist(String username) {
+        if (PLAYLISTS.get(username) == null) {
+            List<Playlist> playlists = new ArrayList<>();
+            PLAYLISTS.put(username, playlists);
         }
-        return list;
+    }
+
+    public List<IdName> getPlaylistsIdNames(String username) {
+        initUserPlaylist(username);
+        return PLAYLISTS.get(username).stream().map(p -> new IdName(p.getId(), p.getName())).toList();
     }
 
     public Optional<Playlist> getPlaylist(String username, Long id) {
+        initUserPlaylist(username);
         Optional<Playlist> optionalPlaylist = PLAYLISTS.get(username).stream().filter(p -> id.equals(p.getId())).findAny();
         if (optionalPlaylist.isPresent()) {
             List<VideoItem> videoItems = optionalPlaylist.get().getVideoItems();
@@ -209,20 +215,27 @@ public class UserRepository {
         return optionalPlaylist;
     }
 
-    public Optional<Playlist> createPlaylist(String username, String listName) {
-        Playlist playlist = new Playlist(username, nextPlaylistId(), listName, new ArrayList<>());
-        List<Playlist> userPlaylists = PLAYLISTS.get(username);
-        if (userPlaylists == null) {
-            userPlaylists = new ArrayList<>();
+    public List<Playlist> deletePlaylist(String username, Long id) {
+        initUserPlaylist(username);
+        List<Playlist> playlists = new ArrayList<>();
+        Optional<Playlist> optionalPlaylist = PLAYLISTS.get(username).stream().filter(p -> id.equals(p.getId())).findAny();
+        if (optionalPlaylist.isPresent()) {
+            playlists = PLAYLISTS.get(username).stream().filter(p -> !id.equals(p.getId())).collect(Collectors.toList());
         }
-        userPlaylists.add(playlist);
-        PLAYLISTS.put(username, userPlaylists);
+        return playlists;
+    }
+
+    public Optional<Playlist> createPlaylist(String username, String listName) {
+        initUserPlaylist(username);
+        Playlist playlist = new Playlist(username, nextPlaylistId(), listName, new ArrayList<>());
+        PLAYLISTS.get(username).add(playlist);
         return Optional.of(playlist);
     }
 
     public Playlist addPlaylistVideoItem(String username, Long listId, Video video) {
-        Playlist playlist = getPlaylist(username, listId).get();
-        if (video == null) {
+        initUserPlaylist(username);
+        Playlist playlist = getPlaylist(username, listId).orElse(null);
+        if (playlist == null || video == null) {
             return playlist;
         }
         VideoItem last = getLastVideoItem(playlist);
@@ -238,8 +251,11 @@ public class UserRepository {
         return playlist;
     }
 
-    public Playlist removePlaylistVideoItem(String username, Long listId, String videoCode) {
-        Playlist playlist = getPlaylist(username, listId).get();
+    public Optional<Playlist> removePlaylistVideoItem(String username, Long listId, String videoCode) {
+        Playlist playlist = getPlaylist(username, listId).orElse(null);
+        if (playlist == null) {
+            return Optional.empty();
+        }
         Optional<VideoItem> optionalVideoItem = playlist.getVideoItems().stream().filter(v -> videoCode.equals(v.getCode())).findAny();
         if (optionalVideoItem.isPresent()) {
             List<VideoItem> cleaned = new ArrayList<>();
@@ -265,7 +281,7 @@ public class UserRepository {
             }
             playlist.setVideoItems(sortVideoItems(cleaned));
         }
-        return playlist;
+        return Optional.of(playlist);
     }
 
     public Playlist movePlaylistVideoItem(String username, Long listId, String videoCode, String direction) {

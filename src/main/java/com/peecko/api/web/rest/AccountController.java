@@ -39,7 +39,15 @@ public class AccountController extends BaseController {
 
     @GetMapping("/notifications")
     public ResponseEntity<?> getNotifications() {
-        return ResponseEntity.ok(notificationRepository.getNotifications());
+        String username = getUsername(userRepository);
+        return ResponseEntity.ok(notificationRepository.getNotifications(username));
+    }
+
+    @PutMapping("/notifications/{id}")
+    public ResponseEntity<?> updateNotification(@PathVariable Long id) {
+        String username = getUsername(userRepository);
+        notificationRepository.updateNotification(username, id);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/languages")

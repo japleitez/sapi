@@ -68,7 +68,7 @@ public class VideoController extends BaseController {
     @GetMapping("/playlists")
     public ResponseEntity<?> getPlaylists() {
         String username = getUsername(userRepository);
-        List<IdName> list = userRepository.getPlaylists(username);
+        List<IdName> list = userRepository.getPlaylistsIdNames(username);
         return ResponseEntity.ok(list);
     }
 
@@ -77,6 +77,13 @@ public class VideoController extends BaseController {
         String username = getUsername(userRepository);
         Optional<Playlist> optionalPlaylist = userRepository.getPlaylist(username, listId);
         return ResponseEntity.ofNullable(optionalPlaylist); // 404 Not Found
+    }
+
+    @DeleteMapping("/playlists/{listId}")
+    public ResponseEntity<?> deletePlaylist(@PathVariable Long listId) {
+        String username = getUsername(userRepository);
+        List<Playlist> playlists = userRepository.deletePlaylist(username, listId);
+        return ResponseEntity.ok(playlists);
     }
 
     @Licensed
@@ -102,8 +109,8 @@ public class VideoController extends BaseController {
     @DeleteMapping("/playlists/{listId}/{videoCode}")
     public ResponseEntity<?> removePlaylistVideoItem(@PathVariable Long listId, @PathVariable String videoCode) {
         String username = getUsername(userRepository);
-        Playlist playlist = userRepository.removePlaylistVideoItem(username, listId, videoCode);
-        return ResponseEntity.ok(playlist);
+        Optional<Playlist> playlist = userRepository.removePlaylistVideoItem(username, listId, videoCode);
+        return ResponseEntity.ofNullable(playlist);
     }
 
     @PutMapping("/playlists/{listId}/{videoCode}/{direction}")
@@ -112,6 +119,9 @@ public class VideoController extends BaseController {
         Playlist playlist = userRepository.movePlaylistVideoItem(username, listId, videoCode, direction);
         return ResponseEntity.ok(playlist);
     }
+
+
+
     @GetMapping("/categories")
     public ResponseEntity<?> getLibrary() {
         String greeting = "All our video content under one roof, organized into wellness & fitness categories";
