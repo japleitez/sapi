@@ -68,21 +68,21 @@ public class VideoController extends BaseController {
     @GetMapping("/playlists")
     public ResponseEntity<?> getPlaylists() {
         String username = getUsername(userRepository);
-        List<IdName> list = userRepository.getPlaylistsIdNames(username);
+        List<IdName> list = videoRepository.getPlaylistsIdNames(username);
         return ResponseEntity.ok(list);
     }
 
     @GetMapping("/playlists/{listId}")
     public ResponseEntity<?> getPlaylist(@PathVariable Long listId) {
         String username = getUsername(userRepository);
-        Optional<Playlist> optionalPlaylist = userRepository.getPlaylist(username, listId);
+        Optional<Playlist> optionalPlaylist = videoRepository.getPlaylist(username, listId);
         return ResponseEntity.ofNullable(optionalPlaylist); // 404 Not Found
     }
 
     @DeleteMapping("/playlists/{listId}")
     public ResponseEntity<?> deletePlaylist(@PathVariable Long listId) {
         String username = getUsername(userRepository);
-        List<IdName> list = userRepository.deletePlaylist(username, listId);
+        List<IdName> list = videoRepository.deletePlaylist(username, listId);
         return ResponseEntity.ok(list);
     }
 
@@ -91,36 +91,44 @@ public class VideoController extends BaseController {
     public ResponseEntity<?> createPlaylist(@Valid @RequestBody CreatePlaylistRequest request) {
         String name = request.getName();
         String username = getUsername(userRepository);
-        if (userRepository.playlistExistsByName(username, name)) {
+        if (videoRepository.playlistExistsByName(username, name)) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("playlist.duplicate")));
         }
-        Optional<Playlist> optionalPlaylist = userRepository.createPlaylist(username, name);
+        Optional<Playlist> optionalPlaylist = videoRepository.createPlaylist(username, name);
         return ResponseEntity.ofNullable(optionalPlaylist);
     }
 
     @PutMapping("/playlists/{listId}/{videoCode}")
     public ResponseEntity<?> addPlaylistVideoItem(@PathVariable Long listId, @PathVariable String videoCode) {
         String username = getUsername(userRepository);
+        Playlist playlist = videoRepository.getPlaylist(username, listId).orElse(null);
+        if (playlist == null) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("playlist.invalid")));
+        }
         Video video = videoRepository.getVideo(username, videoCode);
-        Playlist playlist = userRepository.addPlaylistVideoItem(username, listId, video);
-        return ResponseEntity.ok(playlist);
+        if (video == null) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("video.invalid")));
+        }
+        if (videoRepository.videoIsAlreadyAdded(username, playlist, video)) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("playlist.video.added.already")));
+        }
+        Playlist updated = videoRepository.addPlaylistVideoItem(username, playlist, video);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/playlists/{listId}/{videoCode}")
     public ResponseEntity<?> removePlaylistVideoItem(@PathVariable Long listId, @PathVariable String videoCode) {
         String username = getUsername(userRepository);
-        Optional<Playlist> playlist = userRepository.removePlaylistVideoItem(username, listId, videoCode);
+        Optional<Playlist> playlist = videoRepository.removePlaylistVideoItem(username, listId, videoCode);
         return ResponseEntity.ofNullable(playlist);
     }
 
     @PutMapping("/playlists/{listId}/{videoCode}/{direction}")
     public ResponseEntity<?> movePlaylistVideoItem(@PathVariable Long listId, @PathVariable String videoCode, @PathVariable String direction) {
         String username = getUsername(userRepository);
-        Playlist playlist = userRepository.movePlaylistVideoItem(username, listId, videoCode, direction);
+        Playlist playlist = videoRepository.movePlaylistVideoItem(username, listId, videoCode, direction);
         return ResponseEntity.ok(playlist);
     }
-
-
 
     @GetMapping("/categories")
     public ResponseEntity<?> getLibrary() {

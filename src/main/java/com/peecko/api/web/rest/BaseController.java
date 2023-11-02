@@ -13,11 +13,16 @@ import java.util.Set;
 
 public abstract class BaseController {
 
-    private static Set<String> availableLanguages = Set.of("EN", "FR", "DE", "ES");
+    public static String EN = "EN";
+    public static String DE = "DE";
+    public static String FR = "FR";
+    public static String ES = "ES";
+
+    private static Set<String> availableLanguages = Set.of(EN, FR, DE, ES);
 
     protected String getActiveLanguage(UserRepository userRepository) {
         User user = getActiveUser(userRepository);
-        return user != null? user.language(): "en";
+        return user != null? user.language(): EN;
     }
 
     protected String getUsername(UserRepository userRepository) {
@@ -36,18 +41,13 @@ public abstract class BaseController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String lang = user != null? user.language(): "en";
+        String lang = user != null? resolveLanguage(user.language()): EN;
         Locale locale = Locale.forLanguageTag(lang);
         return locale;
     }
 
     protected String resolveLanguage(String lang) {
-        String found = "EN";
-        if (StringUtils.hasText(lang)) {
-            if (!availableLanguages.contains(lang)) {
-                found = "EN";
-            }
-        }
-        return found;
+        return availableLanguages.contains(lang)? lang.toUpperCase(): EN;
     }
+
 }

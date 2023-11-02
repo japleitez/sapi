@@ -13,4 +13,5 @@ import lombok.experimental.Accessors;
 public class IdName {
     Long id;
     String name;
+    Integer counter;
 }
