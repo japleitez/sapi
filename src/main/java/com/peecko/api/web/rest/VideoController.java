@@ -75,8 +75,11 @@ public class VideoController extends BaseController {
     @GetMapping("/playlists/{listId}")
     public ResponseEntity<?> getPlaylist(@PathVariable Long listId) {
         String username = getUsername(userRepository);
-        Optional<Playlist> optionalPlaylist = videoRepository.getPlaylist(username, listId);
-        return ResponseEntity.ofNullable(optionalPlaylist); // 404 Not Found
+        Playlist playlist = videoRepository.getPlaylist(username, listId).orElse(null);
+        if (playlist == null) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("playlist.invalid")));
+        }
+        return ResponseEntity.ok(playlist);
     }
 
     @DeleteMapping("/playlists/{listId}")
