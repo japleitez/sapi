@@ -122,14 +122,58 @@ public class VideoController extends BaseController {
     @DeleteMapping("/playlists/{listId}/{videoCode}")
     public ResponseEntity<?> removePlaylistVideoItem(@PathVariable Long listId, @PathVariable String videoCode) {
         String username = getUsername(userRepository);
-        Optional<Playlist> playlist = videoRepository.removePlaylistVideoItem(username, listId, videoCode);
-        return ResponseEntity.ofNullable(playlist);
+        Playlist playlist = videoRepository.getPlaylist(username, listId).orElse(null);
+        if (playlist == null) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("playlist.invalid")));
+        }
+        Video video = videoRepository.getVideo(username, videoCode);
+        if (video == null) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("video.invalid")));
+        }
+        Playlist updated = videoRepository.removePlaylistVideoItem(username, playlist, video);
+        return ResponseEntity.ok(updated);
     }
 
     @PutMapping("/playlists/{listId}/{videoCode}/{direction}")
     public ResponseEntity<?> movePlaylistVideoItem(@PathVariable Long listId, @PathVariable String videoCode, @PathVariable String direction) {
         String username = getUsername(userRepository);
-        Playlist playlist = videoRepository.movePlaylistVideoItem(username, listId, videoCode, direction);
+        Playlist playlist = videoRepository.getPlaylist(username, listId).orElse(null);
+        if (playlist == null) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("playlist.invalid")));
+        }
+        Video video = videoRepository.getVideo(username, videoCode);
+        if (video == null) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("video.invalid")));
+        }
+        VideoItem videoItem = videoRepository.getVideoItem(playlist, videoCode);
+        if (videoItem == null) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("video.item.invalid")));
+        }
+        Playlist updated = videoRepository.movePlaylistVideoItem(username, playlist, videoItem, direction);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/playlists/{listId}/{videoCode}/drag-beneath/{newPreviousVideoCode}")
+    public  ResponseEntity<?> dragPlaylistVideoItem(@PathVariable Long listId, @PathVariable String videoCode, @PathVariable String newPreviousVideoCode) {
+        String username = getUsername(userRepository);
+        Playlist playlist = videoRepository.getPlaylist(username, listId).orElse(null);
+        if (playlist == null) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("playlist.invalid")));
+        }
+        Video video = videoRepository.getVideo(username, videoCode);
+        if (video == null) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("video.invalid")));
+        }
+        VideoItem videoItem = videoRepository.getVideoItem(playlist, videoCode);
+        if (videoItem == null) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("video.item.invalid")));
+        }
+        if (!VideoRepository.TOP.equals(newPreviousVideoCode)) {
+            if (videoRepository.getVideoItem(playlist, newPreviousVideoCode) == null) {
+                return ResponseEntity.ok(new MessageResponse(ERROR, message("video.item.new.previous.invalid")));
+            }
+        }
+        playlist = videoRepository.dragPlaylistVideoItem(username, playlist, videoItem, newPreviousVideoCode);
         return ResponseEntity.ok(playlist);
     }
 
