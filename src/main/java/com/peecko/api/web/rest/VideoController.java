@@ -7,6 +7,7 @@ import com.peecko.api.security.Licensed;
 import com.peecko.api.utils.Common;
 import com.peecko.api.utils.FileDownloadUtil;
 import com.peecko.api.web.payload.request.CreatePlaylistRequest;
+import com.peecko.api.web.payload.request.VideoCodeRequest;
 import com.peecko.api.web.payload.response.LibraryResponse;
 import com.peecko.api.web.payload.response.MessageResponse;
 import com.peecko.api.web.payload.response.TodayResponse;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -119,19 +121,22 @@ public class VideoController extends BaseController {
         return ResponseEntity.ok(updated);
     }
 
-    @DeleteMapping("/playlists/{listId}/{videoCode}")
-    public ResponseEntity<?> removePlaylistVideoItem(@PathVariable Long listId, @PathVariable String videoCode) {
+    @DeleteMapping("/playlists/{listId}/bulk-delete")
+    public ResponseEntity<?> removePlaylistVideoItems(@PathVariable Long listId, @RequestBody List<String> codes) {
         String username = getUsername(userRepository);
         Playlist playlist = videoRepository.getPlaylist(username, listId).orElse(null);
         if (playlist == null) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("playlist.invalid")));
         }
-        Video video = videoRepository.getVideo(username, videoCode);
-        if (video == null) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("video.invalid")));
+        for(String videoCode: codes) {
+            if (StringUtils.hasText(videoCode)) {
+                Video video = videoRepository.getVideo(username, videoCode);
+                if (video != null) {
+                    playlist = videoRepository.removePlaylistVideoItem(username, playlist, video);
+                }
+            }
         }
-        Playlist updated = videoRepository.removePlaylistVideoItem(username, playlist, video);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(playlist);
     }
 
     @PutMapping("/playlists/{listId}/{videoCode}/{direction}")
