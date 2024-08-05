@@ -77,7 +77,7 @@ public class AuthController extends BaseController {
 
         userRepository.save(user);
 
-        return ResponseEntity.ok(new MessageResponse(OK, message("user.signup.ok")));
+        return ResponseEntity.ok(new MessageResponse(OK, message("user.signup.ok", user)));
     }
 
     @PostMapping("/signin")
@@ -287,6 +287,12 @@ public class AuthController extends BaseController {
 
     private String message(String code) {
         Locale locale = geActiveLocale(userRepository);
+        return messageSource.getMessage(code, null, locale);
+    }
+
+    private String message(String code, User user) {
+        String lang = resolveLanguage(user.language());
+        Locale locale = Locale.forLanguageTag(lang);
         return messageSource.getMessage(code, null, locale);
     }
 

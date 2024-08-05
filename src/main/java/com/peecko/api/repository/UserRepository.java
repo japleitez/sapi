@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.peecko.api.utils.Common.MAX_ALLOWED;
 
@@ -34,6 +35,7 @@ public class UserRepository {
     static final List<String> SPONSORS = SponsorUtils.getSponsors();
 
     static final Map<String, Membership> MEMBERSHIPS = new HashMap<>();
+
 
     static final DateTimeFormatter CUSTOM_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -175,6 +177,5 @@ public class UserRepository {
         LocalDateTime now = LocalDateTime.now();
         PIN_CODES.entrySet().removeIf(entry -> entry.getValue().getExpireAt().isBefore(now));
     }
-
 
 }

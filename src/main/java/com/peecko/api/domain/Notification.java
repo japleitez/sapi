@@ -10,9 +10,11 @@ import lombok.experimental.Accessors;
 @Getter
 @Accessors(chain = true)
 public class Notification {
+    private Long id;
     private String title;
     private String message;
     private String image;
     private String video;
     private String date;
+    private Boolean viewed;
 }

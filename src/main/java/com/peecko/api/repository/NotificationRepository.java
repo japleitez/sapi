@@ -4,6 +4,7 @@ import com.peecko.api.domain.Notification;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -19,13 +20,33 @@ public class NotificationRepository {
     public static final String VIDEO_1 = "http://path/filename.jpg";
     public static final String VIDEO_2 = "http://path/filename.jpg";
 
-    static {
-        DATA.add(new Notification(TITLE_1, MESSAGE_1, IMAGE_1, VIDEO_1, "07 Dec 2023"));
-        DATA.add(new Notification(TITLE_2, MESSAGE_2, IMAGE_2, VIDEO_2, "05 Dec 2023"));
+    public static final HashMap<String, List<Notification>> NOTIFICATIONS =  new HashMap<>();
+
+    private void initUserNotification(String username) {
+        if (!NOTIFICATIONS.containsKey(username)) {
+            List<Notification> news = new ArrayList<>();
+            news.add(new Notification(1L, TITLE_1, MESSAGE_1, IMAGE_1, VIDEO_1, "07 Dec 2023", false));
+            news.add(new Notification(2L, TITLE_2, MESSAGE_2, IMAGE_2, VIDEO_2, "05 Dec 2023", false));
+            NOTIFICATIONS.put(username, news);
+        }
     }
 
-    public List<Notification> getNotifications() {
-        return DATA;
+    public List<Notification> getNotifications(String username) {
+        initUserNotification(username);
+        return NOTIFICATIONS.get(username);
+    }
+
+    public void updateNotification(String username, Long id) {
+        initUserNotification(username);
+         NOTIFICATIONS.get(username)
+                 .stream()
+                 .filter(n -> id.equals(n.getId()))
+                 .findAny()
+                 .ifPresent(this::setNotificationAsViewed);
+    }
+
+    private void setNotificationAsViewed(Notification notification) {
+        notification.setViewed(true);
     }
 
 }
