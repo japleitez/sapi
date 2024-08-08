@@ -5,7 +5,7 @@ import java.util.Locale;
 
 import com.peecko.api.domain.dto.Device;
 import com.peecko.api.domain.dto.Membership;
-import com.peecko.api.domain.dto.User;
+import com.peecko.api.domain.dto.UserDTO;
 import com.peecko.api.repository.fake.UserRepository;
 import com.peecko.api.security.JwtUtils;
 import com.peecko.api.utils.EmailUtils;
@@ -69,15 +69,15 @@ public class AuthController extends BaseController {
                     .body(new MessageResponse(ERROR, message("email.duplicated")));
         }
         String name = NameUtils.camel(signUpRequest.getName());
-        User user = new User()
+        UserDTO userDTO = new UserDTO()
                 .name(name)
                 .username(email)
                 .language(signUpRequest.getLanguage().toUpperCase())
                 .password(encoder.encode(signUpRequest.getPassword()));
 
-        userRepository.save(user);
+        userRepository.save(userDTO);
 
-        return ResponseEntity.ok(new MessageResponse(OK, message("user.signup.ok", user)));
+        return ResponseEntity.ok(new MessageResponse(OK, message("user.signup.ok", userDTO)));
     }
 
     @PostMapping("/signin")
@@ -120,9 +120,9 @@ public class AuthController extends BaseController {
         }
         boolean verified = !username.contains("not.verified@");
         if (verified) {
-            User user = userRepository.findByUsername(username).get();
-            user.verified(true);
-            userRepository.save(user);
+            UserDTO userDTO = userRepository.findByUsername(username).get();
+            userDTO.verified(true);
+            userRepository.save(userDTO);
             return ResponseEntity.ok(new MessageResponse(OK, message("email.verified.ok")));
         } else {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("email.verified.nok")));
@@ -156,9 +156,9 @@ public class AuthController extends BaseController {
                 return ResponseEntity.ok(new MessageResponse(ERROR, message("password.valid.nok")));
             }
             String email = userRepository.getPinCode(request.getRequestId()).getEmail();
-            User user = userRepository.findByUsername(email).get();
-            user.password(encoder.encode(request.getPassword()));
-            userRepository.save(user);
+            UserDTO userDTO = userRepository.findByUsername(email).get();
+            userDTO.password(encoder.encode(request.getPassword()));
+            userRepository.save(userDTO);
             return ResponseEntity.ok(new MessageResponse(OK, message("password.change.ok")));
         } else {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("password.change.nok")));
@@ -174,16 +174,16 @@ public class AuthController extends BaseController {
         if (!userRepository.existsByUsername(username)) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("email.notfound")));
         }
-        User user = userRepository.findByUsername(username).get();
-        if (!encoder.matches(request.getCurrent(), user.password())) {
+        UserDTO userDTO = userRepository.findByUsername(username).get();
+        if (!encoder.matches(request.getCurrent(), userDTO.password())) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("password.old.mismatch")));
         }
         boolean isValidPassword = PasswordUtils.isValid(request.getPassword());
         if (!isValidPassword) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("password.valid.nok")));
         }
-        user.password(encoder.encode(request.getPassword()));
-        userRepository.save(user);
+        userDTO.password(encoder.encode(request.getPassword()));
+        userRepository.save(userDTO);
         return ResponseEntity.ok(new MessageResponse(OK, message("password.change.ok")));
     }
 
@@ -195,11 +195,11 @@ public class AuthController extends BaseController {
         if (!userRepository.existsByUsername(request.getUsername())) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("email.notfound")));
         }
-        User user = userRepository.findByUsername(request.getUsername()).get();
+        UserDTO userDTO = userRepository.findByUsername(request.getUsername()).get();
         boolean isValid = NameUtils.isValid(request.getName());
         if (isValid) {
-            user.name(request.getName());
-            userRepository.save(user);
+            userDTO.name(request.getName());
+            userRepository.save(userDTO);
             return ResponseEntity.ok(new MessageResponse(OK, message("user.info.change.ok")));
         } else {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("name.valid.nok")));
@@ -249,16 +249,16 @@ public class AuthController extends BaseController {
         return userRepository.findByUsername(username).map(this::userToLogin).orElse(notFound);
     }
 
-    private LoginResponse userToLogin(User user) {
-        int devicesCount = userRepository.getUserDevices(user.username()).size();
+    private LoginResponse userToLogin(UserDTO userDTO) {
+        int devicesCount = userRepository.getUserDevices(userDTO.username()).size();
         LoginResponse login = new LoginResponse();
-        login.setUsername(user.username());
-        login.setName(user.name());
-        login.setEmailVerified(user.verified());
+        login.setUsername(userDTO.username());
+        login.setName(userDTO.name());
+        login.setEmailVerified(userDTO.verified());
         login.setDevicesCount(devicesCount);
         login.setDevicesExceeded(UserRepository.isInstallationExceeded(devicesCount));
-        if (user.membership() != null) {
-            Membership membership = user.membership();
+        if (userDTO.membership() != null) {
+            Membership membership = userDTO.membership();
             login.setMembership(membership.getLicense());
             login.setMembershipSponsor(membership.getSponsor());
             login.setMembershipSponsorLogo(membership.getLogo());
@@ -290,8 +290,8 @@ public class AuthController extends BaseController {
         return messageSource.getMessage(code, null, locale);
     }
 
-    private String message(String code, User user) {
-        String lang = resolveLanguage(user.language());
+    private String message(String code, UserDTO userDTO) {
+        String lang = resolveLanguage(userDTO.language());
         Locale locale = Locale.forLanguageTag(lang);
         return messageSource.getMessage(code, null, locale);
     }

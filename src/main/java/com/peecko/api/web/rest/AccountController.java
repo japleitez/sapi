@@ -1,6 +1,6 @@
 package com.peecko.api.web.rest;
 
-import com.peecko.api.domain.dto.User;
+import com.peecko.api.domain.dto.UserDTO;
 import com.peecko.api.repository.fake.HelpRepository;
 import com.peecko.api.repository.fake.LanguageRepository;
 import com.peecko.api.repository.fake.NotificationRepository;
@@ -57,8 +57,8 @@ public class AccountController extends BaseController {
 
     @PutMapping("/languages/{lang}")
     public ResponseEntity<?> setLanguage(@PathVariable("lang")  String lang) {
-        User user = getActiveUser(userRepository);
-        user.language(resolveLanguage(lang));
+        UserDTO userDTO = getActiveUser(userRepository);
+        userDTO.language(resolveLanguage(lang));
         return ResponseEntity.ok().build();
     }
 

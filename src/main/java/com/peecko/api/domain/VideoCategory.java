@@ -1,8 +1,11 @@
 package com.peecko.api.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "video_category")
@@ -31,6 +34,10 @@ import java.time.Instant;
 
     @Column(name = "archived")
     private Instant archived;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "videoCategory")
+    @JsonIgnoreProperties(value = { "videoCategory", "coach" }, allowSetters = true)
+    private Set<Video> videos = new HashSet<>();
 
     public Long getId() {
         return id;

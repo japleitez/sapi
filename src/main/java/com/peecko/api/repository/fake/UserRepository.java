@@ -1,7 +1,6 @@
 package com.peecko.api.repository.fake;
 
 import com.peecko.api.domain.dto.*;
-import com.peecko.api.dto.*;
 import com.peecko.api.utils.Common;
 import com.peecko.api.utils.SponsorUtils;
 import com.peecko.api.web.payload.request.SignInRequest;
@@ -20,7 +19,7 @@ import static com.peecko.api.utils.Common.MAX_ALLOWED;
 @Component
 public class UserRepository {
 
-    public static final HashMap<String, User> REPO = new HashMap<>();
+    public static final HashMap<String, UserDTO> REPO = new HashMap<>();
 
     public static final HashMap<String, Set<Device>> DEVICES = new HashMap<>();
 
@@ -61,7 +60,7 @@ public class UserRepository {
         }
     }
 
-    public Optional<User> findByUsername(String username) {
+    public Optional<UserDTO> findByUsername(String username) {
         if (REPO.containsKey(username)) {
             return Optional.of(REPO.get(username));
         } else {
@@ -71,8 +70,8 @@ public class UserRepository {
 
     public boolean hasActiveLicense(String username) {
         if (REPO.containsKey(username)) {
-            User user = REPO.get(username);
-            return UserRepository.isValidLicense(user.license());
+            UserDTO userDTO = REPO.get(username);
+            return UserRepository.isValidLicense(userDTO.license());
         }
         return false;
     }
@@ -81,9 +80,9 @@ public class UserRepository {
         return REPO.containsKey(username);
     }
 
-    public void save(User user) {
-        user.roles(DEFAULT_ROLES);
-        REPO.put(user.username(), user);
+    public void save(UserDTO userDTO) {
+        userDTO.roles(DEFAULT_ROLES);
+        REPO.put(userDTO.username(), userDTO);
     }
 
     private int sponsorIndex = 0;

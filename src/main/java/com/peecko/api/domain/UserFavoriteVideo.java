@@ -5,8 +5,8 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "video_favorite")
-public class VideoFavorite implements Serializable {
+@Table(name = "user_favorite_video")
+public class UserFavoriteVideo implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
@@ -17,8 +17,9 @@ public class VideoFavorite implements Serializable {
     @Column(name = "aps_user_id")
     private Long userId;
 
-    @Column(name = "video_id")
-    private Long videoId;
+    @ManyToOne
+    @JoinColumn(name = "video_id", nullable = false)
+    private Video video;
 
     public Long getId() {
         return id;
@@ -36,11 +37,11 @@ public class VideoFavorite implements Serializable {
         this.userId = userId;
     }
 
-    public Long getVideoId() {
-        return videoId;
+    public Video getVideo() {
+        return video;
     }
 
-    public void setVideoId(Long videoId) {
-        this.videoId = videoId;
+    public void setVideo(Video video) {
+        this.video = video;
     }
 }

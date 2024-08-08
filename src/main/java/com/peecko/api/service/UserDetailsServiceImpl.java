@@ -1,8 +1,7 @@
 package com.peecko.api.service;
 
-import com.peecko.api.domain.dto.User;
-import com.peecko.api.security.UserDetailsImpl;
-import com.peecko.api.repository.fake.UserRepository;
+import com.peecko.api.domain.dto.UserDTO;
+import com.peecko.api.domain.mapper.UserDTOMapper;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,17 +10,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    final UserRepository userRepository;
+    final ApsUserService apsUserService;
 
-    public UserDetailsServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserDetailsServiceImpl(ApsUserService apsUserService) {
+        this.apsUserService = apsUserService;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found with username " + username));
-        return UserDetailsImpl.build(user);
+        UserDTO userDTO = apsUserService.findByUsernameOrElseThrow(username);
+        return UserDTOMapper.toUserDetails(userDTO);
     }
+
 
 }

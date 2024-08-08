@@ -1,0 +1,21 @@
+{
+    "selected": "EN",
+    "languages": [
+        {
+            "code": "EN",
+            "name": "English"
+        },
+        {
+            "code": "FR",
+            "name": "French"
+        },
+        {
+            "code": "DE",
+            "name": "German"
+        },
+        {
+            "code": "ES",
+            "name": "Spanish"
+        }
+    ]
+}

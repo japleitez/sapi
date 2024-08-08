@@ -1,7 +1,7 @@
 package com.peecko.api.web.rest;
 
 import com.peecko.api.domain.dto.Membership;
-import com.peecko.api.domain.dto.User;
+import com.peecko.api.domain.dto.UserDTO;
 import com.peecko.api.repository.fake.UserRepository;
 import com.peecko.api.web.payload.request.ActivationRequest;
 import com.peecko.api.web.payload.response.MessageResponse;
@@ -37,10 +37,10 @@ public class MembershipController extends BaseController {
         }
         if (UserRepository.isValidLicense(license)) {
             Membership membership = userRepository.retrieveMembership(license);
-            User user = getActiveUser(userRepository);
-            user.license(license);
-            user.membership(membership);
-            userRepository.save(user);
+            UserDTO userDTO = getActiveUser(userRepository);
+            userDTO.license(license);
+            userDTO.membership(membership);
+            userRepository.save(userDTO);
             return ResponseEntity.ok(new MessageResponse(OK, message("membership.activate.ok")));
         } else {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("membership.activate.nok")));

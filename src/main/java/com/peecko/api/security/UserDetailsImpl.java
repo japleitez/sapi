@@ -1,7 +1,7 @@
 package com.peecko.api.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.peecko.api.domain.dto.User;
+import com.peecko.api.domain.dto.UserDTO;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,13 +27,6 @@ public class UserDetailsImpl implements UserDetails {
         this.username = username;
         this.password = password;
         this.authorities = authorities;
-    }
-
-    public static UserDetailsImpl build(User user) {
-        List<GrantedAuthority> authorities = user.roles().stream()
-            .map(role -> new SimpleGrantedAuthority(role.name()))
-            .collect(Collectors.toList());
-        return new UserDetailsImpl(user.name(), user.username(), user.password(), authorities);
     }
 
     public String getName() {

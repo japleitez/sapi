@@ -1,0 +1,139 @@
+{
+    "greeting": "Here is your weekly dose of Wellness support. Check back next week for more updates",
+    "tags": [
+        "energy",
+        "endurance",
+        "relax",
+        "learn"
+    ],
+    "videos": [
+        {
+            "code": "YG002",
+            "category": "YOGA",
+            "title": "Yoga Leg Stretching 2",
+            "duration": "12:30",
+            "coach": "Julia Hernandez",
+            "image": "https://i.ytimg.com/vi/FbmLx-PahO4/hqdefault.jpg",
+            "url": "https://www.youtube.com/embed/FbmLx-PahO4",
+            "audience": "Women",
+            "intensity": "Beginner, Intermediate",
+            "tags": [
+                "energy",
+                "endurance"
+            ],
+            "description": "This is a quick routine that is focused mainly on hips and hamstrings. Perfect for recovery/sore muscles and working on your flexibility",
+            "resume": "She is a LA-based yoga trainer who specialises in yoga therapeutics for scoliosis, stress, anxiety, depression, and many other modern day imbalances and health issues",
+            "player": "youtube",
+            "favorite": true,
+            "coach-website": "https://peecko.com/",
+            "coach-email": "julia.hernandez@gmail.com",
+            "coach-instagram": "julialux"
+        },
+        {
+            "code": "PI007",
+            "category": "PILATES",
+            "title": "Morning pilates 7",
+            "duration": "10:20",
+            "coach": "Tatiana Mendoza",
+            "image": "https://i.ytimg.com/vi/_nGeLorj9nQ/hqdefault.jpg",
+            "url": "https://www.youtube.com/embed/_nGeLorj9nQ",
+            "audience": "All Genders",
+            "intensity": "Beginner",
+            "tags": [
+                "energy",
+                "endurance"
+            ],
+            "description": "This is a quick routine that is focused mainly on hips and hamstrings. Perfect for recovery/sore muscles and working on your flexibility",
+            "resume": "",
+            "player": "youtube",
+            "favorite": false,
+            "coach-website": "https://peecko.com/",
+            "coach-email": "tatiana.mendoza@hotmail.co.uk",
+            "coach-instagram": ""
+        },
+        {
+            "code": "CA001",
+            "category": "CONDITIONING",
+            "title": "Recovery after Exercise",
+            "duration": "7:15",
+            "coach": "Robert Roca",
+            "image": "https://i.ytimg.com/vi/FH7MwueSRVE/hqdefault.jpg",
+            "url": "https://www.youtube.com/embed/FH7MwueSRVE",
+            "audience": "Men",
+            "intensity": "Beginner, Intermediate",
+            "tags": [
+                "endurance"
+            ],
+            "description": "",
+            "resume": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua",
+            "player": "youtube",
+            "favorite": false,
+            "coach-website": "",
+            "coach-email": "",
+            "coach-instagram": "rocapilateshome"
+        },
+        {
+            "code": "ME006",
+            "category": "MEDITATION",
+            "title": "Meditation 4 sleep  6",
+            "duration": "10:45",
+            "coach": "Tom Hollwege",
+            "image": "https://i.ytimg.com/vi/1_C37WjcFzE/hqdefault.jpg",
+            "url": "https://www.youtube.com/embed/1_C37WjcFzE",
+            "audience": "All Genders",
+            "intensity": "",
+            "tags": [
+                "relax"
+            ],
+            "description": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat",
+            "resume": "",
+            "player": "youtube",
+            "favorite": false,
+            "coach-website": "",
+            "coach-email": "julia.hernandez@yahoo.com",
+            "coach-instagram": "donotome"
+        },
+        {
+            "code": "HR007",
+            "category": "HEALTH RISK",
+            "title": "Zinc deficiency 7",
+            "duration": "2:30",
+            "coach": "Angelica Muller",
+            "image": "https://i.ytimg.com/vi/1_C37WjcFzE/hqdefault.jpg",
+            "url": "https://www.youtube.com/embed/1_C37WjcFzE",
+            "audience": "All Genders",
+            "intensity": "",
+            "tags": [
+                "learn"
+            ],
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua",
+            "resume": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit",
+            "player": "youtube",
+            "favorite": false,
+            "coach-website": "https://peecko.com/",
+            "coach-email": "julia.hernandez@gmail.com",
+            "coach-instagram": ""
+        },
+        {
+            "code": "HR001",
+            "category": "HEALTH RISK",
+            "title": "Wellness",
+            "duration": "0:20",
+            "coach": "Angelica Muller",
+            "image": "https://i.ytimg.com/vi/1_C37WjcFzE/hqdefault.jpg",
+            "url": "https://d2zumfut4741yc.cloudfront.net/0f74fab4-17a2-4bdf-ad51-c9a5cfcd29d2/AppleHLS1/KLYU_004_SHOOTING_SIDE.m3u8",
+            "audience": "All Genders",
+            "intensity": "",
+            "tags": [
+                "learn"
+            ],
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua",
+            "resume": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit",
+            "player": "peecko",
+            "favorite": false,
+            "coach-website": "https://peecko.com/",
+            "coach-email": "julia.hernandez@gmail.com",
+            "coach-instagram": ""
+        }
+    ]
+}

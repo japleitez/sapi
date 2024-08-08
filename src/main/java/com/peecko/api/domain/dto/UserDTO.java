@@ -8,7 +8,8 @@ import java.util.Set;
 
 @Data
 @Accessors(chain = true, fluent = true)
-public class User {
+public class UserDTO {
+    private Long id;
     private String name;
     private String username;
     private String password;

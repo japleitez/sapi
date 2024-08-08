@@ -6,6 +6,7 @@ import com.peecko.api.web.payload.request.SignInRequest;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public abstract class Common {
 
@@ -48,11 +49,9 @@ public abstract class Common {
     }
 
     public static List<String> getVideoTags(List<VideoDTO> videos) {
-        Set<String> set = new LinkedHashSet<>();
-        for(VideoDTO v: videos) {
-            set.addAll(v.getTags());
-        }
-        return set.stream().toList();
+        Set<String> tags = new LinkedHashSet<>();
+        videos.forEach(videoDTO -> tags.addAll(videoDTO.getTags()));
+        return tags.stream().sorted().toList();
     }
 
     public static VideoDTO clone(VideoDTO v) {

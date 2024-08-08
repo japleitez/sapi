@@ -1,0 +1,144 @@
+{
+    "username": "jose.pleitez@gmail.com",
+    "id": 1,
+    "name": "Core Exercises",
+    "videoItems": [
+        {
+            "index": 0,
+            "previous": null,
+            "code": "PI001",
+            "next": "YG007",
+            "video": {
+                "code": "PI001",
+                "category": "PILATES",
+                "title": "Morning pilates 1",
+                "duration": "10:20",
+                "coach": "Tatiana Mendoza",
+                "image": "https://i.ytimg.com/vi/hH_KVVgV_Vo/hqdefault.jpg",
+                "url": "https://www.youtube.com/embed/hH_KVVgV_Vo",
+                "audience": "All Genders",
+                "intensity": "Beginner",
+                "tags": [
+                    "energy",
+                    "endurance"
+                ],
+                "description": "This is a quick routine that is focused mainly on hips and hamstrings. Perfect for recovery/sore muscles and working on your flexibility",
+                "resume": "",
+                "player": "youtube",
+                "favorite": false,
+                "coach-website": "https://peecko.com/",
+                "coach-email": "tatiana.mendoza@hotmail.co.uk",
+                "coach-instagram": ""
+            }
+        },
+        {
+            "index": 1,
+            "previous": "PI001",
+            "code": "YG007",
+            "next": "ME006",
+            "video": {
+                "code": "YG007",
+                "category": "YOGA",
+                "title": "Yoga Leg Stretching 7",
+                "duration": "12:30",
+                "coach": "Julia Hernandez",
+                "image": "https://i.ytimg.com/vi/yqeirBfn2j4/hqdefault.jpg",
+                "url": "https://www.youtube.com/embed/yqeirBfn2j4",
+                "audience": "Women",
+                "intensity": "Beginner, Intermediate",
+                "tags": [
+                    "energy",
+                    "endurance"
+                ],
+                "description": "This is a quick routine that is focused mainly on hips and hamstrings. Perfect for recovery/sore muscles and working on your flexibility",
+                "resume": "She is a LA-based yoga trainer who specialises in yoga therapeutics for scoliosis, stress, anxiety, depression, and many other modern day imbalances and health issues",
+                "player": "youtube",
+                "favorite": false,
+                "coach-website": "https://peecko.com/",
+                "coach-email": "julia.hernandez@gmail.com",
+                "coach-instagram": "julialux"
+            }
+        },
+        {
+            "index": 2,
+            "previous": "YG007",
+            "code": "ME006",
+            "next": "HR007",
+            "video": {
+                "code": "ME006",
+                "category": "MEDITATION",
+                "title": "Meditation 4 sleep  6",
+                "duration": "10:45",
+                "coach": "Tom Hollwege",
+                "image": "https://i.ytimg.com/vi/1_C37WjcFzE/hqdefault.jpg",
+                "url": "https://www.youtube.com/embed/1_C37WjcFzE",
+                "audience": "All Genders",
+                "intensity": "",
+                "tags": [
+                    "relax"
+                ],
+                "description": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat",
+                "resume": "",
+                "player": "youtube",
+                "favorite": false,
+                "coach-website": "",
+                "coach-email": "julia.hernandez@yahoo.com",
+                "coach-instagram": "donotome"
+            }
+        },
+        {
+            "index": 3,
+            "previous": "ME006",
+            "code": "HR007",
+            "next": "ME007",
+            "video": {
+                "code": "HR007",
+                "category": "HEALTH RISK",
+                "title": "Zinc deficiency 7",
+                "duration": "2:30",
+                "coach": "Angelica Muller",
+                "image": "https://i.ytimg.com/vi/1_C37WjcFzE/hqdefault.jpg",
+                "url": "https://www.youtube.com/embed/1_C37WjcFzE",
+                "audience": "All Genders",
+                "intensity": "",
+                "tags": [
+                    "learn"
+                ],
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua",
+                "resume": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit",
+                "player": "youtube",
+                "favorite": false,
+                "coach-website": "https://peecko.com/",
+                "coach-email": "julia.hernandez@gmail.com",
+                "coach-instagram": ""
+            }
+        },
+        {
+            "index": 4,
+            "previous": "HR007",
+            "code": "ME007",
+            "next": null,
+            "video": {
+                "code": "ME007",
+                "category": "MEDITATION",
+                "title": "Meditation 4 sleep  7",
+                "duration": "10:45",
+                "coach": "Tom Hollwege",
+                "image": "https://i.ytimg.com/vi/1_C37WjcFzE/hqdefault.jpg",
+                "url": "https://www.youtube.com/embed/1_C37WjcFzE",
+                "audience": "All Genders",
+                "intensity": "",
+                "tags": [
+                    "relax"
+                ],
+                "description": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat",
+                "resume": "",
+                "player": "youtube",
+                "favorite": false,
+                "coach-website": "",
+                "coach-email": "julia.hernandez@yahoo.com",
+                "coach-instagram": "donotome"
+            }
+        }
+    ]
+}

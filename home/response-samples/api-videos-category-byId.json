@@ -1,0 +1,160 @@
+{
+  "code": "yo",
+  "title": "Yoga",
+  "videos": [
+    {
+      "code": "YG002",
+      "category": "YOGA",
+      "title": "Yoga Leg Stretching 2",
+      "duration": "12:30",
+      "coach": "Julia Hernandez",
+      "image": "https://i.ytimg.com/vi/FbmLx-PahO4/hqdefault.jpg",
+      "url": "https://www.youtube.com/embed/FbmLx-PahO4",
+      "audience": "Women",
+      "intensity": "Beginner, Intermediate",
+      "tags": [
+        "energy",
+        "endurance"
+      ],
+      "description": "This is a quick routine that is focused mainly on hips and hamstrings. Perfect for recovery/sore muscles and working on your flexibility",
+      "resume": "She is a LA-based yoga trainer who specialises in yoga therapeutics for scoliosis, stress, anxiety, depression, and many other modern day imbalances and health issues",
+      "player": "youtube",
+      "favorite": true,
+      "coach-website": "https://peecko.com/",
+      "coach-email": "julia.hernandez@gmail.com",
+      "coach-instagram": "julialux"
+    },
+    {
+      "code": "YG001",
+      "category": "YOGA",
+      "title": "Yoga Leg Stretching 1",
+      "duration": "12:30",
+      "coach": "Julia Hernandez",
+      "image": "https://i.ytimg.com/vi/-btuQsCiyfc/hqdefault.jpg",
+      "url": "https://www.youtube.com/embed/-btuQsCiyfc",
+      "audience": "Women",
+      "intensity": "Beginner, Intermediate",
+      "tags": [
+        "energy",
+        "endurance"
+      ],
+      "description": "This is a quick routine that is focused mainly on hips and hamstrings. Perfect for recovery/sore muscles and working on your flexibility",
+      "resume": "She is a LA-based yoga trainer who specialises in yoga therapeutics for scoliosis, stress, anxiety, depression, and many other modern day imbalances and health issues",
+      "player": "youtube",
+      "favorite": false,
+      "coach-website": "https://peecko.com/",
+      "coach-email": "julia.hernandez@gmail.com",
+      "coach-instagram": "julialux"
+    },
+    {
+      "code": "YG007",
+      "category": "YOGA",
+      "title": "Yoga Leg Stretching 7",
+      "duration": "12:30",
+      "coach": "Julia Hernandez",
+      "image": "https://i.ytimg.com/vi/yqeirBfn2j4/hqdefault.jpg",
+      "url": "https://www.youtube.com/embed/yqeirBfn2j4",
+      "audience": "Women",
+      "intensity": "Beginner, Intermediate",
+      "tags": [
+        "energy",
+        "endurance"
+      ],
+      "description": "This is a quick routine that is focused mainly on hips and hamstrings. Perfect for recovery/sore muscles and working on your flexibility",
+      "resume": "She is a LA-based yoga trainer who specialises in yoga therapeutics for scoliosis, stress, anxiety, depression, and many other modern day imbalances and health issues",
+      "player": "youtube",
+      "favorite": false,
+      "coach-website": "https://peecko.com/",
+      "coach-email": "julia.hernandez@gmail.com",
+      "coach-instagram": "julialux"
+    },
+    {
+      "code": "YG006",
+      "category": "YOGA",
+      "title": "Yoga Leg Stretching 6",
+      "duration": "12:30",
+      "coach": "Julia Hernandez",
+      "image": "https://i.ytimg.com/vi/yqeirBfn2j4/hqdefault.jpg",
+      "url": "https://www.youtube.com/embed/yqeirBfn2j4",
+      "audience": "Women",
+      "intensity": "Beginner, Intermediate",
+      "tags": [
+        "energy",
+        "endurance"
+      ],
+      "description": "This is a quick routine that is focused mainly on hips and hamstrings. Perfect for recovery/sore muscles and working on your flexibility",
+      "resume": "She is a LA-based yoga trainer who specialises in yoga therapeutics for scoliosis, stress, anxiety, depression, and many other modern day imbalances and health issues",
+      "player": "youtube",
+      "favorite": false,
+      "coach-website": "https://peecko.com/",
+      "coach-email": "julia.hernandez@gmail.com",
+      "coach-instagram": "julialux"
+    },
+    {
+      "code": "YG005",
+      "category": "YOGA",
+      "title": "Yoga Leg Stretching 5",
+      "duration": "12:30",
+      "coach": "Julia Hernandez",
+      "image": "https://i.ytimg.com/vi/4snu7NxD4nM/hqdefault.jpg",
+      "url": "https://www.youtube.com/embed/4snu7NxD4nM",
+      "audience": "Women",
+      "intensity": "Beginner, Intermediate",
+      "tags": [
+        "energy",
+        "endurance"
+      ],
+      "description": "This is a quick routine that is focused mainly on hips and hamstrings. Perfect for recovery/sore muscles and working on your flexibility",
+      "resume": "She is a LA-based yoga trainer who specialises in yoga therapeutics for scoliosis, stress, anxiety, depression, and many other modern day imbalances and health issues",
+      "player": "youtube",
+      "favorite": false,
+      "coach-website": "https://peecko.com/",
+      "coach-email": "julia.hernandez@gmail.com",
+      "coach-instagram": "julialux"
+    },
+    {
+      "code": "YG004",
+      "category": "YOGA",
+      "title": "Yoga Leg Stretching 4",
+      "duration": "12:30",
+      "coach": "Julia Hernandez",
+      "image": "https://i.ytimg.com/vi/23zxyx6DASc/hqdefault.jpg",
+      "url": "https://www.youtube.com/embed/23zxyx6DASc",
+      "audience": "Women",
+      "intensity": "Beginner, Intermediate",
+      "tags": [
+        "energy",
+        "endurance"
+      ],
+      "description": "This is a quick routine that is focused mainly on hips and hamstrings. Perfect for recovery/sore muscles and working on your flexibility",
+      "resume": "She is a LA-based yoga trainer who specialises in yoga therapeutics for scoliosis, stress, anxiety, depression, and many other modern day imbalances and health issues",
+      "player": "youtube",
+      "favorite": false,
+      "coach-website": "https://peecko.com/",
+      "coach-email": "julia.hernandez@gmail.com",
+      "coach-instagram": "julialux"
+    },
+    {
+      "code": "YG003",
+      "category": "YOGA",
+      "title": "Yoga Leg Stretching 3",
+      "duration": "12:30",
+      "coach": "Julia Hernandez",
+      "image": "https://i.ytimg.com/vi/oOuCBVKjODg/hqdefault.jpg",
+      "url": "https://www.youtube.com/embed/oOuCBVKjODg",
+      "audience": "Women",
+      "intensity": "Beginner, Intermediate",
+      "tags": [
+        "energy",
+        "endurance"
+      ],
+      "description": "This is a quick routine that is focused mainly on hips and hamstrings. Perfect for recovery/sore muscles and working on your flexibility",
+      "resume": "She is a LA-based yoga trainer who specialises in yoga therapeutics for scoliosis, stress, anxiety, depression, and many other modern day imbalances and health issues",
+      "player": "youtube",
+      "favorite": false,
+      "coach-website": "https://peecko.com/",
+      "coach-email": "julia.hernandez@gmail.com",
+      "coach-instagram": "julialux"
+    }
+  ]
+}

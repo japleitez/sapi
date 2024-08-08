@@ -1,6 +1,6 @@
 package com.peecko.api.web.rest;
 
-import com.peecko.api.domain.dto.User;
+import com.peecko.api.domain.dto.UserDTO;
 import com.peecko.api.repository.fake.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,27 +18,27 @@ public abstract class BaseController {
     private static Set<String> availableLanguages = Set.of(EN, FR, DE, ES);
 
     protected String getActiveLanguage(UserRepository userRepository) {
-        User user = getActiveUser(userRepository);
-        return user != null? user.language(): EN;
+        UserDTO userDTO = getActiveUser(userRepository);
+        return userDTO != null? userDTO.language(): EN;
     }
 
     protected String getUsername(UserRepository userRepository) {
         return getActiveUser(userRepository).username();
     }
 
-    protected User getActiveUser(UserRepository userRepository) {
+    protected UserDTO getActiveUser(UserRepository userRepository) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userRepository.findByUsername(userDetails.getUsername()).get();
     }
 
     protected Locale geActiveLocale(UserRepository userRepository) {
-        User user =  null;
+        UserDTO userDTO =  null;
         try {
-            user = getActiveUser(userRepository);
+            userDTO = getActiveUser(userRepository);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String lang = user != null? resolveLanguage(user.language()): EN;
+        String lang = userDTO != null? resolveLanguage(userDTO.language()): EN;
         Locale locale = Locale.forLanguageTag(lang);
         return locale;
     }
