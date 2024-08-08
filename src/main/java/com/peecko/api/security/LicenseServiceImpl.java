@@ -1,6 +1,6 @@
 package com.peecko.api.security;
 
-import com.peecko.api.repository.UserRepository;
+import com.peecko.api.repository.fake.UserRepository;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;

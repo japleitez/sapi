@@ -1,11 +1,10 @@
-package com.peecko.api.repository;
+package com.peecko.api.repository.fake;
 
-import com.peecko.api.domain.Language;
+import com.peecko.api.domain.dto.Language;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 @Component
 public class LanguageRepository {

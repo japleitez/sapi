@@ -1,7 +1,7 @@
 package com.peecko.api.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.peecko.api.domain.User;
+import com.peecko.api.domain.dto.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

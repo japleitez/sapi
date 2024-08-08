@@ -1,10 +1,7 @@
-package com.peecko.api.domain;
+package com.peecko.api.domain.dto;
 
 import lombok.*;
 import lombok.experimental.Accessors;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 @Data
 @Setter @Getter @Accessors(chain = true)

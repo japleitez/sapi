@@ -13,3 +13,6 @@ Before you can build this project, you must install and configure the following 
 ```
 ./mvnw
 ```
+
+REST API Document
+https://github.com/japleitez/peecko-api-doc

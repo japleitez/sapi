@@ -1,8 +1,8 @@
 package com.peecko.api.service;
 
-import com.peecko.api.domain.User;
+import com.peecko.api.domain.dto.User;
 import com.peecko.api.security.UserDetailsImpl;
-import com.peecko.api.repository.UserRepository;
+import com.peecko.api.repository.fake.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

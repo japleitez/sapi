@@ -1,8 +1,8 @@
 package com.peecko.api.web.rest;
 
-import com.peecko.api.domain.Membership;
-import com.peecko.api.domain.User;
-import com.peecko.api.repository.UserRepository;
+import com.peecko.api.domain.dto.Membership;
+import com.peecko.api.domain.dto.User;
+import com.peecko.api.repository.fake.UserRepository;
 import com.peecko.api.web.payload.request.ActivationRequest;
 import com.peecko.api.web.payload.response.MessageResponse;
 import jakarta.validation.Valid;

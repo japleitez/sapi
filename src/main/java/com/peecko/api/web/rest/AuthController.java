@@ -3,10 +3,10 @@ package com.peecko.api.web.rest;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import com.peecko.api.domain.Device;
-import com.peecko.api.domain.Membership;
-import com.peecko.api.domain.User;
-import com.peecko.api.repository.UserRepository;
+import com.peecko.api.domain.dto.Device;
+import com.peecko.api.domain.dto.Membership;
+import com.peecko.api.domain.dto.User;
+import com.peecko.api.repository.fake.UserRepository;
 import com.peecko.api.security.JwtUtils;
 import com.peecko.api.utils.EmailUtils;
 import com.peecko.api.utils.NameUtils;

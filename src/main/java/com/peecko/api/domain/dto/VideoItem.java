@@ -1,4 +1,4 @@
-package com.peecko.api.domain;
+package com.peecko.api.domain.dto;
 
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -14,5 +14,5 @@ public class VideoItem {
     private String previous;
     private String code;
     private String next;
-    private Video video;
+    private VideoDTO video;
 }

@@ -1,13 +1,12 @@
 package com.peecko.api.web.rest;
 
-import com.peecko.api.domain.*;
-import com.peecko.api.repository.UserRepository;
-import com.peecko.api.repository.VideoRepository;
+import com.peecko.api.domain.dto.*;
+import com.peecko.api.repository.fake.UserRepository;
+import com.peecko.api.repository.fake.VideoRepository;
 import com.peecko.api.security.Licensed;
 import com.peecko.api.utils.Common;
 import com.peecko.api.utils.FileDownloadUtil;
 import com.peecko.api.web.payload.request.CreatePlaylistRequest;
-import com.peecko.api.web.payload.request.VideoCodeRequest;
 import com.peecko.api.web.payload.response.LibraryResponse;
 import com.peecko.api.web.payload.response.MessageResponse;
 import com.peecko.api.web.payload.response.TodayResponse;
@@ -53,7 +52,7 @@ public class VideoController extends BaseController {
     public ResponseEntity<?> getTodayVideos() {
         String greeting = "Here is your weekly dose of Wellness support. Check back next week for more updates";
         String username = getUsername(userRepository);
-        List<Video> videos = videoRepository.getTodayVideos(username);
+        List<VideoDTO> videos = videoRepository.getTodayVideos(username);
         List<String> tags = Common.getVideoTags(videos);
         return ResponseEntity.ok(new TodayResponse(greeting, tags, videos));
     }
@@ -62,7 +61,7 @@ public class VideoController extends BaseController {
     public ResponseEntity<?> getFavorites() {
         String username = getUsername(userRepository);
         String greeting = "Here is your list of favorite videos, we are glad to know you keep up the good work!";
-        List<Video> videos = videoRepository.getUserFavorites(username);
+        List<VideoDTO> videos = videoRepository.getUserFavorites(username);
         List<String> tags = Common.getVideoTags(videos);
         return ResponseEntity.ok(new TodayResponse(greeting, tags, videos));
     }
@@ -110,7 +109,7 @@ public class VideoController extends BaseController {
         if (playlist == null) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("playlist.invalid")));
         }
-        Video video = videoRepository.getVideo(username, videoCode);
+        VideoDTO video = videoRepository.getVideo(username, videoCode);
         if (video == null) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("video.invalid")));
         }
@@ -130,7 +129,7 @@ public class VideoController extends BaseController {
         }
         for(String videoCode: codes) {
             if (StringUtils.hasText(videoCode)) {
-                Video video = videoRepository.getVideo(username, videoCode);
+                VideoDTO video = videoRepository.getVideo(username, videoCode);
                 if (video != null) {
                     playlist = videoRepository.removePlaylistVideoItem(username, playlist, video);
                 }
@@ -146,7 +145,7 @@ public class VideoController extends BaseController {
         if (playlist == null) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("playlist.invalid")));
         }
-        Video video = videoRepository.getVideo(username, videoCode);
+        VideoDTO video = videoRepository.getVideo(username, videoCode);
         if (video == null) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("video.invalid")));
         }
@@ -165,7 +164,7 @@ public class VideoController extends BaseController {
         if (playlist == null) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("playlist.invalid")));
         }
-        Video video = videoRepository.getVideo(username, videoCode);
+        VideoDTO video = videoRepository.getVideo(username, videoCode);
         if (video == null) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("video.invalid")));
         }
@@ -186,14 +185,14 @@ public class VideoController extends BaseController {
     public ResponseEntity<?> getLibrary() {
         String greeting = "All our video content under one roof, organized into wellness & fitness categories";
         String username = getUsername(userRepository);
-        List<Category> categories = videoRepository.getLibrary(username);
+        List<CategoryDTO> categories = videoRepository.getLibrary(username);
         return ResponseEntity.ok(new LibraryResponse(greeting, categories));
     }
 
     @GetMapping("/categories/{code}")
     public ResponseEntity<?> getCategory(@PathVariable String code) {
         String username = getUsername(userRepository);
-        Optional<Category> category = videoRepository.getCategory(code, username);
+        Optional<CategoryDTO> category = videoRepository.getCategory(code, username);
         return ResponseEntity.ofNullable(category); // 404 Not Found
     }
 

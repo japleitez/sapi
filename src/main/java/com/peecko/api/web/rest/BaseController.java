@@ -1,13 +1,10 @@
 package com.peecko.api.web.rest;
 
-import com.peecko.api.domain.Language;
-import com.peecko.api.domain.User;
-import com.peecko.api.repository.UserRepository;
+import com.peecko.api.domain.dto.User;
+import com.peecko.api.repository.fake.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.util.StringUtils;
 
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 

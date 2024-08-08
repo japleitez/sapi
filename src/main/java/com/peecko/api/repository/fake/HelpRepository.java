@@ -1,6 +1,6 @@
-package com.peecko.api.repository;
+package com.peecko.api.repository.fake;
 
-import com.peecko.api.domain.Help;
+import com.peecko.api.domain.dto.Help;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

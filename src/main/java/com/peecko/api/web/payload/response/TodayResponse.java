@@ -1,6 +1,6 @@
 package com.peecko.api.web.payload.response;
 
-import com.peecko.api.domain.Video;
+import com.peecko.api.domain.dto.VideoDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -13,5 +13,5 @@ import java.util.List;
 public class TodayResponse {
     private String greeting;
     private List<String> tags;
-    private List<Video> videos;
+    private List<VideoDTO> videos;
 }

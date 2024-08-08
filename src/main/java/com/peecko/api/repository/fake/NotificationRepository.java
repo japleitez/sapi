@@ -1,6 +1,6 @@
-package com.peecko.api.repository;
+package com.peecko.api.repository.fake;
 
-import com.peecko.api.domain.Notification;
+import com.peecko.api.domain.dto.Notification;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

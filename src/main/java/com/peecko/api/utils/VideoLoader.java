@@ -1,8 +1,8 @@
 package com.peecko.api.utils;
 
-import com.peecko.api.domain.Coach;
-import com.peecko.api.domain.Video;
-import com.peecko.api.repository.CoachRepository;
+import com.peecko.api.domain.dto.Coach;
+import com.peecko.api.domain.dto.VideoDTO;
+import com.peecko.api.repository.fake.CoachRepository;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,8 +20,8 @@ public class VideoLoader {
     private static final String PEECKO = "peecko";
     private static final String AMAZON_VIDEO = "https://d2zumfut4741yc.cloudfront.net/0f74fab4-17a2-4bdf-ad51-c9a5cfcd29d2/AppleHLS1/KLYU_004_SHOOTING_SIDE.m3u8";
 
-    public List<Video> loadVideos(String filename) {
-        List<Video> videos = new ArrayList<>();
+    public List<VideoDTO> loadVideos(String filename) {
+        List<VideoDTO> videos = new ArrayList<>();
         InputStream is = getClass().getResourceAsStream(filename);
         try (BufferedReader br =  new BufferedReader(new InputStreamReader(is))) {
             int row = 0;
@@ -38,9 +38,9 @@ public class VideoLoader {
         return videos;
     }
 
-    private Video createVideo(String[] values) {
+    private VideoDTO createVideo(String[] values) {
         String player = values[6].contains(YOUTUBE)? YOUTUBE: PEECKO;
-        Video video = new Video()
+        VideoDTO video = new VideoDTO()
             .setCode(trim(values[0]))
             .setCategory(trim(values[1]))
             .setTitle(trim(values[2]))

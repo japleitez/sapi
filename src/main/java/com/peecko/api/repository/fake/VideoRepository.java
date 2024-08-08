@@ -1,6 +1,6 @@
-package com.peecko.api.repository;
+package com.peecko.api.repository.fake;
 
-import com.peecko.api.domain.*;
+import com.peecko.api.domain.dto.*;
 import com.peecko.api.utils.Common;
 import com.peecko.api.utils.VideoLoader;
 import org.apache.commons.text.CaseUtils;
@@ -13,39 +13,39 @@ import java.util.stream.Collectors;
 @Component
 public class VideoRepository {
 
-    private static final List<Video> TODAY_VIDEOS = new LinkedList<>();
-    private static final List<Category> CATEGORIES = new LinkedList<>();
-    private static final List<Category> LIBRARY = new LinkedList<>();
+    private static final List<VideoDTO> TODAY_VIDEOS = new LinkedList<>();
+    private static final List<CategoryDTO> CATEGORIES = new LinkedList<>();
+    private static final List<CategoryDTO> LIBRARY = new LinkedList<>();
     public static final HashMap<String, List<String>> FAVORITES =  new LinkedHashMap<>();
-    public static final Set<Video> ALL_VIDEOS = new HashSet<>();
+    public static final Set<VideoDTO> ALL_VIDEOS = new HashSet<>();
 
     private static boolean loaded = false;
 
     public static final HashMap<String, List<Playlist>> PLAYLISTS = new HashMap<>();
 
 
-    public List<Video> getTodayVideos(String user) {
+    public List<VideoDTO> getTodayVideos(String user) {
         loadVideos();
         return decorateVideo(TODAY_VIDEOS, user);
     }
 
-    public List<Category> getLibrary(String user) {
+    public List<CategoryDTO> getLibrary(String user) {
         loadVideos();
-        return LIBRARY.stream().map(category -> decorateCategory(category, user)).collect(Collectors.toList());
+        return LIBRARY.stream().map(categoryDTO -> decorateCategory(categoryDTO, user)).collect(Collectors.toList());
     }
 
-    public Optional<Category> getCategory(String code, String user) {
+    public Optional<CategoryDTO> getCategory(String code, String user) {
         loadVideos();
-        return CATEGORIES.stream().filter(category -> category.getCode().equals(code)).map(category -> decorateCategory(category, user)).findFirst();
+        return CATEGORIES.stream().filter(categoryDTO -> categoryDTO.getCode().equals(code)).map(categoryDTO -> decorateCategory(categoryDTO, user)).findFirst();
     }
 
-    public List<Video> getUserFavorites(String username) {
+    public List<VideoDTO> getUserFavorites(String username) {
         loadVideos();
         List<String> videoCodes = getUserFavoriteVideoCodes(username);
         return ALL_VIDEOS.stream()
             .filter(video -> videoCodes.contains(video.getCode()))
             .map(video -> {
-                Video clone = Common.clone(video);
+                VideoDTO clone = Common.clone(video);
                 clone.setFavorite(true);
                 return clone;
             })
@@ -54,9 +54,9 @@ public class VideoRepository {
 
     public void addFavorite(String username, String videoCode) {
         loadVideos();
-        Optional<Video> optional = ALL_VIDEOS.stream().filter(video -> video.getCode().equals(videoCode)).findFirst();
+        Optional<VideoDTO> optional = ALL_VIDEOS.stream().filter(video -> video.getCode().equals(videoCode)).findFirst();
         if (optional.isPresent()) {
-            Video video = optional.get();
+            VideoDTO video = optional.get();
             List<String> videoCodes = getUserFavoriteVideoCodes(username);
             if (!videoCodes.contains(video.getCode())) {
                 videoCodes.add(video.getCode());
@@ -67,9 +67,9 @@ public class VideoRepository {
 
     public void removeFavorite(String username, String videoCode) {
         loadVideos();
-        Optional<Video> optional = ALL_VIDEOS.stream().filter(video -> video.getCode().equals(videoCode)).findFirst();
+        Optional<VideoDTO> optional = ALL_VIDEOS.stream().filter(video -> video.getCode().equals(videoCode)).findFirst();
         if (optional.isPresent()) {
-            Video video = optional.get();
+            VideoDTO video = optional.get();
             List<String> videoCodes = getUserFavoriteVideoCodes(username);
             if (videoCodes.contains(video.getCode())) {
                 videoCodes.remove(video.getCode());
@@ -95,31 +95,31 @@ public class VideoRepository {
         List<String> videoCategories = List.of("YOGA", "PILATES", "CONDITIONING", "MEDITATION", "HEALTH RISK");
         ALL_VIDEOS.addAll(new VideoLoader().loadVideos("/data/videos.csv"));
         for(String categoryName: videoCategories) {
-            Category c1 = new Category();
+            CategoryDTO c1 = new CategoryDTO();
             c1.setCode(categoryName.substring(0,2).toLowerCase());
             c1.setTitle(CaseUtils.toCamelCase(categoryName, true, null));
             c1.setVideos(videosByCategory(categoryName));
             CATEGORIES.add(c1);
             TODAY_VIDEOS.add(c1.getVideos().get(0));
-            Category c2 = new Category();
+            CategoryDTO c2 = new CategoryDTO();
             c2.setCode(c1.getCode());
             c2.setTitle(c1.getTitle());
             c2.setVideos(copyVideos(c1.getVideos(), 3));
             LIBRARY.add(c2);
         }
-        List<Video> plist =  ALL_VIDEOS.stream().filter(video -> video.getPlayer().equals("peecko")).collect(Collectors.toList());
+        List<VideoDTO> plist =  ALL_VIDEOS.stream().filter(video -> video.getPlayer().equals("peecko")).collect(Collectors.toList());
         TODAY_VIDEOS.addAll(plist);
     }
 
-    private static List<Video> videosByCategory(String category) {
+    private static List<VideoDTO> videosByCategory(String category) {
         loadVideos();
         return new ArrayList<>(ALL_VIDEOS.stream().filter(v -> v.getCategory().equals(category)).collect(Collectors.toList()));
     }
 
-    private static List<Video> copyVideos(List<Video> from, int num) {
-        List<Video> list = new LinkedList<>();
+    private static List<VideoDTO> copyVideos(List<VideoDTO> from, int num) {
+        List<VideoDTO> list = new LinkedList<>();
         for(int i = 0; i < num; i++) {
-            Video clone = Common.clone(from.get(i));
+            VideoDTO clone = Common.clone(from.get(i));
             list.add(clone);
         }
         return list;
@@ -134,32 +134,32 @@ public class VideoRepository {
         return userFavorites;
     }
 
-    public Video getVideo(String username, String videoCode) {
+    public VideoDTO getVideo(String username, String videoCode) {
         loadVideos();
-        Video video = ALL_VIDEOS.stream().filter(v -> videoCode.equals(v.getCode())).findAny().orElse(null);
+        VideoDTO video = ALL_VIDEOS.stream().filter(v -> videoCode.equals(v.getCode())).findAny().orElse(null);
         if (video != null) {
             List<String> videoCodes = getUserFavoriteVideoCodes(username);
-            Video clone = Common.clone(video);
+            VideoDTO clone = Common.clone(video);
             clone.setFavorite(videoCodes.contains(video.getCode()));
             return clone;
         }
         return null;
     }
 
-    private List<Video> decorateVideo(List<Video> videos, String username) {
+    private List<VideoDTO> decorateVideo(List<VideoDTO> videos, String username) {
         List<String> favoriteVideoCodes = getUserFavoriteVideoCodes(username);
         return videos.stream().map(video -> {
-            Video clone = Common.clone(video);
+            VideoDTO clone = Common.clone(video);
             clone.setFavorite(favoriteVideoCodes.contains(video.getCode()));
             return clone;
         }).collect(Collectors.toList());
     }
 
-    private Category decorateCategory(Category category, String user) {
-        Category nc = new Category();
-        nc.setCode(category.getCode());
-        nc.setTitle(category.getTitle());
-        nc.setVideos(decorateVideo(category.getVideos(), user));
+    private CategoryDTO decorateCategory(CategoryDTO categoryDTO, String user) {
+        CategoryDTO nc = new CategoryDTO();
+        nc.setCode(categoryDTO.getCode());
+        nc.setTitle(categoryDTO.getTitle());
+        nc.setVideos(decorateVideo(categoryDTO.getVideos(), user));
         return nc;
     }
 
@@ -218,7 +218,7 @@ public class VideoRepository {
         return Optional.of(playlist);
     }
 
-    public Playlist addPlaylistVideoItem(String username, Playlist playlist, Video video) {
+    public Playlist addPlaylistVideoItem(String username, Playlist playlist, VideoDTO video) {
         initUserPlaylist(username);
         if (playlist == null || video == null) {
             return playlist;
@@ -236,13 +236,13 @@ public class VideoRepository {
         return playlist;
     }
 
-    public boolean videoIsAlreadyAdded(String username, Playlist playlist, Video video) {
+    public boolean videoIsAlreadyAdded(String username, Playlist playlist, VideoDTO video) {
         initUserPlaylist(username);
         String videoCode = video.getCode();
         return playlist.getVideoItems().stream().filter(v -> videoCode.equals(v.getCode())).findAny().isPresent();
     }
 
-    public Playlist removePlaylistVideoItem(String username, Playlist playlist, Video video) {
+    public Playlist removePlaylistVideoItem(String username, Playlist playlist, VideoDTO video) {
         if (playlist == null || video == null) {
             return playlist;
         }

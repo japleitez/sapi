@@ -1,10 +1,10 @@
 package com.peecko.api.web.rest;
 
-import com.peecko.api.domain.User;
-import com.peecko.api.repository.HelpRepository;
-import com.peecko.api.repository.LanguageRepository;
-import com.peecko.api.repository.NotificationRepository;
-import com.peecko.api.repository.UserRepository;
+import com.peecko.api.domain.dto.User;
+import com.peecko.api.repository.fake.HelpRepository;
+import com.peecko.api.repository.fake.LanguageRepository;
+import com.peecko.api.repository.fake.NotificationRepository;
+import com.peecko.api.repository.fake.UserRepository;
 import com.peecko.api.web.payload.response.LanguageResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;

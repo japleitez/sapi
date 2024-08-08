@@ -1,7 +1,7 @@
 package com.peecko.api.utils;
 
-import com.peecko.api.domain.Device;
-import com.peecko.api.domain.Video;
+import com.peecko.api.domain.dto.Device;
+import com.peecko.api.domain.dto.VideoDTO;
 import com.peecko.api.web.payload.request.SignInRequest;
 
 import java.util.*;
@@ -47,16 +47,16 @@ public abstract class Common {
         }
     }
 
-    public static List<String> getVideoTags(List<Video> videos) {
+    public static List<String> getVideoTags(List<VideoDTO> videos) {
         Set<String> set = new LinkedHashSet<>();
-        for(Video v: videos) {
+        for(VideoDTO v: videos) {
             set.addAll(v.getTags());
         }
         return set.stream().toList();
     }
 
-    public static Video clone(Video v) {
-        Video nv = new Video();
+    public static VideoDTO clone(VideoDTO v) {
+        VideoDTO nv = new VideoDTO();
         nv.setCode(v.getCode());
         nv.setCategory(v.getCategory());
         nv.setTitle(v.getTitle());

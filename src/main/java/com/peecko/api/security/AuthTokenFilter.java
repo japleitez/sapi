@@ -1,6 +1,6 @@
 package com.peecko.api.security;
 
-import com.peecko.api.repository.UserRepository;
+import com.peecko.api.repository.fake.UserRepository;
 import com.peecko.api.service.UserDetailsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

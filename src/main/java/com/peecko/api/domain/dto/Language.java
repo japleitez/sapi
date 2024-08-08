@@ -1,11 +1,9 @@
-package com.peecko.api.domain;
+package com.peecko.api.domain.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Locale;
 
 @Data
 @AllArgsConstructor

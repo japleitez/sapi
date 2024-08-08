@@ -1,6 +1,6 @@
 package com.peecko.api.web.payload.response;
 
-import com.peecko.api.domain.Category;
+import com.peecko.api.domain.dto.CategoryDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -12,5 +12,5 @@ import java.util.List;
 @AllArgsConstructor @Setter @Getter
 public class LibraryResponse {
     private String greeting;
-    private List<Category> categories;
+    private List<CategoryDTO> categories;
 }

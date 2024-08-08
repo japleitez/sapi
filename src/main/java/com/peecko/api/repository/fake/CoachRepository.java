@@ -1,7 +1,6 @@
-package com.peecko.api.repository;
+package com.peecko.api.repository.fake;
 
-import com.peecko.api.domain.Coach;
-import org.springframework.stereotype.Component;
+import com.peecko.api.domain.dto.Coach;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.peecko.api.domain;
+package com.peecko.api.domain.dto;
 
 import lombok.Data;
 import lombok.Getter;

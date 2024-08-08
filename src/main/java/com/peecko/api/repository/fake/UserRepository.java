@@ -1,6 +1,7 @@
-package com.peecko.api.repository;
+package com.peecko.api.repository.fake;
 
-import com.peecko.api.domain.*;
+import com.peecko.api.domain.dto.*;
+import com.peecko.api.dto.*;
 import com.peecko.api.utils.Common;
 import com.peecko.api.utils.SponsorUtils;
 import com.peecko.api.web.payload.request.SignInRequest;
@@ -13,7 +14,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.peecko.api.utils.Common.MAX_ALLOWED;
 
