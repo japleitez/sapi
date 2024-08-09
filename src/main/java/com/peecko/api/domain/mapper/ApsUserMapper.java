@@ -12,6 +12,7 @@ public class ApsUserMapper {
         dto.name(apsUser.getName());
         dto.username(apsUser.getUsername());
         dto.password(apsUser.getPassword());
+        dto.language(apsUser.getLanguage().name());
         return dto;
     }
 }

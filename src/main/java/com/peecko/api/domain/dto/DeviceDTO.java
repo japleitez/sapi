@@ -13,7 +13,7 @@ import lombok.experimental.Accessors;
 @Getter
 @Accessors(chain = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Device {
+public class DeviceDTO {
     @EqualsAndHashCode.Include
     @JsonProperty("device-id")
     String deviceId;
@@ -22,7 +22,7 @@ public class Device {
     @JsonProperty("os-version")
     String osVersion;
     @JsonProperty("installed-on")
-    String installed;
+    String installedOn;
     @JsonIgnore
     String jwt;
 }

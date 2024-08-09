@@ -54,6 +54,9 @@ public class ApsUser implements Serializable {
     @Column(name = "updated")
     private Instant updated;
 
+    @Column(name = "jwt")
+    private String jwt;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "apsUser")
     @JsonIgnoreProperties(value = { "apsUser" }, allowSetters = true)
     private Set<ApsDevice> apsDevices = new HashSet<>();
@@ -216,6 +219,20 @@ public class ApsUser implements Serializable {
 
     public void setUpdated(Instant updated) {
         this.updated = updated;
+    }
+
+
+    public String getJwt() {
+        return jwt;
+    }
+
+    public void setJwt(String jwt) {
+        this.jwt = jwt;
+    }
+
+    public ApsUser jwt(String jwt) {
+        this.setJwt(jwt);
+        return this;
     }
 
     public Set<ApsDevice> getApsDevices() {

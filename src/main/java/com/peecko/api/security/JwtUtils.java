@@ -17,6 +17,7 @@ public class JwtUtils {
     @Value("${peecko.api.jwtSecret}")
     private String jwtSecret;
 
+    /** 24 hours expiration = 1000 * 60 * 60 * 24 */
     @Value("${peecko.api.jwtExpirationMs}")
     private int jwtExpirationMs;
 

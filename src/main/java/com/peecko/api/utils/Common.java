@@ -1,13 +1,18 @@
 package com.peecko.api.utils;
 
-import com.peecko.api.domain.dto.Device;
+import com.peecko.api.domain.ApsDevice;
+import com.peecko.api.domain.dto.DeviceDTO;
 import com.peecko.api.domain.dto.VideoDTO;
+import com.peecko.api.domain.enumeration.Language;
 import com.peecko.api.web.payload.request.SignInRequest;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
+import java.time.temporal.TemporalAdjusters;
 public abstract class Common {
 
     private static final int MAX = 9;
@@ -76,12 +81,53 @@ public abstract class Common {
         return nv;
     }
 
-    public static Device mapToDevice(SignInRequest r) {
-        Device d = new Device();
+    static final DateTimeFormatter CUSTOM_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    public static DeviceDTO mapToDevice(SignInRequest r) {
+        DeviceDTO d = new DeviceDTO();
         d.setDeviceId(r.getDeviceId());
         d.setPhoneModel(r.getPhoneModel());
         d.setOsVersion(r.getOsVersion());
         return d;
+    }
+
+    public static ApsDevice toApsDevice(SignInRequest request) {
+        ApsDevice apsDevice = new ApsDevice();
+        apsDevice.username(request.getUsername());
+        apsDevice.deviceId(request.getDeviceId());
+        apsDevice.osVersion(request.getOsVersion());
+        apsDevice.phoneModel(request.getPhoneModel());
+        apsDevice.installedOn(Instant.now());
+        return apsDevice;
+    }
+
+
+    public static int currentYearMonth() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMM");
+        String yearMonthString = LocalDate.now().format(formatter);
+        return Integer.parseInt(yearMonthString);
+    }
+
+    public static String lastDayOfMonthAsString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        LocalDate lastDayOfMonth = lastDayOfMonth();
+        return lastDayOfMonth.format(formatter);
+    }
+
+    public static LocalDate lastDayOfMonth() {
+        LocalDate currentDate = LocalDate.now();
+        return currentDate.with(TemporalAdjusters.lastDayOfMonth());
+    }
+
+    public static Language toLanguage(String lang) {
+        if (lang == null) {
+            return Language.EN;
+        }
+        try {
+            return Language.valueOf(lang.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return Language.EN;
+        }
     }
 
 }

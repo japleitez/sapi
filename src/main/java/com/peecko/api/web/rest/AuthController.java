@@ -3,11 +3,15 @@ package com.peecko.api.web.rest;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import com.peecko.api.domain.dto.Device;
+import com.peecko.api.domain.dto.DeviceDTO;
 import com.peecko.api.domain.dto.Membership;
 import com.peecko.api.domain.dto.UserDTO;
 import com.peecko.api.repository.fake.UserRepository;
 import com.peecko.api.security.JwtUtils;
+import com.peecko.api.service.ApsDeviceService;
+import com.peecko.api.service.ApsUserService;
+import com.peecko.api.service.response.LoginResponse;
+import com.peecko.api.service.TokenBlacklistService;
 import com.peecko.api.utils.EmailUtils;
 import com.peecko.api.utils.NameUtils;
 import com.peecko.api.utils.PasswordUtils;
@@ -40,12 +44,40 @@ public class AuthController extends BaseController {
     final PasswordEncoder encoder;
     final JwtUtils jwtUtils;
 
-    public AuthController(MessageSource messageSource, AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder encoder, JwtUtils jwtUtils) {
+    private final TokenBlacklistService tokenBlacklistService;
+    private final ApsDeviceService apsDeviceService;
+    private final ApsUserService apsUserService;
+
+    public AuthController(MessageSource messageSource, AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder encoder, JwtUtils jwtUtils, TokenBlacklistService tokenBlacklistService, ApsDeviceService apsDeviceService, ApsUserService apsUserService) {
         this.messageSource = messageSource;
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.jwtUtils = jwtUtils;
+        this.tokenBlacklistService = tokenBlacklistService;
+        this.apsDeviceService = apsDeviceService;
+        this.apsUserService = apsUserService;
+    }
+
+    @PostMapping("/signin")
+    public ResponseEntity<LoginResponse> signIn(@Valid @RequestBody SignInRequest request) {
+        boolean authenticated = apsUserService.authenticateUser(request.getUsername(), request.getPassword());
+        if (authenticated) {
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtils.generateJwtToken(authentication);
+            LoginResponse response = apsUserService.signIn(request, jwt);
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.ok(new LoginResponse());
+        }
+    }
+
+    @PostMapping("/signout")
+    public ResponseEntity<?> signOut(@Valid @RequestBody SignOutRequest signOutRequest, @RequestHeader("Authorization") String authHeader) {
+        tokenBlacklistService.invalidateToken(authHeader);
+        apsUserService.signOut(signOutRequest);
+        return ResponseEntity.ok(new MessageResponse(OK, message("user.logoff.ok")));
     }
 
     @PostMapping("/signup")
@@ -62,54 +94,25 @@ public class AuthController extends BaseController {
         if (!isValidName) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("name.valid.nok")));
         }
-        String email = signUpRequest.getUsername().toLowerCase();
-        if (userRepository.existsByUsername(email)) {
+        if (apsUserService.userExistsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse(ERROR, message("email.duplicated")));
         }
-        String name = NameUtils.camel(signUpRequest.getName());
-        UserDTO userDTO = new UserDTO()
-                .name(name)
-                .username(email)
-                .language(signUpRequest.getLanguage().toUpperCase())
-                .password(encoder.encode(signUpRequest.getPassword()));
-
-        userRepository.save(userDTO);
-
+        UserDTO userDTO = apsUserService.signUp(signUpRequest);
         return ResponseEntity.ok(new MessageResponse(OK, message("user.signup.ok", userDTO)));
     }
 
-    @PostMapping("/signin")
-    public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest req) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword()));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
-        userRepository.addDevice(req, jwt);
-
-        LoginResponse login = userRepository.findByUsername(req.getUsername()).map(this::userToLogin).orElse(new LoginResponse());
-        login.setToken(jwt);
-
-        return ResponseEntity.ok(login);
-    }
-
-    @PostMapping("/signout")
-    public ResponseEntity<?> signOut(@Valid @RequestBody SignOutRequest signOutRequest) {
-        userRepository.removeDevice(signOutRequest);
-        return ResponseEntity.ok(new MessageResponse(OK, message("user.logoff.ok")));
-    }
-
-
     @GetMapping("/installations")
     public ResponseEntity<?> getInstallations() {
-        List<Device> installations = new ArrayList<>();
-        installations.addAll(userRepository.getUserDevices(getUsername()));
-        InstallationsResponse response = new InstallationsResponse(MAX_ALLOWED, installations);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new InstallationsResponse(MAX_ALLOWED, apsUserService.getDevicesByUsername(getUsername())));
     }
 
+    /**
+     * -------------------------------------------------------------------------------------
+     * TO IMPLEMENT
+     * -------------------------------------------------------------------------------------
+     */
     @GetMapping("/active/{username}")
     public ResponseEntity<?> verifyAccount(@PathVariable String username) {
         if (!StringUtils.hasText(username)) {

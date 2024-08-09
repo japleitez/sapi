@@ -1,4 +1,4 @@
-package com.peecko.api.web.payload.response;
+package com.peecko.api.service.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

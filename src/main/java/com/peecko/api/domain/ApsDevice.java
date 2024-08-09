@@ -127,4 +127,11 @@ public class ApsDevice implements Serializable {
         return this;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ApsDevice device = (ApsDevice) o;
+        return username.equals(device.username) && deviceId.equals(device.deviceId);
+    }
 }

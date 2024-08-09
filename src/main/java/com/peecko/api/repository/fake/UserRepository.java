@@ -21,7 +21,7 @@ public class UserRepository {
 
     public static final HashMap<String, UserDTO> REPO = new HashMap<>();
 
-    public static final HashMap<String, Set<Device>> DEVICES = new HashMap<>();
+    public static final HashMap<String, Set<DeviceDTO>> DEVICES = new HashMap<>();
 
     public static final HashMap<String, PinCode> PIN_CODES = new HashMap<>();
 
@@ -103,7 +103,7 @@ public class UserRepository {
         return membership;
     }
 
-    public Set<Device> getUserDevices(String username) {
+    public Set<DeviceDTO> getUserDevices(String username) {
         if (DEVICES.containsKey(username)) {
             return DEVICES.get(username);
         } else {
@@ -117,28 +117,28 @@ public class UserRepository {
 
     public void addDevice(SignInRequest signInRequest, String jwt) {
         String username = signInRequest.getUsername();
-        Set<Device> userDevices = getUserDevices(username);
-        Device device = Common.mapToDevice(signInRequest);
-        if (!userDevices.contains(device)) {
+        Set<DeviceDTO> userDeviceDTOS = getUserDevices(username);
+        DeviceDTO deviceDTO = Common.mapToDevice(signInRequest);
+        if (!userDeviceDTOS.contains(deviceDTO)) {
             LocalDateTime ldt = LocalDateTime.now();
-            device.setInstalled(ldt.format(CUSTOM_FORMATTER));
-            device.setJwt(jwt);
-            userDevices.add(device);
-            DEVICES.put(username, userDevices);
+            deviceDTO.setInstalledOn(ldt.format(CUSTOM_FORMATTER));
+            deviceDTO.setJwt(jwt);
+            userDeviceDTOS.add(deviceDTO);
+            DEVICES.put(username, userDeviceDTOS);
         }
     }
 
     public void removeDevice(SignOutRequest signOutRequest) {
-        Device deviceParam = new Device();
-        deviceParam.setDeviceId(signOutRequest.getDeviceId());
+        DeviceDTO deviceDTOParam = new DeviceDTO();
+        deviceDTOParam.setDeviceId(signOutRequest.getDeviceId());
         String username = signOutRequest.getUsername();
-        Set<Device> userDevices = getUserDevices(username);
-        Optional<Device> optionalDevice =  userDevices.stream().filter(deviceParam::equals).findAny();
+        Set<DeviceDTO> userDeviceDTOS = getUserDevices(username);
+        Optional<DeviceDTO> optionalDevice =  userDeviceDTOS.stream().filter(deviceDTOParam::equals).findAny();
         if (optionalDevice.isPresent()) {
-            Device device = optionalDevice.get();
-            userDevices.remove(device);
-            DEVICES.put(username, userDevices);
-            INVALID_JWT.add(device.getJwt());
+            DeviceDTO deviceDTO = optionalDevice.get();
+            userDeviceDTOS.remove(deviceDTO);
+            DEVICES.put(username, userDeviceDTOS);
+            INVALID_JWT.add(deviceDTO.getJwt());
         }
     }
 

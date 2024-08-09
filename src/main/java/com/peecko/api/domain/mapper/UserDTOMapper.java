@@ -19,4 +19,5 @@ public class UserDTOMapper {
                 .collect(Collectors.toList());
         return new UserDetailsImpl(userDTO.name(), userDTO.username(), userDTO.password(), authorities);
     }
+
 }

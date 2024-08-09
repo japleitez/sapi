@@ -1,0 +1,2 @@
+- add jwt string to apsUser
+- add customer_id to apsMembership
