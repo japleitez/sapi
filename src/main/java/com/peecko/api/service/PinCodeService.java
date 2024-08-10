@@ -1,8 +1,8 @@
 package com.peecko.api.service;
 
 import com.peecko.api.domain.PinCode;
+import com.peecko.api.domain.dto.Language;
 import com.peecko.api.domain.dto.PinCodeDTO;
-import com.peecko.api.domain.enumeration.Language;
 import com.peecko.api.domain.mapper.PinCodeMapper;
 import com.peecko.api.repository.PinCodeRepo;
 import com.peecko.api.service.context.EmailContext;
@@ -16,10 +16,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class PinCodeService {
@@ -35,8 +32,13 @@ public class PinCodeService {
         this.templateEngine = templateEngine;
     }
 
+    public PinCodeDTO findByRequestId(String requestId) {
+        UUID uuid = UUID.fromString(requestId);
+        return pinCodeRepo.findById(uuid).map(PinCodeMapper::pinCodeDTO).orElse(null);
+    }
+
     @Transactional
-    public PinCodeDTO generatePinCodeForEmailValidation(String email, String language) {
+    public PinCodeDTO generatePinCode(String email, String language) {
         PinCode pinCode = new PinCode();
         pinCode.setEmail(email.toLowerCase());
         pinCode.setAgencyEmail("agencyEmail");
@@ -82,7 +84,7 @@ public class PinCodeService {
         private String resolveSubject() {
             Locale locale = new Locale(pinCode.getLanguage());
             Object[] args = new Object[] {};
-            return messageSource.getMessage("pin.code.email.verification.subject", args, locale);
+            return messageSource.getMessage("pin.code.email.subject", args, locale);
         }
 
         private String resolveText() {
@@ -90,9 +92,17 @@ public class PinCodeService {
             variables.put("code", pinCode.getCode());
             Context context = new Context();
             context.setVariables(variables);
-            return templateEngine.process("pin.code.email.verification.html", context);
+            return templateEngine.process(getTemplateName(), context);
         }
 
+        private String getTemplateName() {
+            return switch (pinCode.getLanguage()) {
+                case "FR" -> "pin_code_email_fr.html";
+                case "DE" -> "pin_code_email_de.html";
+                case "ES" -> "pin_code_email_es.html";
+                default -> "pin_code_email.html";
+            };
+        }
     }
 
 }

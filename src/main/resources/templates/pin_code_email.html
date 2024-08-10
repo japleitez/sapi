@@ -33,26 +33,28 @@
       font-size: 12px;
       color: #777777;
     }
+    .pincode {
+      color: f7a600;
+      font-size: 24px;
+    }
   </style>
 </head>
 <body>
 <div class="container">
   <div class="header">
-    <h1>PEECKO</h1>
+    <h1>PEECKO Verification Code</h1>
   </div>
   <div class="content">
     <p>Dear User,</p>
-    <p>Thank you for joining us, we are glad to have you on board.</p>
-    <p>Please use the code below to confirm your email address:</p>
-    <div class="invoice-details">
-        <span th:text="${number}">1234</span>
-    </div>
+    <p>Your verification code is: <span th:text="${number}" class="pincode"><strong>1234</strong></span></p>
     <p>The code will expire in 10 minutes and can be used only once.</p>
-    <p>If you have any questions regarding your email verification, please contact us at <span th:text="${supportEmail}"></span></p>
-    <p>Best regards,<br><span>PEECKO</span></p>
+    <p>For security purposes, please do not share this code with anyone, including our staff</p>
+    <p>For further assistance, please contact us via email at <span>support@peecko.com</span></p>
+    <p>Best regards,</p>
+    <p><span>PEECKO Team</span></p>
   </div>
   <div class="footer">
-    <p>Your Company Inc. | 123 Business Road, Business City, BC 12345</p>
+    <p>PEECKO SRL | 8 September Avenue, L-2360, Luxembourg</p>
   </div>
 </div>
 </body>

@@ -61,7 +61,7 @@ public class ApsUserService {
         return apsUserRepo.existsByUsername(username.toLowerCase());
     }
 
-    public void activateUserAccount(String username) {
+    public void activateUser(String username) {
         Optional<ApsUser> optional = apsUserRepo.findByUsername(username.toLowerCase());
         if (optional.isPresent()) {
             ApsUser apsUser = optional.get();
@@ -140,4 +140,14 @@ public class ApsUserService {
         }
         return new ArrayList<>();
     }
+
+    public void updatePassword(String username, String password) {
+        Optional<ApsUser> optional = apsUserRepo.findByUsername(username.toLowerCase());
+        if (optional.isPresent()) {
+            ApsUser apsUser = optional.get();
+            apsUser.password(passwordEncoder.encode(password));
+            apsUserRepo.save(apsUser);
+        }
+    }
+
 }

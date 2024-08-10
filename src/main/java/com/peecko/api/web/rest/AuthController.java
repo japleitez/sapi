@@ -7,7 +7,6 @@ import com.peecko.api.domain.dto.DeviceDTO;
 import com.peecko.api.domain.dto.Membership;
 import com.peecko.api.domain.dto.PinCodeDTO;
 import com.peecko.api.domain.dto.UserDTO;
-import com.peecko.api.domain.enumeration.Language;
 import com.peecko.api.repository.fake.UserRepository;
 import com.peecko.api.security.JwtUtils;
 import com.peecko.api.service.ApsUserService;
@@ -26,7 +25,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
@@ -39,12 +37,11 @@ import static com.peecko.api.utils.Common.*;
 @RequestMapping("/api/auth")
 public class AuthController extends BaseController {
 
-    final MessageSource messageSource;
-    final AuthenticationManager authenticationManager;
-    final UserRepository userRepository;
-    final PasswordEncoder encoder;
-    final JwtUtils jwtUtils;
-
+    private final MessageSource messageSource;
+    private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final PasswordEncoder encoder;
+    private final JwtUtils jwtUtils;
     private final TokenBlacklistService tokenBlacklistService;
     private final ApsUserService apsUserService;
     private final PinCodeService pinCodeService;
@@ -111,14 +108,14 @@ public class AuthController extends BaseController {
     }
 
     @GetMapping("/active/{username}")
-    public ResponseEntity<?> activateUserAccount(@PathVariable String username) {
+    public ResponseEntity<?> activateUser(@PathVariable String username) {
         if (!StringUtils.hasText(username)) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("email.required")));
         }
         if (!apsUserService.exists(username)) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("email.notfound")));
         }
-        apsUserService.activateUserAccount(username);
+        apsUserService.activateUser(username);
         return ResponseEntity.ok(new MessageResponse(OK, message("email.verified.ok")));
     }
 
@@ -128,7 +125,7 @@ public class AuthController extends BaseController {
             return ResponseEntity.badRequest().build();
         }
         UserDTO user = apsUserService.findByUsernameOrElseThrow(request.getUsername());
-        PinCodeDTO pinCode = pinCodeService.generatePinCodeForEmailValidation(request.getUsername(), user.language());
+        PinCodeDTO pinCode = pinCodeService.generatePinCode(request.getUsername(), user.language());
         PinCodeResponse response = new PinCodeResponse(pinCode.getRequestId());
         return ResponseEntity.ok(response);
     }
@@ -142,28 +139,19 @@ public class AuthController extends BaseController {
         }
     }
 
-    /**
-     * -------------------------------------------------------------------------------------
-     * TO IMPLEMENT
-     * -------------------------------------------------------------------------------------
-     */
-
-
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
-        if (userRepository.isPinCodeValid(request.getRequestId(), request.getPinCode())) {
-            boolean isValidPassword = PasswordUtils.isValid(request.getPassword());
-            if (!isValidPassword) {
-                return ResponseEntity.ok(new MessageResponse(ERROR, message("password.valid.nok")));
-            }
-            String email = userRepository.getPinCode(request.getRequestId()).getEmail();
-            UserDTO userDTO = userRepository.findByUsername(email).get();
-            userDTO.password(encoder.encode(request.getPassword()));
-            userRepository.save(userDTO);
-            return ResponseEntity.ok(new MessageResponse(OK, message("password.change.ok")));
-        } else {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("password.change.nok")));
+        if (!PasswordUtils.isValid(request.getPassword())) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("password.valid.nok")));
         }
+        PinCodeDTO pinCode = pinCodeService.findByRequestId(request.getRequestId());
+        if (pinCode != null) {
+            if (pinCode.getPinCode().equals(request.getPinCode())) {
+                apsUserService.updatePassword(pinCode.getEmail(), request.getPassword());
+                return ResponseEntity.ok(new MessageResponse(OK, message("password.change.ok")));
+            }
+        }
+        return ResponseEntity.ok(new MessageResponse(ERROR, message("password.change.nok")));
     }
 
     @PostMapping("/change-password")
@@ -172,10 +160,10 @@ public class AuthController extends BaseController {
         if (!StringUtils.hasText(username)) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("email.required")));
         }
-        if (!userRepository.existsByUsername(username)) {
+        if (!apsUserService.exists(username)) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("email.notfound")));
         }
-        UserDTO userDTO = userRepository.findByUsername(username).get();
+        UserDTO userDTO = apsUserService.findByUsernameOrElseThrow(username);
         if (!encoder.matches(request.getCurrent(), userDTO.password())) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("password.old.mismatch")));
         }
@@ -183,10 +171,16 @@ public class AuthController extends BaseController {
         if (!isValidPassword) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("password.valid.nok")));
         }
-        userDTO.password(encoder.encode(request.getPassword()));
-        userRepository.save(userDTO);
+        apsUserService.updatePassword(username, request.getPassword());
         return ResponseEntity.ok(new MessageResponse(OK, message("password.change.ok")));
     }
+
+    /**
+     * -------------------------------------------------------------------------------------
+     * TO IMPLEMENT
+     * -------------------------------------------------------------------------------------
+     */
+
 
     @PostMapping("/change-personal-info")
     public ResponseEntity<?> changeUserInfo(@Valid @RequestBody ChangeUserInfoRequest request) {
