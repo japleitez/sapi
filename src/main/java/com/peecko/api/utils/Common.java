@@ -130,4 +130,16 @@ public abstract class Common {
         }
     }
 
+    public static String generateRandomDigitString(int length) {
+        Random random = new Random();
+        StringBuilder stringBuilder = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++) {
+            int digit = random.nextInt(10); // Generates a random digit between 0 and 9
+            stringBuilder.append(digit);
+        }
+
+        return stringBuilder.toString();
+    }
+
 }

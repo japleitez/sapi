@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Accessors(chain = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class PinCode {
+public class PinCodeDTO {
     @EqualsAndHashCode.Include
     String requestId;
     String pinCode;

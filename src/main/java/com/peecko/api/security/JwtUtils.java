@@ -14,11 +14,11 @@ public class JwtUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-    @Value("${peecko.api.jwtSecret}")
+    @Value("${app.api.jwtSecret}")
     private String jwtSecret;
 
-    /** 24 hours expiration = 1000 * 60 * 60 * 24 */
-    @Value("${peecko.api.jwtExpirationMs}")
+    /** 10 hours expiration = 36000000 = 1000 * 60 * 60 * 10 */
+    @Value("${app.api.jwtExpirationMs:36000000}")
     private int jwtExpirationMs;
 
     public String generateJwtToken(Authentication authentication) {

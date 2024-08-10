@@ -23,7 +23,7 @@ public class UserRepository {
 
     public static final HashMap<String, Set<DeviceDTO>> DEVICES = new HashMap<>();
 
-    public static final HashMap<String, PinCode> PIN_CODES = new HashMap<>();
+    public static final HashMap<String, PinCodeDTO> PIN_CODES = new HashMap<>();
 
     public static final Set<String> INVALID_JWT = new HashSet<>();
 
@@ -149,12 +149,12 @@ public class UserRepository {
     public String generatePinCode(String email) {
         cleanExpiredPinCodes();
         String requestId = UUID.randomUUID().toString();
-        PinCode pinCode = new PinCode();
-        pinCode.setRequestId(requestId);
-        pinCode.setPinCode("1234");
-        pinCode.setEmail(email);
-        pinCode.setExpireAt(LocalDateTime.now().plus(5, ChronoUnit.MINUTES));
-        PIN_CODES.put(requestId, pinCode);
+        PinCodeDTO pinCodeDTO = new PinCodeDTO();
+        pinCodeDTO.setRequestId(requestId);
+        pinCodeDTO.setPinCode("1234");
+        pinCodeDTO.setEmail(email);
+        pinCodeDTO.setExpireAt(LocalDateTime.now().plus(5, ChronoUnit.MINUTES));
+        PIN_CODES.put(requestId, pinCodeDTO);
         return requestId;
     }
 
@@ -162,13 +162,13 @@ public class UserRepository {
         cleanExpiredPinCodes();
         boolean isValid = false;
         if (PIN_CODES.containsKey(requestId)) {
-            PinCode saved = PIN_CODES.get(requestId);
+            PinCodeDTO saved = PIN_CODES.get(requestId);
             isValid = saved.getPinCode().equals(pinCode);
         }
         return isValid;
     }
 
-    public PinCode getPinCode(String requestId) {
+    public PinCodeDTO getPinCode(String requestId) {
         return PIN_CODES.get(requestId);
     }
 

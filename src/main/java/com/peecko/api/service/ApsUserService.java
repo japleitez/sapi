@@ -48,7 +48,7 @@ public class ApsUserService {
         return ApsUserMapper.toUserDTO(apsUser);
     }
 
-    public boolean authenticateUser(String username, String password) {
+    public boolean authenticate(String username, String password) {
         Optional<ApsUser> optionalApsUser = apsUserRepo.findByUsername(username);
         if (optionalApsUser.isPresent()) {
             ApsUser apsUser = optionalApsUser.get();
@@ -57,8 +57,17 @@ public class ApsUserService {
         return false;
     }
 
-    public boolean userExistsByUsername(String username) {
+    public boolean exists(String username) {
         return apsUserRepo.existsByUsername(username.toLowerCase());
+    }
+
+    public void activateUserAccount(String username) {
+        Optional<ApsUser> optional = apsUserRepo.findByUsername(username.toLowerCase());
+        if (optional.isPresent()) {
+            ApsUser apsUser = optional.get();
+            apsUser.setActive(true);
+            apsUserRepo.save(apsUser);
+        }
     }
 
     public UserDTO signUp(SignUpRequest request) {

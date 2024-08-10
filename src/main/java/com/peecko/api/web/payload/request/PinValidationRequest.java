@@ -9,5 +9,5 @@ import lombok.Setter;
 @Setter @Getter
 public class PinValidationRequest {
     @JsonProperty("pin-code")
-    String pinCode;
+    String code;
 }

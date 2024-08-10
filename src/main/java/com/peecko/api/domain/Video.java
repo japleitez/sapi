@@ -1,6 +1,7 @@
 package com.peecko.api.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.peecko.api.domain.enumeration.Intensity;
 import com.peecko.api.domain.enumeration.Language;
 import com.peecko.api.domain.enumeration.Player;
 import jakarta.persistence.*;

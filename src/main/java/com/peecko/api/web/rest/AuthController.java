@@ -1,15 +1,17 @@
 package com.peecko.api.web.rest;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import com.peecko.api.domain.dto.DeviceDTO;
 import com.peecko.api.domain.dto.Membership;
+import com.peecko.api.domain.dto.PinCodeDTO;
 import com.peecko.api.domain.dto.UserDTO;
+import com.peecko.api.domain.enumeration.Language;
 import com.peecko.api.repository.fake.UserRepository;
 import com.peecko.api.security.JwtUtils;
-import com.peecko.api.service.ApsDeviceService;
 import com.peecko.api.service.ApsUserService;
+import com.peecko.api.service.PinCodeService;
 import com.peecko.api.service.response.LoginResponse;
 import com.peecko.api.service.TokenBlacklistService;
 import com.peecko.api.utils.EmailUtils;
@@ -24,12 +26,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 import static com.peecko.api.utils.Common.*;
 
@@ -45,23 +46,23 @@ public class AuthController extends BaseController {
     final JwtUtils jwtUtils;
 
     private final TokenBlacklistService tokenBlacklistService;
-    private final ApsDeviceService apsDeviceService;
     private final ApsUserService apsUserService;
+    private final PinCodeService pinCodeService;
 
-    public AuthController(MessageSource messageSource, AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder encoder, JwtUtils jwtUtils, TokenBlacklistService tokenBlacklistService, ApsDeviceService apsDeviceService, ApsUserService apsUserService) {
+    public AuthController(MessageSource messageSource, AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder encoder, JwtUtils jwtUtils, TokenBlacklistService tokenBlacklistService, ApsUserService apsUserService, PinCodeService pinCodeService) {
         this.messageSource = messageSource;
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.jwtUtils = jwtUtils;
         this.tokenBlacklistService = tokenBlacklistService;
-        this.apsDeviceService = apsDeviceService;
         this.apsUserService = apsUserService;
+        this.pinCodeService = pinCodeService;
     }
 
     @PostMapping("/signin")
     public ResponseEntity<LoginResponse> signIn(@Valid @RequestBody SignInRequest request) {
-        boolean authenticated = apsUserService.authenticateUser(request.getUsername(), request.getPassword());
+        boolean authenticated = apsUserService.authenticate(request.getUsername(), request.getPassword());
         if (authenticated) {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -94,7 +95,7 @@ public class AuthController extends BaseController {
         if (!isValidName) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("name.valid.nok")));
         }
-        if (apsUserService.userExistsByUsername(signUpRequest.getUsername())) {
+        if (apsUserService.exists(signUpRequest.getUsername())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse(ERROR, message("email.duplicated")));
@@ -105,7 +106,40 @@ public class AuthController extends BaseController {
 
     @GetMapping("/installations")
     public ResponseEntity<?> getInstallations() {
-        return ResponseEntity.ok(new InstallationsResponse(MAX_ALLOWED, apsUserService.getDevicesByUsername(getUsername())));
+        List<DeviceDTO> list = apsUserService.getDevicesByUsername(getUsername());
+        return ResponseEntity.ok(new InstallationsResponse(MAX_ALLOWED, list));
+    }
+
+    @GetMapping("/active/{username}")
+    public ResponseEntity<?> activateUserAccount(@PathVariable String username) {
+        if (!StringUtils.hasText(username)) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("email.required")));
+        }
+        if (!apsUserService.exists(username)) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("email.notfound")));
+        }
+        apsUserService.activateUserAccount(username);
+        return ResponseEntity.ok(new MessageResponse(OK, message("email.verified.ok")));
+    }
+
+    @PostMapping("/pincode")
+    public ResponseEntity<?> generatePinCode(@Valid @RequestBody PinCodeRequest request) {
+        if (!apsUserService.exists(request.getUsername())) {
+            return ResponseEntity.badRequest().build();
+        }
+        UserDTO user = apsUserService.findByUsernameOrElseThrow(request.getUsername());
+        PinCodeDTO pinCode = pinCodeService.generatePinCodeForEmailValidation(request.getUsername(), user.language());
+        PinCodeResponse response = new PinCodeResponse(pinCode.getRequestId());
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/pincode/{requestId}")
+    public ResponseEntity<?> pinCodeValidate(@PathVariable String requestId, @Valid @RequestBody PinValidationRequest request) {
+        if (pinCodeService.isPinCodeValid(requestId, request.getCode())) {
+            return ResponseEntity.ok(new MessageResponse(OK, message("pin.valid.ok")));
+        } else {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("pin.valid.nok")));
+        }
     }
 
     /**
@@ -113,43 +147,7 @@ public class AuthController extends BaseController {
      * TO IMPLEMENT
      * -------------------------------------------------------------------------------------
      */
-    @GetMapping("/active/{username}")
-    public ResponseEntity<?> verifyAccount(@PathVariable String username) {
-        if (!StringUtils.hasText(username)) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("email.required")));
-        }
-        if (!userRepository.existsByUsername(username)) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("email.notfound")));
-        }
-        boolean verified = !username.contains("not.verified@");
-        if (verified) {
-            UserDTO userDTO = userRepository.findByUsername(username).get();
-            userDTO.verified(true);
-            userRepository.save(userDTO);
-            return ResponseEntity.ok(new MessageResponse(OK, message("email.verified.ok")));
-        } else {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("email.verified.nok")));
-        }
-    }
 
-    @PostMapping("/pincode")
-    public ResponseEntity<?> pinCode(@Valid @RequestBody PinCodeRequest request) {
-        if (!userRepository.existsByUsername(request.getUsername())) {
-            return ResponseEntity.badRequest().build();
-        }
-        String requestId = userRepository.generatePinCode(request.getUsername());
-        PinCodeResponse response = new PinCodeResponse(requestId);
-        return ResponseEntity.ok(response);
-    }
-
-    @PutMapping("/pincode/{requestId}")
-    public ResponseEntity<?> pinCodeValidate(@PathVariable String requestId, @Valid @RequestBody PinValidationRequest request) {
-        if (userRepository.isPinCodeValid(requestId, request.getPinCode())) {
-            return ResponseEntity.ok(new MessageResponse(OK, message("pin.valid.ok")));
-        } else {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("pin.valid.nok")));
-        }
-    }
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
