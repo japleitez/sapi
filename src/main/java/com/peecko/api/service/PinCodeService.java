@@ -1,12 +1,14 @@
 package com.peecko.api.service;
 
 import com.peecko.api.domain.PinCode;
-import com.peecko.api.domain.dto.Language;
 import com.peecko.api.domain.dto.PinCodeDTO;
+import com.peecko.api.domain.dto.UserDTO;
+import com.peecko.api.domain.enumeration.Verification;
 import com.peecko.api.domain.mapper.PinCodeMapper;
 import com.peecko.api.repository.PinCodeRepo;
 import com.peecko.api.service.context.EmailContext;
 import com.peecko.api.utils.Common;
+import com.peecko.api.web.payload.request.PinCodeRequest;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,12 +26,14 @@ public class PinCodeService {
     private final EmailService emailService;
     private final MessageSource messageSource;
     private final TemplateEngine templateEngine;
+    private final ApsUserService apsUserService;
 
-    public PinCodeService(PinCodeRepo pinCodeRepo, EmailService emailService, MessageSource messageSource, TemplateEngine templateEngine) {
+    public PinCodeService(PinCodeRepo pinCodeRepo, EmailService emailService, MessageSource messageSource, TemplateEngine templateEngine, ApsUserService apsUserService) {
         this.pinCodeRepo = pinCodeRepo;
         this.emailService = emailService;
         this.messageSource = messageSource;
         this.templateEngine = templateEngine;
+        this.apsUserService = apsUserService;
     }
 
     public PinCodeDTO findByRequestId(String requestId) {
@@ -38,16 +42,16 @@ public class PinCodeService {
     }
 
     @Transactional
-    public PinCodeDTO generatePinCode(String email, String language) {
+    public PinCodeDTO generatePinCode(PinCodeRequest request, Verification verification) {
+        UserDTO user = apsUserService.findByUsernameOrElseThrow(request.getUsername());
         PinCode pinCode = new PinCode();
-        pinCode.setEmail(email.toLowerCase());
-        pinCode.setAgencyEmail("agencyEmail");
-        pinCode.setLanguage(language);
+        pinCode.setLanguage(user.language());
+        pinCode.setEmail(request.getUsername().toLowerCase());
         pinCode.setCode(Common.generateRandomDigitString(4));
         pinCode.setExpireAt(LocalDateTime.now().plusMinutes(10));
+        pinCode.setVerification(verification);
         pinCodeRepo.save(pinCode);
-        TransactionSynchronizationManager.registerSynchronization(new NotifyPinCodeForEmailValidation(pinCode));
-
+        TransactionSynchronizationManager.registerSynchronization(new NotifyPinCode(pinCode));
         return PinCodeMapper.pinCodeDTO(pinCode);
     }
 
@@ -60,9 +64,9 @@ public class PinCodeService {
         return code.equals(pinCode.getCode());
     }
 
-    private class NotifyPinCodeForEmailValidation implements TransactionSynchronization {
+    private class NotifyPinCode implements TransactionSynchronization {
         private final PinCode pinCode;
-        public NotifyPinCodeForEmailValidation(PinCode pinCode) {
+        public NotifyPinCode(PinCode pinCode) {
             this.pinCode = pinCode;
         }
 
@@ -75,7 +79,6 @@ public class PinCodeService {
         private EmailContext buildEmailContext() {
             EmailContext context =  new EmailContext();
             context.setTo(pinCode.getEmail());
-            context.setFrom(pinCode.getAgencyEmail());
             context.setSubject(resolveSubject());
             context.setText(resolveText());
             return context;
@@ -84,7 +87,7 @@ public class PinCodeService {
         private String resolveSubject() {
             Locale locale = new Locale(pinCode.getLanguage());
             Object[] args = new Object[] {};
-            return messageSource.getMessage("pin.code.email.subject", args, locale);
+            return messageSource.getMessage("pin.code.email.reset.password.subject", args, locale);
         }
 
         private String resolveText() {
@@ -96,11 +99,11 @@ public class PinCodeService {
         }
 
         private String getTemplateName() {
-            return switch (pinCode.getLanguage()) {
-                case "FR" -> "pin_code_email_fr.html";
-                case "DE" -> "pin_code_email_de.html";
-                case "ES" -> "pin_code_email_es.html";
-                default -> "pin_code_email.html";
+            return switch (pinCode.getLanguage().toUpperCase()) {
+                case "FR" -> "pin_code_email_reset_password_fr.html";
+                case "DE" -> "pin_code_email_reset_password_de.html";
+                case "ES" -> "pin_code_email_reset_password_es.html";
+                default -> "pin_code_email_reset_password.html";
             };
         }
     }

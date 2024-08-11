@@ -1,5 +1,6 @@
 package com.peecko.api.domain;
 
+import com.peecko.api.domain.enumeration.Verification;
 import org.hibernate.annotations.GenericGenerator;
 import jakarta.persistence.*;
 
@@ -37,6 +38,8 @@ public class PinCode {
 
     @Column(name = "expire_at", nullable = false)
     LocalDateTime expireAt;
+
+    Verification verification;
 
     public UUID getRequestId() {
         return requestId;
@@ -92,5 +95,13 @@ public class PinCode {
 
     public void setExpireAt(LocalDateTime expireAt) {
         this.expireAt = expireAt;
+    }
+
+    public Verification getVerification() {
+        return verification;
+    }
+
+    public void setVerification(Verification verification) {
+        this.verification = verification;
     }
 }

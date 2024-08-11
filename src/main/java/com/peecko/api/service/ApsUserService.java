@@ -5,14 +5,16 @@ import com.peecko.api.domain.ApsUser;
 import com.peecko.api.domain.Customer;
 import com.peecko.api.domain.dto.DeviceDTO;
 import com.peecko.api.domain.dto.UserDTO;
+import com.peecko.api.domain.enumeration.Language;
 import com.peecko.api.domain.mapper.ApsDeviceMapper;
 import com.peecko.api.domain.mapper.ApsUserMapper;
 import com.peecko.api.repository.ApsMembershipRepo;
 import com.peecko.api.repository.ApsUserRepo;
 import com.peecko.api.repository.CustomerRepo;
-import com.peecko.api.service.response.LoginResponse;
+import com.peecko.api.service.response.UserProfileResponse;
 import com.peecko.api.utils.Common;
 import com.peecko.api.utils.NameUtils;
+import com.peecko.api.web.payload.request.UpdateUserRequest;
 import com.peecko.api.web.payload.request.SignInRequest;
 import com.peecko.api.web.payload.request.SignOutRequest;
 import com.peecko.api.web.payload.request.SignUpRequest;
@@ -21,10 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,6 +60,11 @@ public class ApsUserService {
         return apsUserRepo.existsByUsername(username.toLowerCase());
     }
 
+    public Locale getUserLocale(String username) {
+        Language language = apsUserRepo.findByUsername(username.toLowerCase()).map(ApsUser::getLanguage).orElse(Language.EN);
+        return Locale.forLanguageTag(language.name());
+    }
+
     public void activateUser(String username) {
         Optional<ApsUser> optional = apsUserRepo.findByUsername(username.toLowerCase());
         if (optional.isPresent()) {
@@ -81,7 +85,7 @@ public class ApsUserService {
     }
 
     @Transactional
-    public LoginResponse signIn(SignInRequest request, String jwt) {
+    public UserProfileResponse signIn(SignInRequest request, String jwt) {
         Optional<ApsUser> optional = apsUserRepo.findByUsername(request.getUsername());
         if (optional.isPresent()) {
             ApsUser apsUser = optional.get();
@@ -90,13 +94,21 @@ public class ApsUserService {
             apsUserRepo.save(apsUser);
             return buildLoginResponse(apsUser);
         }
-        return new LoginResponse();
+        return new UserProfileResponse();
     }
 
-    private LoginResponse buildLoginResponse(ApsUser apsUser) {
+    public UserProfileResponse getProfile(String username) {
+        UserProfileResponse notFound = new UserProfileResponse();
+        notFound.setUsername(username);
+        return apsUserRepo.findByUsername(username.toLowerCase())
+                .map(this::buildLoginResponse)
+                .orElse(notFound);
+    }
+
+    private UserProfileResponse buildLoginResponse(ApsUser apsUser) {
         int currentPeriod = Common.currentYearMonth();
         int deviceCount = apsUser.getApsDevices().size();
-        LoginResponse response = new LoginResponse();
+        UserProfileResponse response = new UserProfileResponse();
         response.setToken(apsUser.getJwt());
         response.setName(apsUser.getName());
         response.setUsername(apsUser.getUsername());
@@ -141,11 +153,20 @@ public class ApsUserService {
         return new ArrayList<>();
     }
 
-    public void updatePassword(String username, String password) {
+    public void updateUserPassword(String username, String password) {
         Optional<ApsUser> optional = apsUserRepo.findByUsername(username.toLowerCase());
         if (optional.isPresent()) {
             ApsUser apsUser = optional.get();
             apsUser.password(passwordEncoder.encode(password));
+            apsUserRepo.save(apsUser);
+        }
+    }
+
+    public void updateUser(UpdateUserRequest request) {
+        Optional<ApsUser> optional = apsUserRepo.findByUsername(request.getUsername().toLowerCase());
+        if (optional.isPresent()) {
+            ApsUser apsUser = optional.get();
+            apsUser.name(request.getName());
             apsUserRepo.save(apsUser);
         }
     }

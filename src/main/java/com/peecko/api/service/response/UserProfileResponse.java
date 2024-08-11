@@ -6,13 +6,11 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 import static com.peecko.api.utils.Common.MAX_ALLOWED;
 
 @Data
 @Setter @Getter
-public class LoginResponse {
+public class UserProfileResponse {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String token;

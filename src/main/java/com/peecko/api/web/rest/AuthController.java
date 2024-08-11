@@ -1,23 +1,21 @@
 package com.peecko.api.web.rest;
 
-import java.util.List;
-import java.util.Locale;
-
 import com.peecko.api.domain.dto.DeviceDTO;
-import com.peecko.api.domain.dto.Membership;
 import com.peecko.api.domain.dto.PinCodeDTO;
 import com.peecko.api.domain.dto.UserDTO;
-import com.peecko.api.repository.fake.UserRepository;
+import com.peecko.api.domain.enumeration.Verification;
 import com.peecko.api.security.JwtUtils;
 import com.peecko.api.service.ApsUserService;
 import com.peecko.api.service.PinCodeService;
-import com.peecko.api.service.response.LoginResponse;
 import com.peecko.api.service.TokenBlacklistService;
+import com.peecko.api.service.response.UserProfileResponse;
 import com.peecko.api.utils.EmailUtils;
 import com.peecko.api.utils.NameUtils;
 import com.peecko.api.utils.PasswordUtils;
 import com.peecko.api.web.payload.request.*;
-import com.peecko.api.web.payload.response.*;
+import com.peecko.api.web.payload.response.InstallationsResponse;
+import com.peecko.api.web.payload.response.MessageResponse;
+import com.peecko.api.web.payload.response.PinCodeResponse;
 import jakarta.validation.Valid;
 import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +28,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Locale;
+
 import static com.peecko.api.utils.Common.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -37,68 +38,65 @@ import static com.peecko.api.utils.Common.*;
 @RequestMapping("/api/auth")
 public class AuthController extends BaseController {
 
-    private final MessageSource messageSource;
-    private final AuthenticationManager authenticationManager;
-    private final UserRepository userRepository;
-    private final PasswordEncoder encoder;
     private final JwtUtils jwtUtils;
-    private final TokenBlacklistService tokenBlacklistService;
+    private final PasswordEncoder encoder;
+    private final MessageSource messageSource;
     private final ApsUserService apsUserService;
     private final PinCodeService pinCodeService;
+    private final TokenBlacklistService tokenBlacklistService;
+    private final AuthenticationManager authenticationManager;
 
-    public AuthController(MessageSource messageSource, AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder encoder, JwtUtils jwtUtils, TokenBlacklistService tokenBlacklistService, ApsUserService apsUserService, PinCodeService pinCodeService) {
-        this.messageSource = messageSource;
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.encoder = encoder;
+    public AuthController(JwtUtils jwtUtils, PasswordEncoder encoder, MessageSource messageSource, ApsUserService apsUserService, PinCodeService pinCodeService, TokenBlacklistService tokenBlacklistService, AuthenticationManager authenticationManager) {
         this.jwtUtils = jwtUtils;
-        this.tokenBlacklistService = tokenBlacklistService;
+        this.encoder = encoder;
+        this.messageSource = messageSource;
         this.apsUserService = apsUserService;
         this.pinCodeService = pinCodeService;
+        this.tokenBlacklistService = tokenBlacklistService;
+        this.authenticationManager = authenticationManager;
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<LoginResponse> signIn(@Valid @RequestBody SignInRequest request) {
+    public ResponseEntity<UserProfileResponse> signIn(@Valid @RequestBody SignInRequest request) {
         boolean authenticated = apsUserService.authenticate(request.getUsername(), request.getPassword());
         if (authenticated) {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = jwtUtils.generateJwtToken(authentication);
-            LoginResponse response = apsUserService.signIn(request, jwt);
+            UserProfileResponse response = apsUserService.signIn(request, jwt);
             return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.ok(new LoginResponse());
+            return ResponseEntity.ok(new UserProfileResponse());
         }
     }
 
     @PostMapping("/signout")
-    public ResponseEntity<?> signOut(@Valid @RequestBody SignOutRequest signOutRequest, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> signOut(@Valid @RequestBody SignOutRequest request, @RequestHeader("Authorization") String authHeader) {
         tokenBlacklistService.invalidateToken(authHeader);
-        apsUserService.signOut(signOutRequest);
+        apsUserService.signOut(request);
         return ResponseEntity.ok(new MessageResponse(OK, message("user.logoff.ok")));
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
-        boolean isValidEmail = EmailUtils.isValid(signUpRequest.getUsername());
+    public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest request) {
+        boolean isValidEmail = EmailUtils.isValid(request.getUsername());
         if (!isValidEmail) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("email.valid.nok")));
         }
-        boolean isValidPassword = PasswordUtils.isValid(signUpRequest.getPassword());
+        boolean isValidPassword = PasswordUtils.isValid(request.getPassword());
         if (!isValidPassword) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("password.valid.ok")));
         }
-        boolean isValidName = NameUtils.isValid(signUpRequest.getName());
+        boolean isValidName = NameUtils.isValid(request.getName());
         if (!isValidName) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("name.valid.nok")));
         }
-        if (apsUserService.exists(signUpRequest.getUsername())) {
+        if (apsUserService.exists(request.getUsername())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse(ERROR, message("email.duplicated")));
         }
-        UserDTO userDTO = apsUserService.signUp(signUpRequest);
-        return ResponseEntity.ok(new MessageResponse(OK, message("user.signup.ok", userDTO)));
+        return ResponseEntity.ok(new MessageResponse(OK, message("user.signup.ok", request.getLanguage())));
     }
 
     @GetMapping("/installations")
@@ -124,8 +122,7 @@ public class AuthController extends BaseController {
         if (!apsUserService.exists(request.getUsername())) {
             return ResponseEntity.badRequest().build();
         }
-        UserDTO user = apsUserService.findByUsernameOrElseThrow(request.getUsername());
-        PinCodeDTO pinCode = pinCodeService.generatePinCode(request.getUsername(), user.language());
+        PinCodeDTO pinCode = pinCodeService.generatePinCode(request, Verification.RESET_PASSWORD);
         PinCodeResponse response = new PinCodeResponse(pinCode.getRequestId());
         return ResponseEntity.ok(response);
     }
@@ -147,7 +144,7 @@ public class AuthController extends BaseController {
         PinCodeDTO pinCode = pinCodeService.findByRequestId(request.getRequestId());
         if (pinCode != null) {
             if (pinCode.getPinCode().equals(request.getPinCode())) {
-                apsUserService.updatePassword(pinCode.getEmail(), request.getPassword());
+                apsUserService.updateUserPassword(pinCode.getEmail(), request.getPassword());
                 return ResponseEntity.ok(new MessageResponse(OK, message("password.change.ok")));
             }
         }
@@ -155,7 +152,7 @@ public class AuthController extends BaseController {
     }
 
     @PostMapping("/change-password")
-    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+    public ResponseEntity<?> changePassword(@Valid @RequestBody UpdatePasswordRequest request) {
         String username = request.getUsername();
         if (!StringUtils.hasText(username)) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("email.required")));
@@ -171,40 +168,28 @@ public class AuthController extends BaseController {
         if (!isValidPassword) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("password.valid.nok")));
         }
-        apsUserService.updatePassword(username, request.getPassword());
+        apsUserService.updateUserPassword(username, request.getPassword());
         return ResponseEntity.ok(new MessageResponse(OK, message("password.change.ok")));
     }
 
-    /**
-     * -------------------------------------------------------------------------------------
-     * TO IMPLEMENT
-     * -------------------------------------------------------------------------------------
-     */
-
-
     @PostMapping("/change-personal-info")
-    public ResponseEntity<?> changeUserInfo(@Valid @RequestBody ChangeUserInfoRequest request) {
+    public ResponseEntity<?> changeUserInfo(@Valid @RequestBody UpdateUserRequest request) {
         if (!StringUtils.hasText(request.getUsername())) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("email.required")));
         }
-        if (!userRepository.existsByUsername(request.getUsername())) {
+        if (!apsUserService.exists(request.getUsername())) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("email.notfound")));
         }
-        UserDTO userDTO = userRepository.findByUsername(request.getUsername()).get();
-        boolean isValid = NameUtils.isValid(request.getName());
-        if (isValid) {
-            userDTO.name(request.getName());
-            userRepository.save(userDTO);
-            return ResponseEntity.ok(new MessageResponse(OK, message("user.info.change.ok")));
-        } else {
+        if (!NameUtils.isValid(request.getName())) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("name.valid.nok")));
         }
+        apsUserService.updateUser(request);
+        return ResponseEntity.ok(new MessageResponse(OK, message("user.info.change.ok")));
     }
 
     @PostMapping("/password/validate")
     public ResponseEntity<?> validatePassword(@Valid @RequestBody PasswordValidationRequest request) {
-        boolean isValid = PasswordUtils.isValid(request.getPassword());
-        if (isValid) {
+        if (PasswordUtils.isValid(request.getPassword())) {
             return ResponseEntity.ok(new MessageResponse(OK, message("password.valid.ok")));
         } else {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("password.valid.nok")));
@@ -213,8 +198,7 @@ public class AuthController extends BaseController {
 
     @PostMapping("/username/validate")
     public ResponseEntity<?> validateUsername(@Valid @RequestBody EmailValidationRequest request) {
-        boolean isValid = EmailUtils.isValid(request.getUsername());
-        if (isValid) {
+        if (EmailUtils.isValid(request.getUsername())) {
             return ResponseEntity.ok(new MessageResponse(OK, message("email.valid.ok")));
         } else {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("email.valid.nok")));
@@ -223,8 +207,7 @@ public class AuthController extends BaseController {
 
     @PostMapping("/name/validate")
     public ResponseEntity<?> validateName(@Valid @RequestBody NameValidationRequest request) {
-        boolean isValid = NameUtils.isValid(request.getName());
-        if (isValid) {
+        if (NameUtils.isValid(request.getName())) {
             return ResponseEntity.ok(new MessageResponse(OK, message("name.valid.ok")));
         } else {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("name.valid.nok")));
@@ -233,47 +216,9 @@ public class AuthController extends BaseController {
 
     @PostMapping("/profile")
     public ResponseEntity<?> getProfile(@Valid @RequestBody EmailValidationRequest request) {
-        return ResponseEntity.ok(privateProfile(request.getUsername()));
+        UserProfileResponse response = apsUserService.getProfile(request.getUsername());
+        return ResponseEntity.ok(response);
     }
-
-    private LoginResponse privateProfile(String username) {
-        LoginResponse notFound = new LoginResponse();
-        notFound.setUsername(username);
-        notFound.setEmailVerified(false);
-        notFound.setMembershipActivated(false);
-        return userRepository.findByUsername(username).map(this::userToLogin).orElse(notFound);
-    }
-
-    private LoginResponse userToLogin(UserDTO userDTO) {
-        int devicesCount = userRepository.getUserDevices(userDTO.username()).size();
-        LoginResponse login = new LoginResponse();
-        login.setUsername(userDTO.username());
-        login.setName(userDTO.name());
-        login.setEmailVerified(userDTO.verified());
-        login.setDevicesCount(devicesCount);
-        login.setDevicesExceeded(UserRepository.isInstallationExceeded(devicesCount));
-        if (userDTO.membership() != null) {
-            Membership membership = userDTO.membership();
-            login.setMembership(membership.getLicense());
-            login.setMembershipSponsor(membership.getSponsor());
-            login.setMembershipSponsorLogo(membership.getLogo());
-            login.setMembershipExpiration(membership.getExpiration());
-            login.setMembershipActivated(UserRepository.isActiveLicense(membership.getLicense()));
-        } else {
-
-        }
-        return login;
-    }
-
-    @PutMapping("/deactivate/{license}")
-    public ResponseEntity<?> deactivateMembership(@PathVariable String license) {
-        if (!StringUtils.hasLength(license) && license.length() != 20) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("membership.valid.nok")));
-        }
-        UserRepository.deactivateLicense(license);
-        return ResponseEntity.ok(new MessageResponse(OK, message("membership.deactivate.ok")));
-    }
-
 
     private String getUsername() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -281,12 +226,11 @@ public class AuthController extends BaseController {
     }
 
     private String message(String code) {
-        Locale locale = geActiveLocale(userRepository);
+        Locale locale = apsUserService.getUserLocale(getUsername());
         return messageSource.getMessage(code, null, locale);
     }
 
-    private String message(String code, UserDTO userDTO) {
-        String lang = resolveLanguage(userDTO.language());
+    private String message(String code, String lang) {
         Locale locale = Locale.forLanguageTag(lang);
         return messageSource.getMessage(code, null, locale);
     }
