@@ -1,12 +1,16 @@
 package com.peecko.api.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import java.io.Serializable;
 
 @Entity
-@Table(name = "user_favorite_video")
-public class UserFavoriteVideo implements Serializable {
+@Table(name = "notification_item")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class NotificationItem implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -14,14 +18,16 @@ public class UserFavoriteVideo implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")
     @Column(name = "id")
+
     private Long id;
 
-    @Column(name = "aps_user_id")
+    @NotNull
+    @Column(name = "aps_user_id", nullable = false)
     private Long apsUserId;
 
-    @ManyToOne
-    @JoinColumn(name = "video_id", nullable = false)
-    private Video video;
+    @NotNull
+    @Column(name = "notification_id", nullable = false)
+    private Long NotificationId;
 
     public Long getId() {
         return id;
@@ -39,12 +45,11 @@ public class UserFavoriteVideo implements Serializable {
         this.apsUserId = apsUserId;
     }
 
-    public Video getVideo() {
-        return video;
+    public Long getNotificationId() {
+        return NotificationId;
     }
 
-    public void setVideo(Video video) {
-        this.video = video;
+    public void setNotificationId(Long notificationId) {
+        NotificationId = notificationId;
     }
-
 }

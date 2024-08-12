@@ -22,7 +22,7 @@ public class TodayService {
     public List<VideoDTO> getTodayVideos(Long userId) {
         List<Video> videos = videoRepo.findAll();
         favoriteService.resolveUserFavoriteVideos(userId, videos);
-        return videos.stream().map(VideoMapper::toVideoDTO).collect(Collectors.toList());
+        return videos.stream().map(VideoMapper::videoDTO).collect(Collectors.toList());
     }
 
 }

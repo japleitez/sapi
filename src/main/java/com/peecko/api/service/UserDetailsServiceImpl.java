@@ -19,7 +19,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserDTO userDTO = apsUserService.findByUsernameOrElseThrow(username);
-        return UserDTOMapper.toUserDetails(userDTO);
+        return UserDTOMapper.userDetails(userDTO);
     }
 
 

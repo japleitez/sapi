@@ -1,2 +1,3 @@
-- add jwt string to apsUser
-- add customer_id to apsMembership
+- add jwt string to apsUser or create a jwt table with the purpose to invalidate (logout)
+- add agency_id, customer_id to apsMembership (we need to know the customer to retrieve notifications)
+- when the user activate his license we can save the license in the user's profile

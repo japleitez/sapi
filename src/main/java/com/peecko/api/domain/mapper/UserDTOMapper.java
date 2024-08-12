@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class UserDTOMapper {
 
-    public static UserDetails toUserDetails(UserDTO userDTO) {
+    public static UserDetails userDetails(UserDTO userDTO) {
         List<GrantedAuthority> authorities = userDTO
                 .roles()
                 .stream()

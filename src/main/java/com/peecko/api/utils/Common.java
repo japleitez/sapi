@@ -6,9 +6,7 @@ import com.peecko.api.domain.dto.VideoDTO;
 import com.peecko.api.domain.enumeration.Language;
 import com.peecko.api.web.payload.request.SignInRequest;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -82,6 +80,19 @@ public abstract class Common {
     }
 
     static final DateTimeFormatter CUSTOM_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    public static String instantAsString(Instant time) {
+        ZoneId zoneId = ZoneId.systemDefault();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(time, zoneId);
+        return localDateTime.format(formatter);
+    }
+
+    public static String localDateAsString(LocalDate localDate) {
+        LocalDateTime localDateTime = localDate.atTime(LocalTime.MIDNIGHT);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return localDateTime.format(formatter);
+    }
 
     public static DeviceDTO mapToDevice(SignInRequest r) {
         DeviceDTO d = new DeviceDTO();

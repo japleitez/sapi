@@ -4,7 +4,7 @@ import com.peecko.api.domain.ApsUser;
 import com.peecko.api.domain.dto.UserDTO;
 
 public class ApsUserMapper {
-    public static UserDTO toUserDTO(ApsUser apsUser) {
+    public static UserDTO userDTO(ApsUser apsUser) {
         if (apsUser == null) {
             return null;
         }

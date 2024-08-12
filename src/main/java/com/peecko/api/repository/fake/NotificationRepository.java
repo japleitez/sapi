@@ -1,6 +1,6 @@
 package com.peecko.api.repository.fake;
 
-import com.peecko.api.domain.dto.Notification;
+import com.peecko.api.domain.dto.NotificationDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -9,7 +9,7 @@ import java.util.List;
 
 @Component
 public class NotificationRepository {
-    public static final List<Notification> DATA = new ArrayList<>();
+    public static final List<NotificationDTO> DATA = new ArrayList<>();
 
     public static final String TITLE_1 = "Weloner Marathon Luxembourg ";
     public static final String TITLE_2 = "Meet Matheo, New Health Coach, We are boarding!";
@@ -20,18 +20,18 @@ public class NotificationRepository {
     public static final String VIDEO_1 = "http://path/filename.jpg";
     public static final String VIDEO_2 = "http://path/filename.jpg";
 
-    public static final HashMap<String, List<Notification>> NOTIFICATIONS =  new HashMap<>();
+    public static final HashMap<String, List<NotificationDTO>> NOTIFICATIONS =  new HashMap<>();
 
     private void initUserNotification(String username) {
         if (!NOTIFICATIONS.containsKey(username)) {
-            List<Notification> news = new ArrayList<>();
-            news.add(new Notification(1L, TITLE_1, MESSAGE_1, IMAGE_1, VIDEO_1, "07 Dec 2023", false));
-            news.add(new Notification(2L, TITLE_2, MESSAGE_2, IMAGE_2, VIDEO_2, "05 Dec 2023", false));
+            List<NotificationDTO> news = new ArrayList<>();
+            news.add(new NotificationDTO(1L, TITLE_1, MESSAGE_1, IMAGE_1, VIDEO_1, "07 Dec 2023", false));
+            news.add(new NotificationDTO(2L, TITLE_2, MESSAGE_2, IMAGE_2, VIDEO_2, "05 Dec 2023", false));
             NOTIFICATIONS.put(username, news);
         }
     }
 
-    public List<Notification> getNotifications(String username) {
+    public List<NotificationDTO> getNotifications(String username) {
         initUserNotification(username);
         return NOTIFICATIONS.get(username);
     }
@@ -45,8 +45,8 @@ public class NotificationRepository {
                  .ifPresent(this::setNotificationAsViewed);
     }
 
-    private void setNotificationAsViewed(Notification notification) {
-        notification.setViewed(true);
+    private void setNotificationAsViewed(NotificationDTO notificationDTO) {
+        notificationDTO.setViewed(true);
     }
 
 }

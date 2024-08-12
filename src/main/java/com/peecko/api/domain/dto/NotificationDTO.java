@@ -9,12 +9,12 @@ import lombok.experimental.Accessors;
 @Setter
 @Getter
 @Accessors(chain = true)
-public class Notification {
+public class NotificationDTO {
     private Long id;
     private String title;
     private String message;
     private String image;
     private String video;
     private String date;
-    private Boolean viewed;
+    private Boolean viewed = false;
 }

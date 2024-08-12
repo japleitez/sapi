@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class VideoMapper {
-    public static VideoDTO toVideoDTO(Video video) {
+    public static VideoDTO videoDTO(Video video) {
         if (video == null) {
             return null;
         }

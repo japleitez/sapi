@@ -44,7 +44,7 @@ public class ApsUserService {
 
     public UserDTO findByUsernameOrElseThrow(String username) {
         ApsUser apsUser = apsUserRepo.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found " + username));
-        return ApsUserMapper.toUserDTO(apsUser);
+        return ApsUserMapper.userDTO(apsUser);
     }
 
     public boolean authenticate(String username, String password) {
@@ -81,7 +81,7 @@ public class ApsUserService {
         apsUser.language(Common.toLanguage(request.getLanguage()));
         apsUser.password(passwordEncoder.encode(request.getPassword()));
         apsUserRepo.save(apsUser);
-        return ApsUserMapper.toUserDTO(apsUser);
+        return ApsUserMapper.userDTO(apsUser);
     }
 
     @Transactional
