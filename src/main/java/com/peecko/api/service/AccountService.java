@@ -38,6 +38,21 @@ public class AccountService {
         this.helpItemRepo = helpItemRepo;
     }
 
+    public boolean activateUserLicense(String username, Integer period, String license) {
+        boolean activated = false;
+        Optional<ApsMembership> optApsMembership = apsMembershipRepo.findByUsernameAndPeriodAndLicense(username, period, license);
+        if (optApsMembership.isPresent()) {
+            Optional<ApsUser> optApsUser = apsUserRepo.findByUsername(username);
+            if (optApsUser.isPresent()) {
+                ApsUser apsUser = optApsUser.get();
+                apsUser.license(license);
+                apsUserRepo.save(apsUser);
+                activated = true;
+            }
+        }
+        return activated;
+    }
+
     public List<NotificationDTO> getNotifications(String username) {
         Optional<ApsUser> optUser = apsUserRepo.findByUsername(username);
         if (optUser.isPresent()) {
