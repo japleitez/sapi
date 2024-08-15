@@ -34,6 +34,12 @@ public class VideoMapper {
         return dto;
     }
 
+    public static VideoDTO favoriteVideoDTO(Video video) {
+        VideoDTO dto = videoDTO(video);
+        dto.setFavorite(true);
+        return dto;
+    }
+
     private static List<String> convertToList(String values) {
         return StringUtils.hasText(values)? Arrays.asList(values.split(",")) : new ArrayList<>();
     }

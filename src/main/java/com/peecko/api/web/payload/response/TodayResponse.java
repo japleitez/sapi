@@ -12,6 +12,6 @@ import java.util.List;
 @AllArgsConstructor @Setter @Getter
 public class TodayResponse {
     private String greeting;
-    private List<String> tags;
     private List<VideoDTO> videos;
+    private List<String> tags;
 }
