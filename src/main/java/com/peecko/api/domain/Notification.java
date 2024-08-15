@@ -1,7 +1,7 @@
 package com.peecko.api.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.peecko.api.domain.enumeration.Language;
+import com.peecko.api.domain.enumeration.Lang;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.Cache;
@@ -37,7 +37,7 @@ public class Notification implements Serializable {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "language", nullable = false)
-    private Language language;
+    private Lang lang;
 
     @Column(name = "image_url")
     private String imageUrl;
@@ -107,17 +107,17 @@ public class Notification implements Serializable {
         this.message = message;
     }
 
-    public Language getLanguage() {
-        return this.language;
+    public Lang getLanguage() {
+        return this.lang;
     }
 
-    public Notification language(Language language) {
-        this.setLanguage(language);
+    public Notification language(Lang lang) {
+        this.setLanguage(lang);
         return this;
     }
 
-    public void setLanguage(Language language) {
-        this.language = language;
+    public void setLanguage(Lang lang) {
+        this.lang = lang;
     }
 
     public String getImageUrl() {

@@ -2,14 +2,13 @@ package com.peecko.api.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import java.io.Serializable;
 
 @Entity
-@Table(name = "notification_item")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Table(name = "notification_item", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"apsUserId", "notificationId"})
+})
 public class NotificationItem implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -27,7 +26,7 @@ public class NotificationItem implements Serializable {
 
     @NotNull
     @Column(name = "notification_id", nullable = false)
-    private Long NotificationId;
+    private Long notificationId;
 
     public Long getId() {
         return id;
@@ -46,10 +45,10 @@ public class NotificationItem implements Serializable {
     }
 
     public Long getNotificationId() {
-        return NotificationId;
+        return notificationId;
     }
 
     public void setNotificationId(Long notificationId) {
-        NotificationId = notificationId;
+        this.notificationId = notificationId;
     }
 }

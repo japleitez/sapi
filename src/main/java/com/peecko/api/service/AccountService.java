@@ -1,7 +1,10 @@
 package com.peecko.api.service;
 
 import com.peecko.api.domain.*;
+import com.peecko.api.domain.dto.Help;
 import com.peecko.api.domain.dto.NotificationDTO;
+import com.peecko.api.domain.enumeration.Lang;
+import com.peecko.api.domain.mapper.HelpItemMapper;
 import com.peecko.api.domain.mapper.NotificationMapper;
 import com.peecko.api.repository.*;
 import com.peecko.api.utils.Common;
@@ -17,16 +20,22 @@ import java.util.stream.Collectors;
 @Service
 public class AccountService {
 
-    private final ApsUserRepo apsUserRepo;
-    private final NotificationRepo notificationRepo;
-    private final ApsMembershipRepo apsMembershipRepo;
-    private final NotificationItemRepo notificationItemRepo;
+    final ApsUserRepo apsUserRepo;
+    final NotificationRepo notificationRepo;
+    final ApsMembershipRepo apsMembershipRepo;
+    final NotificationItemRepo notificationItemRepo;
+    final NotificationItemService notificationItemService;
+    final LabelRepo labelRepo;
+    final HelpItemRepo helpItemRepo;
 
-    public AccountService(ApsUserRepo apsUserRepo, NotificationItemRepo notificationItemRepo, NotificationRepo notificationRepo, ApsMembershipRepo apsMembershipRepo) {
+    public AccountService(ApsUserRepo apsUserRepo, NotificationItemRepo notificationItemRepo, NotificationRepo notificationRepo, ApsMembershipRepo apsMembershipRepo, NotificationItemService notificationItemService, LabelRepo labelRepo, HelpItemRepo helpItemRepo) {
         this.apsUserRepo = apsUserRepo;
         this.notificationRepo = notificationRepo;
         this.apsMembershipRepo = apsMembershipRepo;
         this.notificationItemRepo = notificationItemRepo;
+        this.notificationItemService = notificationItemService;
+        this.labelRepo = labelRepo;
+        this.helpItemRepo = helpItemRepo;
     }
 
     public List<NotificationDTO> getNotifications(String username) {
@@ -57,6 +66,16 @@ public class AccountService {
         return notificationItems.stream()
                 .map(NotificationItem::getNotificationId)
                 .collect(Collectors.toSet());
+    }
+
+    public void addNotificationItem(Long apsUserId, Long notificationId) {
+        if (apsUserId != null && notificationId != null) {
+            notificationItemService.addNotificationItem(apsUserId, notificationId);
+        }
+    }
+
+    public List<Help> findHelpByLang(Lang lang) {
+        return helpItemRepo.findByLang(lang).stream().map(HelpItemMapper::help).toList();
     }
 
 }

@@ -7,7 +7,7 @@ import java.util.Locale;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class LanguageTest {
+public class LangDTOTest {
 
     @Test
     public void LocaleTest() {

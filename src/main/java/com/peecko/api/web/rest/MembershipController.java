@@ -24,7 +24,6 @@ import static com.peecko.api.utils.Common.OK;
 public class MembershipController extends BaseController {
 
     final MessageSource messageSource;
-
     final UserRepository userRepository;
 
     public MembershipController(MessageSource messageSource, UserRepository userRepository) {

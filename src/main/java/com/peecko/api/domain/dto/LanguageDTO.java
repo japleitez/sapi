@@ -8,7 +8,7 @@ import lombok.Setter;
 @Data
 @AllArgsConstructor
 @Setter @Getter
-public class Language {
+public class LanguageDTO {
     private String code;
     private String name;
 }

@@ -8,5 +8,11 @@ import java.util.List;
 
 @Repository
 public interface NotificationItemRepo extends JpaRepository<NotificationItem, Long> {
+
+    void deleteByApsUserIdAndNotificationId(Long apsUserId, Long notificationId);
+
+    boolean existsByApsUserIdAndNotificationId(Long apsUserId, Long notificationId);
+
     List<NotificationItem> findByApsUserIdAndNotificationIdIn(Long apsUserId, List<Long> notificationIds);
+
 }

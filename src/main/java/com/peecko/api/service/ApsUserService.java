@@ -5,7 +5,7 @@ import com.peecko.api.domain.ApsUser;
 import com.peecko.api.domain.Customer;
 import com.peecko.api.domain.dto.DeviceDTO;
 import com.peecko.api.domain.dto.UserDTO;
-import com.peecko.api.domain.enumeration.Language;
+import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.domain.mapper.ApsDeviceMapper;
 import com.peecko.api.domain.mapper.ApsUserMapper;
 import com.peecko.api.repository.ApsMembershipRepo;
@@ -47,6 +47,14 @@ public class ApsUserService {
         return ApsUserMapper.userDTO(apsUser);
     }
 
+    public Long findIdByUsername(String username) {
+        return apsUserRepo.findByUsername(username).map(ApsUser::getId).orElse(null);
+    }
+
+    public Lang findLangByUsername(String username) {
+        return apsUserRepo.findByUsername(username).map(ApsUser::getLanguage).orElse(Lang.EN);
+    }
+
     public boolean authenticate(String username, String password) {
         Optional<ApsUser> optionalApsUser = apsUserRepo.findByUsername(username);
         if (optionalApsUser.isPresent()) {
@@ -61,15 +69,24 @@ public class ApsUserService {
     }
 
     public Locale getUserLocale(String username) {
-        Language language = apsUserRepo.findByUsername(username.toLowerCase()).map(ApsUser::getLanguage).orElse(Language.EN);
-        return Locale.forLanguageTag(language.name());
+        Lang lang = apsUserRepo.findByUsername(username.toLowerCase()).map(ApsUser::getLanguage).orElse(Lang.EN);
+        return Locale.forLanguageTag(lang.name());
     }
 
-    public void activateUser(String username) {
+    public void setUserActive(String username) {
         Optional<ApsUser> optional = apsUserRepo.findByUsername(username.toLowerCase());
         if (optional.isPresent()) {
             ApsUser apsUser = optional.get();
             apsUser.setActive(true);
+            apsUserRepo.save(apsUser);
+        }
+    }
+
+    public void setUserLanguage(String username, String langCode) {
+        Optional<ApsUser> optional = apsUserRepo.findByUsername(username.toLowerCase());
+        if (optional.isPresent()) {
+            ApsUser apsUser = optional.get();
+            apsUser.language(Lang.fromString(langCode));
             apsUserRepo.save(apsUser);
         }
     }

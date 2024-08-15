@@ -113,7 +113,7 @@ public class AuthController extends BaseController {
         if (!apsUserService.exists(username)) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("email.notfound")));
         }
-        apsUserService.activateUser(username);
+        apsUserService.setUserActive(username);
         return ResponseEntity.ok(new MessageResponse(OK, message("email.verified.ok")));
     }
 

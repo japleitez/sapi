@@ -1,7 +1,7 @@
 package com.peecko.api.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.peecko.api.domain.enumeration.Language;
+import com.peecko.api.domain.enumeration.Lang;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -37,7 +37,7 @@ public class ApsUser implements Serializable {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "language")
-    private Language language;
+    private Lang lang;
 
     @Column(name = "license")
     private String license;
@@ -143,17 +143,17 @@ public class ApsUser implements Serializable {
         this.privateVerified = privateVerified;
     }
 
-    public Language getLanguage() {
-        return this.language;
+    public Lang getLanguage() {
+        return this.lang;
     }
 
-    public ApsUser language(Language language) {
-        this.setLanguage(language);
+    public ApsUser language(Lang lang) {
+        this.setLanguage(lang);
         return this;
     }
 
-    public void setLanguage(Language language) {
-        this.language = language;
+    public void setLanguage(Lang lang) {
+        this.lang = lang;
     }
 
     public String getLicense() {

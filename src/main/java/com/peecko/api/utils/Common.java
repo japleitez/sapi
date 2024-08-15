@@ -3,7 +3,7 @@ package com.peecko.api.utils;
 import com.peecko.api.domain.ApsDevice;
 import com.peecko.api.domain.dto.DeviceDTO;
 import com.peecko.api.domain.dto.VideoDTO;
-import com.peecko.api.domain.enumeration.Language;
+import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.web.payload.request.SignInRequest;
 
 import java.time.*;
@@ -130,14 +130,14 @@ public abstract class Common {
         return currentDate.with(TemporalAdjusters.lastDayOfMonth());
     }
 
-    public static Language toLanguage(String lang) {
+    public static Lang toLanguage(String lang) {
         if (lang == null) {
-            return Language.EN;
+            return Lang.EN;
         }
         try {
-            return Language.valueOf(lang.toUpperCase());
+            return Lang.valueOf(lang.toUpperCase());
         } catch (IllegalArgumentException e) {
-            return Language.EN;
+            return Lang.EN;
         }
     }
 

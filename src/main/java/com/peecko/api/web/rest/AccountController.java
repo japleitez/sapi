@@ -1,17 +1,15 @@
 package com.peecko.api.web.rest;
 
-import com.peecko.api.domain.dto.NotificationDTO;
-import com.peecko.api.domain.dto.UserDTO;
-import com.peecko.api.repository.fake.HelpRepository;
-import com.peecko.api.repository.fake.LanguageRepository;
-import com.peecko.api.repository.fake.NotificationRepository;
-import com.peecko.api.repository.fake.UserRepository;
+import com.peecko.api.domain.dto.Help;
+import com.peecko.api.domain.dto.LanguageDTO;
+import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.service.AccountService;
+import com.peecko.api.service.ApsUserService;
+import com.peecko.api.service.LanguageService;
 import com.peecko.api.web.payload.response.LanguageResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,25 +18,14 @@ import java.util.List;
 @RequestMapping("/api/account")
 public class AccountController extends BaseController {
 
-    final UserRepository userRepository;
-
-    final HelpRepository helpRepository;
-
-    final LanguageRepository languageRepository;
-
-    final NotificationRepository notificationRepository;
-
-    final PasswordEncoder encoder;
-
     final AccountService accountService;
+    final ApsUserService apsUserService;
+    final LanguageService languageService;
 
-    public AccountController(UserRepository userRepository, HelpRepository helpRepository, LanguageRepository languageRepository, NotificationRepository notificationRepository, PasswordEncoder encoder, AccountService accountService) {
-        this.userRepository = userRepository;
-        this.helpRepository = helpRepository;
-        this.languageRepository = languageRepository;
-        this.notificationRepository = notificationRepository;
-        this.encoder = encoder;
+    public AccountController(AccountService accountService, ApsUserService apsUserService, LanguageService languageService) {
         this.accountService = accountService;
+        this.apsUserService = apsUserService;
+        this.languageService = languageService;
     }
 
     @GetMapping("/notifications")
@@ -46,37 +33,37 @@ public class AccountController extends BaseController {
         return ResponseEntity.ok(accountService.getNotifications(getUsername()));
     }
 
-    /**
-     * NOT YET IMPLEMENTED
-     */
+    @PutMapping("/notifications/{id}")
+    public ResponseEntity<?> updateNotification(@PathVariable Long id) {
+        accountService.addNotificationItem(getApsUserId(), id);
+        return ResponseEntity.ok().build();
+    }
 
     @GetMapping("/help")
     public ResponseEntity<?> getHelp() {
-        return ResponseEntity.ok(helpRepository.getHelp());
-    }
-
-
-    @PutMapping("/notifications/{id}")
-    public ResponseEntity<?> updateNotification(@PathVariable Long id) {
-        String username = getUsername(userRepository);
-        notificationRepository.updateNotification(username, id);
-        return ResponseEntity.ok().build();
+        List<Help> helpByLang = accountService.findHelpByLang(getApsUserLang());
+        return ResponseEntity.ok(helpByLang);
     }
 
     @GetMapping("/languages")
     public ResponseEntity<?> getLanguages() {
-        return ResponseEntity.ok(new LanguageResponse(getActiveLanguage(), languageRepository.getLanguages()));
+        String selected = getApsUserLang().name();
+        List<LanguageDTO> activeLanguages = languageService.findActiveLanguages();
+        return ResponseEntity.ok(new LanguageResponse(selected, activeLanguages));
     }
 
     @PutMapping("/languages/{lang}")
     public ResponseEntity<?> setLanguage(@PathVariable("lang")  String lang) {
-        UserDTO userDTO = getActiveUser(userRepository);
-        userDTO.language(resolveLanguage(lang));
+        apsUserService.setUserLanguage(getUsername(), lang);
         return ResponseEntity.ok().build();
     }
 
-    private String getActiveLanguage() {
-        return getActiveLanguage(userRepository);
+    private Lang getApsUserLang() {
+        return apsUserService.findLangByUsername(getUsername());
+    }
+
+    private Long getApsUserId() {
+        return apsUserService.findIdByUsername(getUsername());
     }
 
     private String getUsername() {

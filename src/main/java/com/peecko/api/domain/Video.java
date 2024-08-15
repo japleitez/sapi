@@ -2,7 +2,7 @@ package com.peecko.api.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.peecko.api.domain.enumeration.Intensity;
-import com.peecko.api.domain.enumeration.Language;
+import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.domain.enumeration.Player;
 import jakarta.persistence.*;
 import java.time.Instant;
@@ -28,7 +28,7 @@ public class Video implements Serializable {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "language", nullable = false)
-    private Language language;
+    private Lang lang;
 
     @Column(name = "tags")
     private String tags;
@@ -108,12 +108,12 @@ public class Video implements Serializable {
         this.duration = duration;
     }
 
-    public Language getLanguage() {
-        return language;
+    public Lang getLanguage() {
+        return lang;
     }
 
-    public void setLanguage(Language language) {
-        this.language = language;
+    public void setLanguage(Lang lang) {
+        this.lang = lang;
     }
 
     public String getTags() {

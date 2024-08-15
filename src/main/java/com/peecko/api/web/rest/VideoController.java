@@ -33,11 +33,8 @@ import static com.peecko.api.utils.Common.ERROR;
 public class VideoController extends BaseController {
 
     final MessageSource messageSource;
-
     final VideoRepository videoRepository;
-
     final UserRepository userRepository;
-
     final ResourceLoader resourceLoader;
 
     public VideoController(MessageSource messageSource, VideoRepository videoRepository, UserRepository userRepository, ResourceLoader resourceLoader) {
