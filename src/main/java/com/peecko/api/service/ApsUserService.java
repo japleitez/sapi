@@ -47,6 +47,10 @@ public class ApsUserService {
         return ApsUserMapper.userDTO(apsUser);
     }
 
+    public ApsUser findByUsername(String username) {
+        return apsUserRepo.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found " + username));
+    }
+
     public Long findIdByUsername(String username) {
         return apsUserRepo.findByUsername(username).map(ApsUser::getId).orElse(null);
     }

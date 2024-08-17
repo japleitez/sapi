@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "play_list")
@@ -33,6 +35,8 @@ public class PlayList implements Serializable {
     @JsonIgnoreProperties(value = { "apsDevices", "playLists" }, allowSetters = true)
     private ApsUser apsUser;
 
+    @OneToMany(mappedBy = "playlist", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<VideoItem> videoItems = new ArrayList<>();
     public Long getId() {
         return this.id;
     }
@@ -109,6 +113,24 @@ public class PlayList implements Serializable {
     public PlayList apsUser(ApsUser apsUser) {
         this.setApsUser(apsUser);
         return this;
+    }
+
+    public List<VideoItem> getVideoItems() {
+        return videoItems;
+    }
+
+    public void setVideoItems(List<VideoItem> videoItems) {
+        this.videoItems = videoItems;
+    }
+
+    public void addVideoItem(VideoItem videoItem) {
+        videoItems.add(videoItem);
+        videoItem.setPlaylist(this);
+    }
+
+    public void removeVideoItem(VideoItem videoItem) {
+        videoItems.remove(videoItem);
+        videoItem.setPlaylist(null);
     }
 
 }

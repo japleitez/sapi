@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Set;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface UserFavoriteVideoRepo extends JpaRepository<UserFavoriteVideo, Long> {
@@ -15,5 +16,10 @@ public interface UserFavoriteVideoRepo extends JpaRepository<UserFavoriteVideo, 
 
     @Query("SELECT v.id FROM UserFavoriteVideo v WHERE v.apsUserId = :apsUserId")
     Set<Long> findVideoIdsByApsUserId(@Param("apsUserId") Long apsUserId);
+
+    List<UserFavoriteVideo> findByApsUserIdOrderByIdDesc(Long apsUserId);
+
+    @Transactional
+    void deleteByApsUserId(Long apsUserId);
 
 }

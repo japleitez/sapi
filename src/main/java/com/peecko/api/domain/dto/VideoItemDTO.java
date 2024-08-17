@@ -9,7 +9,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class VideoItem {
+public class VideoItemDTO {
     private Integer index;
     private String previous;
     private String code;

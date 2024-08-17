@@ -7,9 +7,13 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface VideoCategoryRepo extends JpaRepository<VideoCategory, Long> {
+
+    Optional<VideoCategory> findByCode(String code);
+
     @Query("SELECT vc.id FROM VideoCategory vc WHERE vc.released <= :today AND vc.archived IS NULL")
     List<Long> findReleasedAsOfToday(Instant today);
 

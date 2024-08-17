@@ -1,12 +1,22 @@
 package com.peecko.api.web.rest;
 
+import com.peecko.api.domain.ApsUser;
+import com.peecko.api.domain.PlayList;
+import com.peecko.api.domain.VideoCategory;
+import com.peecko.api.domain.VideoItem;
 import com.peecko.api.domain.dto.*;
 import com.peecko.api.domain.enumeration.Lang;
+import com.peecko.api.domain.mapper.PlayListMapper;
+import com.peecko.api.repository.PlayListRepo;
+import com.peecko.api.repository.VideoCategoryRepo;
+import com.peecko.api.repository.VideoItemRepo;
+import com.peecko.api.repository.VideoRepo;
 import com.peecko.api.repository.fake.UserRepository;
 import com.peecko.api.repository.fake.VideoRepository;
 import com.peecko.api.security.Licensed;
 import com.peecko.api.service.ApsUserService;
 import com.peecko.api.service.LabelService;
+import com.peecko.api.service.PlayListService;
 import com.peecko.api.service.VideoService;
 import com.peecko.api.utils.Common;
 import com.peecko.api.utils.FileDownloadUtil;
@@ -30,7 +40,9 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.peecko.api.utils.Common.ERROR;
 
@@ -46,7 +58,14 @@ public class VideoController extends BaseController {
     final LabelService labelService;
     final ApsUserService apsUserService;
 
-    public VideoController(MessageSource messageSource, VideoRepository videoRepository, UserRepository userRepository, ResourceLoader resourceLoader, VideoService videoService, LabelService labelService, ApsUserService apsUserService) {
+    final PlayListRepo playListRepo;
+    final VideoRepo videoRepo;
+    final VideoItemRepo videoItemRepo;
+    final VideoCategoryRepo videoCategoryRepo;
+
+    final PlayListService playListService;
+
+    public VideoController(MessageSource messageSource, VideoRepository videoRepository, UserRepository userRepository, ResourceLoader resourceLoader, VideoService videoService, LabelService labelService, ApsUserService apsUserService, PlayListRepo playListRepo, VideoRepo videoRepo, VideoItemRepo videoItemRepo, VideoCategoryRepo videoCategoryRepo, PlayListService playListService) {
         this.messageSource = messageSource;
         this.videoRepository = videoRepository;
         this.userRepository = userRepository;
@@ -54,6 +73,11 @@ public class VideoController extends BaseController {
         this.videoService = videoService;
         this.labelService = labelService;
         this.apsUserService = apsUserService;
+        this.playListRepo = playListRepo;
+        this.videoRepo = videoRepo;
+        this.videoItemRepo = videoItemRepo;
+        this.videoCategoryRepo = videoCategoryRepo;
+        this.playListService = playListService;
     }
 
     @Licensed
@@ -80,131 +104,98 @@ public class VideoController extends BaseController {
         return ResponseEntity.ok(new LibraryResponse(greeting, categories));
     }
 
-    /**
-     * TO IMPLEMENT
-     */
     @GetMapping("/playlists")
     public ResponseEntity<?> getPlaylists() {
-        String username = getUsername(userRepository);
-        List<IdName> list = videoRepository.getPlaylistsIdNames(username);
-        return ResponseEntity.ok(list);
+        ApsUser apsUser = apsUserService.findByUsername(getUsername());
+        List<IdName> playlistIdNames = playListService.getPlayListIdNames(apsUser);
+        return ResponseEntity.ok(playlistIdNames);
     }
 
     @GetMapping("/playlists/{listId}")
     public ResponseEntity<?> getPlaylist(@PathVariable Long listId) {
-        String username = getUsername(userRepository);
-        Playlist playlist = videoRepository.getPlaylist(username, listId).orElse(null);
-        if (playlist == null) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("playlist.invalid")));
-        }
-        return ResponseEntity.ok(playlist);
+        Locale locale = apsUserService.getUserLocale(getUsername());
+        PlaylistDTO playlistDTO = playListService.getPlayListDTO(getApsUserId(), listId);
+        return ResponseEntity.ok(Objects.requireNonNullElseGet(playlistDTO, () -> new MessageResponse(ERROR, message(locale, "playlist.invalid"))));
     }
 
     @DeleteMapping("/playlists/{listId}")
     public ResponseEntity<?> deletePlaylist(@PathVariable Long listId) {
-        String username = getUsername(userRepository);
-        List<IdName> list = videoRepository.deletePlaylist(username, listId);
-        return ResponseEntity.ok(list);
+        playListService.deletePlayList(listId);
+        ApsUser apsUser = apsUserService.findByUsername(getUsername());
+        List<IdName> playlistIdNames = playListService.getPlayListIdNames(apsUser);
+        return ResponseEntity.ok(playlistIdNames);
     }
 
     @Licensed
     @PostMapping("/playlists/")
     public ResponseEntity<?> createPlaylist(@Valid @RequestBody CreatePlaylistRequest request) {
-        String name = request.getName();
-        String username = getUsername(userRepository);
-        if (videoRepository.playlistExistsByName(username, name)) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("playlist.duplicate")));
+        ApsUser apsUser = apsUserService.findByUsername(getUsername());
+        if (playListService.existsPlayList(apsUser, request.getName())) {
+            Locale locale = apsUserService.getUserLocale(getUsername());
+            return ResponseEntity.ok(new MessageResponse(ERROR, message(locale, "playlist.duplicate")));
         }
-        Optional<Playlist> optionalPlaylist = videoRepository.createPlaylist(username, name);
-        return ResponseEntity.ofNullable(optionalPlaylist);
+        PlaylistDTO playlistDTO = playListService.createPlayList(apsUser, request.getName());
+        return ResponseEntity.ok(playlistDTO);
     }
 
-    @PutMapping("/playlists/{listId}/{videoCode}")
-    public ResponseEntity<?> addPlaylistVideoItem(@PathVariable Long listId, @PathVariable String videoCode) {
-        String username = getUsername(userRepository);
-        Playlist playlist = videoRepository.getPlaylist(username, listId).orElse(null);
-        if (playlist == null) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("playlist.invalid")));
+    @PutMapping("/playlists/{playlistId}/{videoCode}")
+    public ResponseEntity<?> addPlaylistVideoItem(@PathVariable Long playlistId, @PathVariable String videoCode) {
+        Locale locale = apsUserService.getUserLocale(getUsername());
+        PlayList playList = playListRepo.findById(playlistId).orElse(null);
+        if (playList == null) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message(locale,"playlist.invalid")));
         }
-        VideoDTO video = videoRepository.getVideo(username, videoCode);
-        if (video == null) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("video.invalid")));
+        if (videoRepo.findByCode(videoCode).isEmpty()) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message(locale,"video.invalid")));
         }
-        if (videoRepository.videoIsAlreadyAdded(username, playlist, video)) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("playlist.video.added.already")));
+        if (videoItemRepo.existsByCodeAndPlayList(videoCode, playList)) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message(locale,"playlist.video.added.already")));
         }
-        Playlist updated = videoRepository.addPlaylistVideoItem(username, playlist, video);
-        return ResponseEntity.ok(updated);
+        VideoItem newVideoItem = new VideoItem(videoCode);
+        playListService.addVideoItemToTop(playlistId, newVideoItem);
+        PlaylistDTO playlistDTO = playListService.getPlayListDTO(getApsUserId(), playlistId);
+        return ResponseEntity.ok(playlistDTO);
     }
 
-    @DeleteMapping("/playlists/{listId}/bulk-delete")
-    public ResponseEntity<?> removePlaylistVideoItems(@PathVariable Long listId, @RequestBody List<String> codes) {
-        String username = getUsername(userRepository);
-        Playlist playlist = videoRepository.getPlaylist(username, listId).orElse(null);
-        if (playlist == null) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("playlist.invalid")));
+    @PutMapping("/playlists/{listId}/{videoCode}/drag-beneath/{targetVideoCode}")
+    public  ResponseEntity<?> dragPlaylistVideoItem(@PathVariable Long listId, @PathVariable String videoCode, @PathVariable String targetVideoCode) {
+        Locale locale = apsUserService.getUserLocale(getUsername());
+        PlayList playList = playListRepo.findById(listId).orElse(null);
+        if (playList == null) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message(locale,"playlist.invalid")));
         }
-        for(String videoCode: codes) {
-            if (StringUtils.hasText(videoCode)) {
-                VideoDTO video = videoRepository.getVideo(username, videoCode);
-                if (video != null) {
-                    playlist = videoRepository.removePlaylistVideoItem(username, playlist, video);
-                }
-            }
+        if (!videoItemRepo.existsByCodeAndPlayList(videoCode, playList)) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message(locale,"video.item.invalid")));
         }
-        return ResponseEntity.ok(playlist);
+        if (!videoItemRepo.existsByCodeAndPlayList(targetVideoCode, playList)) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message(locale,"video.item.new.previous.invalid")));
+        }
+        playListService.moveVideoItemBelowAnother(listId, videoCode, targetVideoCode);
+        PlaylistDTO playlistDTO = playListService.getPlayListDTO(getApsUserId(), listId);
+        return ResponseEntity.ok(playlistDTO);
     }
 
-    @PutMapping("/playlists/{listId}/{videoCode}/{direction}")
-    public ResponseEntity<?> movePlaylistVideoItem(@PathVariable Long listId, @PathVariable String videoCode, @PathVariable String direction) {
-        String username = getUsername(userRepository);
-        Playlist playlist = videoRepository.getPlaylist(username, listId).orElse(null);
-        if (playlist == null) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("playlist.invalid")));
+    @DeleteMapping("/playlists/{playlistId}/bulk-delete")
+    public ResponseEntity<?> removePlaylistVideoItems(@PathVariable Long playlistId, @RequestBody List<String> codes) {
+        Locale locale = apsUserService.getUserLocale(getUsername());
+        PlayList playList = playListRepo.findById(playlistId).orElse(null);
+        if (playList == null) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message(locale,"playlist.invalid")));
         }
-        VideoDTO video = videoRepository.getVideo(username, videoCode);
-        if (video == null) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("video.invalid")));
-        }
-        VideoItem videoItem = videoRepository.getVideoItem(playlist, videoCode);
-        if (videoItem == null) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("video.item.invalid")));
-        }
-        Playlist updated = videoRepository.movePlaylistVideoItem(username, playlist, videoItem, direction);
-        return ResponseEntity.ok(updated);
-    }
-
-    @PutMapping("/playlists/{listId}/{videoCode}/drag-beneath/{newPreviousVideoCode}")
-    public  ResponseEntity<?> dragPlaylistVideoItem(@PathVariable Long listId, @PathVariable String videoCode, @PathVariable String newPreviousVideoCode) {
-        String username = getUsername(userRepository);
-        Playlist playlist = videoRepository.getPlaylist(username, listId).orElse(null);
-        if (playlist == null) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("playlist.invalid")));
-        }
-        VideoDTO video = videoRepository.getVideo(username, videoCode);
-        if (video == null) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("video.invalid")));
-        }
-        VideoItem videoItem = videoRepository.getVideoItem(playlist, videoCode);
-        if (videoItem == null) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("video.item.invalid")));
-        }
-        if (!VideoRepository.TOP.equals(newPreviousVideoCode)) {
-            if (videoRepository.getVideoItem(playlist, newPreviousVideoCode) == null) {
-                return ResponseEntity.ok(new MessageResponse(ERROR, message("video.item.new.previous.invalid")));
-            }
-        }
-        playlist = videoRepository.dragPlaylistVideoItem(username, playlist, videoItem, newPreviousVideoCode);
-        return ResponseEntity.ok(playlist);
+        playListService.removeVideoItems(playlistId, codes);
+        PlaylistDTO playlistDTO = playListService.getPlayListDTO(getApsUserId(), playlistId);
+        return ResponseEntity.ok(playlistDTO);
     }
 
     @GetMapping("/categories/{code}")
     public ResponseEntity<?> getCategory(@PathVariable String code) {
-        String username = getUsername(userRepository);
-        Optional<CategoryDTO> category = videoRepository.getCategory(code, username);
+        CategoryDTO category = videoService.getAllVideosForCategory(getApsUserId(), code);
         return ResponseEntity.ofNullable(category); // 404 Not Found
     }
 
+    /**
+     * TO IMPLEMENT
+     */
     @PutMapping("/favorites/{code}")
     public ResponseEntity<?> addFavorite(@PathVariable String code) {
         String username = getUsername(userRepository);
@@ -221,34 +212,12 @@ public class VideoController extends BaseController {
 
     @DeleteMapping("/favorites")
     public ResponseEntity<?> removeFavorites() {
-        String username = getUsername(userRepository);
-        videoRepository.removeFavorites(username);
+        Long apsUserId = getApsUserId();
+        videoService.deleteAllFavoritesForUser(apsUserId);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/fetch/{fileCode}")
-    public ResponseEntity<?> downloadFile(@PathVariable("fileCode") String fileCode) {
-        FileDownloadUtil util = new FileDownloadUtil();
-        Resource resource;
-        try {
-            resource = util.getFileAsResource(fileCode);
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
-        }
-        if (resource == null) {
-            return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
-        }
-        String contentType = "application/octet-stream";
-        String headerValue = "attachment; filename=\"" + resource.getFilename() + "\"";
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
-                .body(resource);
-    }
-
-    private String message(String code) {
-        Locale locale = geActiveLocale(userRepository);
+    private String message(Locale locale, String code) {
         return messageSource.getMessage(code, null, locale);
     }
 

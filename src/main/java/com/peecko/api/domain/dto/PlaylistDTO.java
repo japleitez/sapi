@@ -12,9 +12,9 @@ import java.util.List;
 @Accessors(chain = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class Playlist {
+public class PlaylistDTO {
     private String username;
     private Long id;
     private String name;
-    private List<VideoItem> videoItems = new ArrayList<>();
+    private List<VideoItemDTO> videoItemDTOS = new ArrayList<>();
 }
