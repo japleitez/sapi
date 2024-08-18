@@ -157,7 +157,6 @@ public class ApsUserService {
         Optional<ApsUser> optional = apsUserRepo.findByUsername(request.getUsername());
         if (optional.isPresent()) {
             ApsUser apsUser = optional.get();
-            apsUser.setJwt(null);
             apsUser.getApsDevices().stream().filter(device -> deviceId.equals(device.getDeviceId())).findAny().ifPresent(apsUser::removeApsDevice);
             apsUserRepo.save(apsUser);
         }

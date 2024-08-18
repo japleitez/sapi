@@ -5,9 +5,10 @@ import com.peecko.api.domain.dto.PinCodeDTO;
 import com.peecko.api.domain.dto.UserDTO;
 import com.peecko.api.domain.enumeration.Verification;
 import com.peecko.api.security.JwtUtils;
+import com.peecko.api.security.LicenseServiceImpl;
 import com.peecko.api.service.ApsUserService;
+import com.peecko.api.service.InvalidJwtService;
 import com.peecko.api.service.PinCodeService;
-import com.peecko.api.service.TokenBlacklistService;
 import com.peecko.api.service.response.UserProfileResponse;
 import com.peecko.api.utils.EmailUtils;
 import com.peecko.api.utils.NameUtils;
@@ -23,7 +24,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -43,17 +43,19 @@ public class AuthController extends BaseController {
     private final MessageSource messageSource;
     private final ApsUserService apsUserService;
     private final PinCodeService pinCodeService;
-    private final TokenBlacklistService tokenBlacklistService;
     private final AuthenticationManager authenticationManager;
+    private final LicenseServiceImpl licenseService;
+    private final InvalidJwtService invalidJwtService;
 
-    public AuthController(JwtUtils jwtUtils, PasswordEncoder encoder, MessageSource messageSource, ApsUserService apsUserService, PinCodeService pinCodeService, TokenBlacklistService tokenBlacklistService, AuthenticationManager authenticationManager) {
+    public AuthController(JwtUtils jwtUtils, PasswordEncoder encoder, MessageSource messageSource, ApsUserService apsUserService, PinCodeService pinCodeService, AuthenticationManager authenticationManager, LicenseServiceImpl licenseService, InvalidJwtService invalidJwtService) {
         this.jwtUtils = jwtUtils;
         this.encoder = encoder;
         this.messageSource = messageSource;
         this.apsUserService = apsUserService;
         this.pinCodeService = pinCodeService;
-        this.tokenBlacklistService = tokenBlacklistService;
+        this.invalidJwtService = invalidJwtService;
         this.authenticationManager = authenticationManager;
+        this.licenseService = licenseService;
     }
 
     @PostMapping("/signin")
@@ -72,7 +74,10 @@ public class AuthController extends BaseController {
 
     @PostMapping("/signout")
     public ResponseEntity<?> signOut(@Valid @RequestBody SignOutRequest request, @RequestHeader("Authorization") String authHeader) {
-        tokenBlacklistService.invalidateToken(authHeader);
+        String jti = jwtUtils.getJtiFromAuthHeader(authHeader);
+        if (jti != null) {
+            invalidJwtService.invalidateJwt(jti);
+        }
         apsUserService.signOut(request);
         return ResponseEntity.ok(new MessageResponse(OK, message("user.logoff.ok")));
     }

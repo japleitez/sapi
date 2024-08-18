@@ -2,16 +2,18 @@ package com.peecko.api.security;
 
 import com.peecko.api.domain.dto.Role;
 import com.peecko.api.domain.dto.UserDTO;
-import org.springframework.context.annotation.Configuration;
+import com.peecko.api.repository.InvalidJwtRepo;
+import com.peecko.api.service.ApsUserService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-@Configuration
+@Service
 public class LicenseServiceImpl {
     public static final HashMap<String, UserDTO> REPO = new HashMap<>();
     public static final Set<String> INVALID_JWT = new HashSet<>();
@@ -20,6 +22,16 @@ public class LicenseServiceImpl {
 
     static {
         DEFAULT_ROLES.add(Role.USER);
+    }
+
+    final JwtUtils jwtUtils;
+    final InvalidJwtRepo invalidJwtRepo;
+    final ApsUserService apsUserService;
+
+    public LicenseServiceImpl(JwtUtils jwtUtils, InvalidJwtRepo invalidJwtRepo, ApsUserService apsUserService) {
+        this.jwtUtils = jwtUtils;
+        this.invalidJwtRepo = invalidJwtRepo;
+        this.apsUserService = apsUserService;
     }
 
     public boolean authorize() {
@@ -31,15 +43,12 @@ public class LicenseServiceImpl {
     }
 
     boolean hasActiveLicense(String username) {
+        //TODO implementation
         if (REPO.containsKey(username)) {
             UserDTO userDTO = REPO.get(username);
             return isValidLicense(userDTO.license());
         }
         return false;
-    }
-
-    boolean isInvalidJwt(String jwt) {
-        return INVALID_JWT.contains(jwt);
     }
 
 }

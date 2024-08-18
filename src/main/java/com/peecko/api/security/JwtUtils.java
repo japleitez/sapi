@@ -2,7 +2,9 @@ package com.peecko.api.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.Date;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -23,21 +25,39 @@ public class JwtUtils {
 
     public String generateJwtToken(Authentication authentication) {
 
+        String jti = UUID.randomUUID().toString();
+
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 
         return Jwts.builder()
             .setSubject((userPrincipal.getUsername()))
-            .setIssuedAt(new Date())
+            .setIssuedAt(new Date()).setId(jti)
             .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
             .signWith(SignatureAlgorithm.HS512, jwtSecret)
             .compact();
     }
 
-    public String getUserNameFromJwtToken(String token) {
-        return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
+    public String getUserNameFromJwtToken(String authToken) {
+        return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken).getBody().getSubject();
     }
 
-    public boolean validateJwtToken(String authToken) {
+    public String getJtiFromAuthHeader(String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String authToken = authHeader.substring(7);
+            return getJtiFromAuthToken(authToken);
+        }
+        return null;
+    }
+
+    public String getJtiFromAuthToken(String authToken) {
+        try {
+            return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken).getBody().getId();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public boolean validateAuthToken(String authToken) {
         try {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
             return true;
