@@ -36,13 +36,12 @@ public class PinCodeService {
         this.apsUserService = apsUserService;
     }
 
-    public PinCodeDTO findByRequestId(String requestId) {
-        UUID uuid = UUID.fromString(requestId);
-        return pinCodeRepo.findById(uuid).map(PinCodeMapper::pinCodeDTO).orElse(null);
+    public PinCode findByRequestId(UUID uuid) {
+        return pinCodeRepo.findById(uuid).orElse(null);
     }
 
     @Transactional
-    public PinCodeDTO generatePinCode(PinCodeRequest request, Verification verification) {
+    public String generatePinCode(PinCodeRequest request, Verification verification) {
         UserDTO user = apsUserService.findByUsernameOrElseThrow(request.getUsername());
         PinCode pinCode = new PinCode();
         pinCode.setLanguage(user.language());
@@ -52,7 +51,7 @@ public class PinCodeService {
         pinCode.setVerification(verification);
         pinCodeRepo.save(pinCode);
         TransactionSynchronizationManager.registerSynchronization(new NotifyPinCode(pinCode));
-        return PinCodeMapper.pinCodeDTO(pinCode);
+        return pinCode.getRequestId().toString();
     }
 
     public boolean isPinCodeValid(String requestId, String code) {

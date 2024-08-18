@@ -45,9 +45,8 @@ public class AccountController extends BaseController {
 
     @GetMapping("/languages")
     public ResponseEntity<?> getLanguages() {
-        String selected = getApsUserLang().name();
         List<LanguageDTO> activeLanguages = languageService.findActiveLanguages();
-        return ResponseEntity.ok(new LanguageResponse(selected, activeLanguages));
+        return ResponseEntity.ok(new LanguageResponse(getApsUserLang().name(), activeLanguages));
     }
 
     @PutMapping("/languages/{lang}")

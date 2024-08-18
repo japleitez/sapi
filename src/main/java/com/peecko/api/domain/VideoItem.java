@@ -20,13 +20,6 @@ public class VideoItem {
     @ManyToOne
     private PlayList playlist;
 
-    @OneToOne(mappedBy = "previousVideo")
-    private VideoItem nextVideo;
-
-    @OneToOne
-    private VideoItem previousVideo;
-
-    // Constructors, Getters, and Setters
     public VideoItem() {
     }
 
@@ -65,5 +58,6 @@ public class VideoItem {
     public void setPlaylist(PlayList playlist) {
         this.playlist = playlist;
     }
+
 }
 

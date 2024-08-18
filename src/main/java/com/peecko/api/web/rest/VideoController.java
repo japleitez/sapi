@@ -5,7 +5,6 @@ import com.peecko.api.domain.PlayList;
 import com.peecko.api.domain.VideoItem;
 import com.peecko.api.domain.dto.*;
 import com.peecko.api.repository.PlayListRepo;
-import com.peecko.api.repository.VideoCategoryRepo;
 import com.peecko.api.repository.VideoItemRepo;
 import com.peecko.api.repository.VideoRepo;
 import com.peecko.api.security.Licensed;
@@ -20,7 +19,6 @@ import com.peecko.api.web.payload.response.MessageResponse;
 import com.peecko.api.web.payload.response.TodayResponse;
 import jakarta.validation.Valid;
 import org.springframework.context.MessageSource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,27 +32,23 @@ import static com.peecko.api.utils.Common.ERROR;
 @RequestMapping("/api/videos")
 public class VideoController extends BaseController {
 
-    final MessageSource messageSource;
-    final ResourceLoader resourceLoader;
-    final VideoService videoService;
-    final LabelService labelService;
-    final ApsUserService apsUserService;
-    final PlayListRepo playListRepo;
     final VideoRepo videoRepo;
+    final PlayListRepo playListRepo;
+    final LabelService labelService;
+    final VideoService videoService;
     final VideoItemRepo videoItemRepo;
-    final VideoCategoryRepo videoCategoryRepo;
+    final MessageSource messageSource;
+    final ApsUserService apsUserService;
     final PlayListService playListService;
 
-    public VideoController(MessageSource messageSource, ResourceLoader resourceLoader, VideoService videoService, LabelService labelService, ApsUserService apsUserService, PlayListRepo playListRepo, VideoRepo videoRepo, VideoItemRepo videoItemRepo, VideoCategoryRepo videoCategoryRepo, PlayListService playListService) {
-        this.messageSource = messageSource;
-        this.resourceLoader = resourceLoader;
-        this.videoService = videoService;
-        this.labelService = labelService;
-        this.apsUserService = apsUserService;
-        this.playListRepo = playListRepo;
+    public VideoController(VideoRepo videoRepo, PlayListRepo playListRepo, LabelService labelService, VideoService videoService, VideoItemRepo videoItemRepo, MessageSource messageSource, ApsUserService apsUserService, PlayListService playListService) {
         this.videoRepo = videoRepo;
+        this.playListRepo = playListRepo;
+        this.labelService = labelService;
+        this.videoService = videoService;
         this.videoItemRepo = videoItemRepo;
-        this.videoCategoryRepo = videoCategoryRepo;
+        this.messageSource = messageSource;
+        this.apsUserService = apsUserService;
         this.playListService = playListService;
     }
 
@@ -85,8 +79,8 @@ public class VideoController extends BaseController {
     @GetMapping("/playlists")
     public ResponseEntity<?> getPlaylists() {
         ApsUser apsUser = apsUserService.findByUsername(getUsername());
-        List<IdName> playlistIdNames = playListService.getPlayListIdNames(apsUser);
-        return ResponseEntity.ok(playlistIdNames);
+        List<IdName> listIdNames = playListService.getPlayListIdNames(apsUser);
+        return ResponseEntity.ok(listIdNames);
     }
 
     @GetMapping("/playlists/{listId}")
@@ -100,8 +94,8 @@ public class VideoController extends BaseController {
     public ResponseEntity<?> deletePlaylist(@PathVariable Long listId) {
         playListService.deletePlayList(listId);
         ApsUser apsUser = apsUserService.findByUsername(getUsername());
-        List<IdName> playlistIdNames = playListService.getPlayListIdNames(apsUser);
-        return ResponseEntity.ok(playlistIdNames);
+        List<IdName> listIdNames = playListService.getPlayListIdNames(apsUser);
+        return ResponseEntity.ok(listIdNames);
     }
 
     @Licensed

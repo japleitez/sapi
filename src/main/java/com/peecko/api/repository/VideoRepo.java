@@ -14,9 +14,9 @@ public interface VideoRepo extends JpaRepository<Video, Long> {
     Optional<Video> findByCode(String code);
 
     @Query("SELECT v FROM Video v WHERE v.videoCategory IN :categories AND v.released IS NOT NULL ORDER BY v.released DESC")
-    List<Video> findTopByCategoriesOrderByUploadDateDesc(@Param("categories") List<Long> categories, @Param("limit") int limit);
+    List<Video> findTopByCategories(@Param("categories") List<Long> categories, @Param("limit") int limit);
 
     @Query("SELECT v FROM Video v WHERE v.videoCategory = :videoCategory AND v.released <= :today AND (v.archived IS NULL OR v.archived > :today) ORDER BY v.released DESC")
-    List<Video> findReleasedAndNotArchivedVideos(@Param("videoCategory") VideoCategory videoCategory, @Param("today") Instant today);
+    List<Video> findReleasedAndNotArchived(@Param("videoCategory") VideoCategory videoCategory, @Param("today") Instant today);
 
 }

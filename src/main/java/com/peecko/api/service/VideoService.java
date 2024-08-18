@@ -47,7 +47,7 @@ public class VideoService {
         List<Long> categoryIDs = videoCategoryRepo.findReleasedAsOfToday(today).stream().toList();
         int limit  = MAX_VIDEOS_BY_CATEGORY * categoryIDs.size();
         return  videoRepo
-                .findTopByCategoriesOrderByUploadDateDesc(categoryIDs, limit)
+                .findTopByCategories(categoryIDs, limit)
                 .stream()
                 .map(v -> resolveFavorite(v, favoriteIds))
                 .collect(Collectors.groupingBy(Video::getVideoCategory))
@@ -74,7 +74,7 @@ public class VideoService {
         Set<Long> favoriteIds = userFavoriteVideoRepo.findVideoIdsByApsUserId(apsUserId);
         Instant today = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant();
         List<Video> videos = videoRepo
-                .findReleasedAndNotArchivedVideos(videoCategory, today)
+                .findReleasedAndNotArchived(videoCategory, today)
                 .stream()
                 .map(v -> resolveFavorite(v, favoriteIds))
                 .toList();

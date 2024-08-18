@@ -77,7 +77,7 @@ public class ApsUserService {
         return Locale.forLanguageTag(lang.name());
     }
 
-    public void setUserActive(String username) {
+    public void activeUser(String username) {
         Optional<ApsUser> optional = apsUserRepo.findByUsername(username.toLowerCase());
         if (optional.isPresent()) {
             ApsUser apsUser = optional.get();
@@ -95,14 +95,13 @@ public class ApsUserService {
         }
     }
 
-    public UserDTO signUp(SignUpRequest request) {
+    public void signUp(SignUpRequest request) {
         ApsUser apsUser = new ApsUser();
         apsUser.username(request.getUsername().toLowerCase());
         apsUser.name(NameUtils.camel(request.getName()));
         apsUser.language(Common.toLang(request.getLanguage()));
         apsUser.password(passwordEncoder.encode(request.getPassword()));
         apsUserRepo.save(apsUser);
-        return ApsUserMapper.userDTO(apsUser);
     }
 
     @Transactional
@@ -162,7 +161,7 @@ public class ApsUserService {
         }
     }
 
-    public List<DeviceDTO> getDevicesByUsername(String username) {
+    public List<DeviceDTO> getDevices(String username) {
         Optional<ApsUser> optional = apsUserRepo.findByUsername(username.toLowerCase());
         if (optional.isPresent()) {
             ApsUser apsUser = optional.get();
@@ -182,7 +181,7 @@ public class ApsUserService {
         }
     }
 
-    public void updateUser(UpdateUserRequest request) {
+    public void updateUserInfo(UpdateUserRequest request) {
         Optional<ApsUser> optional = apsUserRepo.findByUsername(request.getUsername().toLowerCase());
         if (optional.isPresent()) {
             ApsUser apsUser = optional.get();

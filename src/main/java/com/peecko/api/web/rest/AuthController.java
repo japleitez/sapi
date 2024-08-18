@@ -1,7 +1,7 @@
 package com.peecko.api.web.rest;
 
+import com.peecko.api.domain.PinCode;
 import com.peecko.api.domain.dto.DeviceDTO;
-import com.peecko.api.domain.dto.PinCodeDTO;
 import com.peecko.api.domain.dto.UserDTO;
 import com.peecko.api.domain.enumeration.Verification;
 import com.peecko.api.security.JwtUtils;
@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import static com.peecko.api.utils.Common.*;
 
@@ -37,15 +38,15 @@ import static com.peecko.api.utils.Common.*;
 @RequestMapping("/api/auth")
 public class AuthController extends BaseController {
 
-    private final JwtUtils jwtUtils;
-    private final PasswordEncoder encoder;
-    private final MessageSource messageSource;
-    private final ApsUserService apsUserService;
-    private final PinCodeService pinCodeService;
-    private final AuthenticationManager authenticationManager;
-    private final InvalidJwtService invalidJwtService;
+    final JwtUtils jwtUtils;
+    final PasswordEncoder encoder;
+    final MessageSource messageSource;
+    final ApsUserService apsUserService;
+    final PinCodeService pinCodeService;
+    final InvalidJwtService invalidJwtService;
+    final AuthenticationManager authenticationManager;
 
-    public AuthController(JwtUtils jwtUtils, PasswordEncoder encoder, MessageSource messageSource, ApsUserService apsUserService, PinCodeService pinCodeService, AuthenticationManager authenticationManager, InvalidJwtService invalidJwtService) {
+    public AuthController(JwtUtils jwtUtils, PasswordEncoder encoder, MessageSource messageSource, ApsUserService apsUserService, PinCodeService pinCodeService, InvalidJwtService invalidJwtService, AuthenticationManager authenticationManager) {
         this.jwtUtils = jwtUtils;
         this.encoder = encoder;
         this.messageSource = messageSource;
@@ -53,6 +54,27 @@ public class AuthController extends BaseController {
         this.pinCodeService = pinCodeService;
         this.invalidJwtService = invalidJwtService;
         this.authenticationManager = authenticationManager;
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest request) {
+        boolean isValidEmail = EmailUtils.isValid(request.getUsername());
+        if (!isValidEmail) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("email.valid.nok")));
+        }
+        boolean isValidPassword = PasswordUtils.isValid(request.getPassword());
+        if (!isValidPassword) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("password.valid.ok")));
+        }
+        boolean isValidName = NameUtils.isValid(request.getName());
+        if (!isValidName) {
+            return ResponseEntity.ok(new MessageResponse(ERROR, message("name.valid.nok")));
+        }
+        if (apsUserService.exists(request.getUsername())) {
+            return ResponseEntity.badRequest().body(new MessageResponse(ERROR, message("email.duplicated")));
+        }
+        apsUserService.signUp(request);
+        return ResponseEntity.ok(new MessageResponse(OK, message("user.signup.ok", request.getLanguage())));
     }
 
     @PostMapping("/signin")
@@ -79,31 +101,9 @@ public class AuthController extends BaseController {
         return ResponseEntity.ok(new MessageResponse(OK, message("user.logoff.ok")));
     }
 
-    @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest request) {
-        boolean isValidEmail = EmailUtils.isValid(request.getUsername());
-        if (!isValidEmail) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("email.valid.nok")));
-        }
-        boolean isValidPassword = PasswordUtils.isValid(request.getPassword());
-        if (!isValidPassword) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("password.valid.ok")));
-        }
-        boolean isValidName = NameUtils.isValid(request.getName());
-        if (!isValidName) {
-            return ResponseEntity.ok(new MessageResponse(ERROR, message("name.valid.nok")));
-        }
-        if (apsUserService.exists(request.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(ERROR, message("email.duplicated")));
-        }
-        return ResponseEntity.ok(new MessageResponse(OK, message("user.signup.ok", request.getLanguage())));
-    }
-
     @GetMapping("/installations")
-    public ResponseEntity<?> getInstallations() {
-        List<DeviceDTO> list = apsUserService.getDevicesByUsername(getUsername());
+    public ResponseEntity<?> getDevices() {
+        List<DeviceDTO> list = apsUserService.getDevices(getUsername());
         return ResponseEntity.ok(new InstallationsResponse(MAX_ALLOWED, list));
     }
 
@@ -115,7 +115,7 @@ public class AuthController extends BaseController {
         if (!apsUserService.exists(username)) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("email.notfound")));
         }
-        apsUserService.setUserActive(username);
+        apsUserService.activeUser(username);
         return ResponseEntity.ok(new MessageResponse(OK, message("email.verified.ok")));
     }
 
@@ -124,9 +124,8 @@ public class AuthController extends BaseController {
         if (!apsUserService.exists(request.getUsername())) {
             return ResponseEntity.badRequest().build();
         }
-        PinCodeDTO pinCode = pinCodeService.generatePinCode(request, Verification.RESET_PASSWORD);
-        PinCodeResponse response = new PinCodeResponse(pinCode.getRequestId());
-        return ResponseEntity.ok(response);
+        String requestId = pinCodeService.generatePinCode(request, Verification.RESET_PASSWORD);
+        return ResponseEntity.ok(new PinCodeResponse(requestId));
     }
 
     @PutMapping("/pincode/{requestId}")
@@ -143,9 +142,10 @@ public class AuthController extends BaseController {
         if (!PasswordUtils.isValid(request.getPassword())) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("password.valid.nok")));
         }
-        PinCodeDTO pinCode = pinCodeService.findByRequestId(request.getRequestId());
+        UUID uuid = UUID.fromString(request.getRequestId());
+        PinCode pinCode = pinCodeService.findByRequestId(uuid);
         if (pinCode != null) {
-            if (pinCode.getPinCode().equals(request.getPinCode())) {
+            if (pinCode.getCode().equals(request.getPinCode())) {
                 apsUserService.updateUserPassword(pinCode.getEmail(), request.getPassword());
                 return ResponseEntity.ok(new MessageResponse(OK, message("password.change.ok")));
             }
@@ -154,7 +154,7 @@ public class AuthController extends BaseController {
     }
 
     @PostMapping("/change-password")
-    public ResponseEntity<?> changePassword(@Valid @RequestBody UpdatePasswordRequest request) {
+    public ResponseEntity<?> updateUserPassword(@Valid @RequestBody UpdatePasswordRequest request) {
         String username = request.getUsername();
         if (!StringUtils.hasText(username)) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("email.required")));
@@ -175,7 +175,7 @@ public class AuthController extends BaseController {
     }
 
     @PostMapping("/change-personal-info")
-    public ResponseEntity<?> changeUserInfo(@Valid @RequestBody UpdateUserRequest request) {
+    public ResponseEntity<?> updateUserInfo(@Valid @RequestBody UpdateUserRequest request) {
         if (!StringUtils.hasText(request.getUsername())) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("email.required")));
         }
@@ -185,7 +185,7 @@ public class AuthController extends BaseController {
         if (!NameUtils.isValid(request.getName())) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("name.valid.nok")));
         }
-        apsUserService.updateUser(request);
+        apsUserService.updateUserInfo(request);
         return ResponseEntity.ok(new MessageResponse(OK, message("user.info.change.ok")));
     }
 
