@@ -14,6 +14,7 @@ public class VideoCategoryMapper {
         return categoryDTO(entry.getKey(), entry.getValue());
 
     }
+
     public static CategoryDTO categoryDTO(VideoCategory videoCategory, List<Video> videos) {
         CategoryDTO dto = new CategoryDTO();
         dto.setCode(videoCategory.getCode());
@@ -21,4 +22,5 @@ public class VideoCategoryMapper {
         dto.setVideos(videos.stream().map(VideoMapper::videoDTO).collect(Collectors.toList()));
         return dto;
     }
+
 }

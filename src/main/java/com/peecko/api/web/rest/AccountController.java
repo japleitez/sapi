@@ -66,9 +66,4 @@ public class AccountController extends BaseController {
         return apsUserService.findIdByUsername(getUsername());
     }
 
-    private String getUsername() {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userDetails.getUsername();
-    }
-
 }

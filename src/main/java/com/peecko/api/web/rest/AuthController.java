@@ -220,11 +220,6 @@ public class AuthController extends BaseController {
         return ResponseEntity.ok(response);
     }
 
-    private String getUsername() {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userDetails.getUsername();
-    }
-
     private String message(String code) {
         Locale locale = apsUserService.getUserLocale(getUsername());
         return messageSource.getMessage(code, null, locale);

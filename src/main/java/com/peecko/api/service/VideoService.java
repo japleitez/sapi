@@ -24,6 +24,8 @@ public class VideoService {
     private final VideoCategoryRepo videoCategoryRepo;
     private final UserFavoriteVideoRepo userFavoriteVideoRepo;
 
+    private final int MAX_VIDEOS_BY_CATEGORY = 5;
+
     public VideoService(VideoRepo videoRepo, VideoCategoryRepo videoCategoryRepo, UserFavoriteVideoRepo userFavoriteVideoRepo) {
         this.videoRepo = videoRepo;
         this.videoCategoryRepo = videoCategoryRepo;
@@ -44,15 +46,28 @@ public class VideoService {
         Instant today = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant();
         Set<Long> favoriteIds = userFavoriteVideoRepo.findVideoIdsByApsUserId(apsUserId);
         List<Long> categoryIDs = videoCategoryRepo.findReleasedAsOfToday(today).stream().toList();
-        List<Video> videos = videoRepo
-                .findTopByCategoriesOrderByUploadDateDesc(categoryIDs, 5 * categoryIDs.size())
+        int limit  = MAX_VIDEOS_BY_CATEGORY * categoryIDs.size();
+        return  videoRepo
+                .findTopByCategoriesOrderByUploadDateDesc(categoryIDs, limit)
                 .stream()
                 .map(v -> resolveFavorite(v, favoriteIds))
+                .collect(Collectors.groupingBy(Video::getVideoCategory))
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().stream()
+                                .sorted(Comparator.comparing(Video::getReleased).reversed())
+                                .limit(MAX_VIDEOS_BY_CATEGORY)
+                                .collect(Collectors.toList())
+                ))
+                .entrySet()
+                .stream()
+                .map(VideoCategoryMapper::categoryDTO)
                 .collect(Collectors.toList());
-        return buildCategoryDTOs(videos);
     }
 
-    public CategoryDTO getAllVideosForCategory(Long apsUserId, String categoryCode) {
+    public CategoryDTO getCategory(Long apsUserId, String categoryCode) {
         VideoCategory videoCategory = videoCategoryRepo.findByCode(categoryCode).orElse(null);
         if (videoCategory == null) {
             return null;
@@ -67,22 +82,26 @@ public class VideoService {
         return VideoCategoryMapper.categoryDTO(videoCategory, videos);
     }
 
-    private List<CategoryDTO> buildCategoryDTOs(List<Video> videos) {
-        return videos.stream()
-                .collect(Collectors.groupingBy(Video::getVideoCategory))
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> entry.getValue().stream()
-                                .sorted(Comparator.comparing(Video::getReleased).reversed())
-                                .limit(5)
-                                .collect(Collectors.toList())
-                ))
-                .entrySet()
-                .stream()
-                .map(VideoCategoryMapper::categoryDTO)
-                .collect(Collectors.toList());
+    public void addFavoriteVideo(Long apsUserId, String videoCode) {
+        Video video = videoRepo.findByCode(videoCode).orElse(null);
+        if (video == null) {
+            return;
+        }
+        UserFavoriteVideo item = new UserFavoriteVideo();
+        item.setVideo(video);
+        item.setApsUserId(apsUserId);
+        userFavoriteVideoRepo.save(item);
+    }
+
+    public void removeFavoriteVideo(Long apsUserId, String videoCode) {
+        Video video = videoRepo.findByCode(videoCode).orElse(null);
+        if (video != null) {
+            userFavoriteVideoRepo.deleteByApsUserIdAndVideo(apsUserId, video);
+        }
+    }
+
+    public void deleteFavoriteVideosForUser(Long apsUserId) {
+        userFavoriteVideoRepo.deleteByApsUserId(apsUserId);
     }
 
     public List<VideoDTO> findUserFavoriteVideos(Long apsUserId) {
@@ -94,9 +113,6 @@ public class VideoService {
                 .collect(Collectors.toList());
     }
 
-    public void deleteAllFavoritesForUser(Long apsUserId) {
-        userFavoriteVideoRepo.deleteByApsUserId(apsUserId);
-    }
 
     private Video resolveFavorite(Video video, Set<Long> favoriteIds) {
         video.setFavorite(favoriteIds.contains(video.getId()));

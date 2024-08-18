@@ -10,6 +10,7 @@ import com.peecko.api.domain.dto.VideoDTO;
 import com.peecko.api.domain.dto.VideoItemDTO;
 import com.peecko.api.domain.mapper.PlayListMapper;
 import com.peecko.api.domain.mapper.VideoMapper;
+import com.peecko.api.domain.sorter.VideoListSorter;
 import com.peecko.api.repository.PlayListRepo;
 import com.peecko.api.repository.UserFavoriteVideoRepo;
 import com.peecko.api.repository.VideoItemRepo;
@@ -80,13 +81,12 @@ public class PlayListService {
                         .map(item -> getVideoItemDTO(item, favIds))
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
-                dto.getVideoItemDTOS().addAll(sortVideoItems(videoItemDTOS));
+                dto.getVideoItemDTOS().addAll(VideoListSorter.sortVideoList(videoItemDTOS));
             }
             return dto;
         }
         return null;
     }
-
 
     private VideoItemDTO getVideoItemDTO(VideoItem videoItem, Set<Long> favIds) {
         Video video = videoRepo.findByCode(videoItem.getCode()).orElse(null);
@@ -108,8 +108,8 @@ public class PlayListService {
 
     }
 
-
     public PlayList moveVideoItemBelowAnother(Long playlistId, String movingVideoCode, String targetVideoCode) {
+
         Optional<PlayList> playlistOptional = playListRepo.findById(playlistId);
 
         if (playlistOptional.isPresent()) {
@@ -268,25 +268,6 @@ public class PlayListService {
 
         // Remove the video item
         videoItemRepo.delete(videoItem);
-    }
-
-    private List<VideoItemDTO> sortVideoItems(List<VideoItemDTO> videoItemDTOS) {
-        List<VideoItemDTO> sortedList =  new ArrayList<>();
-        if (videoItemDTOS == null || videoItemDTOS.isEmpty()) {
-            return sortedList;
-        }
-        Integer index = 0;
-        VideoItemDTO videoItemDTO = videoItemDTOS.stream().filter(v -> !StringUtils.hasText(v.getPrevious())).findAny().get();
-        videoItemDTO.setIndex(index);
-        sortedList.add(videoItemDTO);
-        while (StringUtils.hasText(videoItemDTO.getNext())) {
-            String next = videoItemDTO.getNext();;
-            videoItemDTO = videoItemDTOS.stream().filter(v -> next.equals(v.getCode())).findAny().get();
-            index++;
-            videoItemDTO.setIndex(index);
-            sortedList.add(videoItemDTO);
-        }
-        return sortedList;
     }
 
 }

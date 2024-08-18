@@ -28,12 +28,10 @@ import static com.peecko.api.utils.Common.OK;
 public class MembershipController extends BaseController {
 
     final MessageSource messageSource;
-    final UserRepository userRepository;
     final AccountService accountService;
 
-    public MembershipController(MessageSource messageSource, UserRepository userRepository, AccountService accountService) {
+    public MembershipController(MessageSource messageSource, AccountService accountService) {
         this.messageSource = messageSource;
-        this.userRepository = userRepository;
         this.accountService = accountService;
     }
 
@@ -55,8 +53,4 @@ public class MembershipController extends BaseController {
         return messageSource.getMessage(code, null, Locale.ENGLISH);
     }
 
-    private String getUsername() {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userDetails.getUsername();
-    }
 }

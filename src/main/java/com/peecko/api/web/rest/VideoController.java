@@ -2,11 +2,9 @@ package com.peecko.api.web.rest;
 
 import com.peecko.api.domain.ApsUser;
 import com.peecko.api.domain.PlayList;
-import com.peecko.api.domain.VideoCategory;
 import com.peecko.api.domain.VideoItem;
 import com.peecko.api.domain.dto.*;
 import com.peecko.api.domain.enumeration.Lang;
-import com.peecko.api.domain.mapper.PlayListMapper;
 import com.peecko.api.repository.PlayListRepo;
 import com.peecko.api.repository.VideoCategoryRepo;
 import com.peecko.api.repository.VideoItemRepo;
@@ -19,30 +17,21 @@ import com.peecko.api.service.LabelService;
 import com.peecko.api.service.PlayListService;
 import com.peecko.api.service.VideoService;
 import com.peecko.api.utils.Common;
-import com.peecko.api.utils.FileDownloadUtil;
 import com.peecko.api.web.payload.request.CreatePlaylistRequest;
 import com.peecko.api.web.payload.response.LibraryResponse;
 import com.peecko.api.web.payload.response.MessageResponse;
 import com.peecko.api.web.payload.response.TodayResponse;
 import jakarta.validation.Valid;
 import org.springframework.context.MessageSource;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.peecko.api.utils.Common.ERROR;
 
@@ -51,8 +40,6 @@ import static com.peecko.api.utils.Common.ERROR;
 public class VideoController extends BaseController {
 
     final MessageSource messageSource;
-    final VideoRepository videoRepository;
-    final UserRepository userRepository;
     final ResourceLoader resourceLoader;
     final VideoService videoService;
     final LabelService labelService;
@@ -65,10 +52,8 @@ public class VideoController extends BaseController {
 
     final PlayListService playListService;
 
-    public VideoController(MessageSource messageSource, VideoRepository videoRepository, UserRepository userRepository, ResourceLoader resourceLoader, VideoService videoService, LabelService labelService, ApsUserService apsUserService, PlayListRepo playListRepo, VideoRepo videoRepo, VideoItemRepo videoItemRepo, VideoCategoryRepo videoCategoryRepo, PlayListService playListService) {
+    public VideoController(MessageSource messageSource, ResourceLoader resourceLoader, VideoService videoService, LabelService labelService, ApsUserService apsUserService, PlayListRepo playListRepo, VideoRepo videoRepo, VideoItemRepo videoItemRepo, VideoCategoryRepo videoCategoryRepo, PlayListService playListService) {
         this.messageSource = messageSource;
-        this.videoRepository = videoRepository;
-        this.userRepository = userRepository;
         this.resourceLoader = resourceLoader;
         this.videoService = videoService;
         this.labelService = labelService;
@@ -189,31 +174,25 @@ public class VideoController extends BaseController {
 
     @GetMapping("/categories/{code}")
     public ResponseEntity<?> getCategory(@PathVariable String code) {
-        CategoryDTO category = videoService.getAllVideosForCategory(getApsUserId(), code);
+        CategoryDTO category = videoService.getCategory(getApsUserId(), code);
         return ResponseEntity.ofNullable(category); // 404 Not Found
     }
 
-    /**
-     * TO IMPLEMENT
-     */
     @PutMapping("/favorites/{code}")
     public ResponseEntity<?> addFavorite(@PathVariable String code) {
-        String username = getUsername(userRepository);
-        videoRepository.addFavorite(username, code);
+        videoService.addFavoriteVideo(getApsUserId(), code);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/favorites/{code}")
     public ResponseEntity<?> removeFavorite(@PathVariable String code) {
-        String username = getUsername(userRepository);
-        videoRepository.removeFavorite(username, code);
+        videoService.removeFavoriteVideo(getApsUserId(), code);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/favorites")
     public ResponseEntity<?> removeFavorites() {
-        Long apsUserId = getApsUserId();
-        videoService.deleteAllFavoritesForUser(apsUserId);
+        videoService.deleteFavoriteVideosForUser(getApsUserId());
         return ResponseEntity.ok().build();
     }
 
@@ -221,17 +200,8 @@ public class VideoController extends BaseController {
         return messageSource.getMessage(code, null, locale);
     }
 
-    private Lang getApsUserLang() {
-        return apsUserService.findLangByUsername(getUsername());
-    }
-
     private Long getApsUserId() {
         return apsUserService.findIdByUsername(getUsername());
-    }
-
-    private String getUsername() {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userDetails.getUsername();
     }
 
 }
