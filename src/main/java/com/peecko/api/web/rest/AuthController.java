@@ -5,7 +5,6 @@ import com.peecko.api.domain.dto.PinCodeDTO;
 import com.peecko.api.domain.dto.UserDTO;
 import com.peecko.api.domain.enumeration.Verification;
 import com.peecko.api.security.JwtUtils;
-import com.peecko.api.security.LicenseServiceImpl;
 import com.peecko.api.service.ApsUserService;
 import com.peecko.api.service.InvalidJwtService;
 import com.peecko.api.service.PinCodeService;
@@ -44,10 +43,9 @@ public class AuthController extends BaseController {
     private final ApsUserService apsUserService;
     private final PinCodeService pinCodeService;
     private final AuthenticationManager authenticationManager;
-    private final LicenseServiceImpl licenseService;
     private final InvalidJwtService invalidJwtService;
 
-    public AuthController(JwtUtils jwtUtils, PasswordEncoder encoder, MessageSource messageSource, ApsUserService apsUserService, PinCodeService pinCodeService, AuthenticationManager authenticationManager, LicenseServiceImpl licenseService, InvalidJwtService invalidJwtService) {
+    public AuthController(JwtUtils jwtUtils, PasswordEncoder encoder, MessageSource messageSource, ApsUserService apsUserService, PinCodeService pinCodeService, AuthenticationManager authenticationManager, InvalidJwtService invalidJwtService) {
         this.jwtUtils = jwtUtils;
         this.encoder = encoder;
         this.messageSource = messageSource;
@@ -55,7 +53,6 @@ public class AuthController extends BaseController {
         this.pinCodeService = pinCodeService;
         this.invalidJwtService = invalidJwtService;
         this.authenticationManager = authenticationManager;
-        this.licenseService = licenseService;
     }
 
     @PostMapping("/signin")

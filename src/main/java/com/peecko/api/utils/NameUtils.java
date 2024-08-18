@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//https://stackoverflow.com/questions/15805555/java-regex-to-validate-full-name-allow-only-spaces-and-letters
 public abstract class NameUtils {
     private static String NAME_REGEX = "^\\p{L}+[\\p{L}\\p{Z}\\p{P}]{0,}";
     private static String INVALID_CHARS = "!#$%&()*+/0123456789:;<=>?@[\\]^_{|},~`";

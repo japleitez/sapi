@@ -10,13 +10,9 @@ import java.util.Set;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-/**
- * A ApsOrder.
- */
 @Entity
 @Table(name = "aps_order")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-@SuppressWarnings("common-java:DuplicatedBlocks")
 public class ApsOrder implements Serializable {
 
     private static final long serialVersionUID = 1L;

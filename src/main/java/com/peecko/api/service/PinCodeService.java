@@ -47,7 +47,7 @@ public class PinCodeService {
         PinCode pinCode = new PinCode();
         pinCode.setLanguage(user.language());
         pinCode.setEmail(request.getUsername().toLowerCase());
-        pinCode.setCode(Common.generateRandomDigitString(4));
+        pinCode.setCode(Common.randomDigitsAsString(4));
         pinCode.setExpireAt(LocalDateTime.now().plusMinutes(10));
         pinCode.setVerification(verification);
         pinCodeRepo.save(pinCode);

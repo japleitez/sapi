@@ -5,7 +5,6 @@ import org.springframework.util.StringUtils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//https://www.baeldung.com/java-email-validation-regex
 public abstract class EmailUtils {
 
     private static final String REGEX = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@"

@@ -3,8 +3,6 @@ package com.peecko.api.security;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
@@ -12,9 +10,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class LicenseAuthAspect {
 
-    final LicenseServiceImpl licenseService;
+    final LicenseService licenseService;
 
-    public LicenseAuthAspect(LicenseServiceImpl licenseService) {
+    public LicenseAuthAspect(LicenseService licenseService) {
         this.licenseService = licenseService;
     }
 

@@ -57,7 +57,7 @@ public class AccountService {
         Optional<ApsUser> optUser = apsUserRepo.findByUsername(username);
         if (optUser.isPresent()) {
             ApsUser apsUser = optUser.get();
-            Optional<ApsMembership> optMembership = apsMembershipRepo.findByUsernameAndPeriod(username, Common.currentYearMonth());
+            Optional<ApsMembership> optMembership = apsMembershipRepo.findByUsernameAndPeriod(username, Common.currentPeriod());
             if (optMembership.isPresent()) {
                 Customer customer = Customer.of(optMembership.get().getCustomerId());
                 List<Notification> notifications = getActiveNotificationsForCustomer(customer);

@@ -8,8 +8,6 @@ import com.peecko.api.service.ApsUserService;
 import com.peecko.api.service.LanguageService;
 import com.peecko.api.web.payload.response.LanguageResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

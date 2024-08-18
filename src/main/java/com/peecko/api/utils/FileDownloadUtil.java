@@ -2,13 +2,10 @@ package com.peecko.api.utils;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-// https://www.codejava.net/frameworks/spring-boot/file-download-upload-rest-api-examples
 
 public class FileDownloadUtil {
     Path foundFile;

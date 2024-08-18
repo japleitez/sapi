@@ -16,8 +16,6 @@ import com.peecko.api.repository.UserFavoriteVideoRepo;
 import com.peecko.api.repository.VideoItemRepo;
 import com.peecko.api.repository.VideoRepo;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;

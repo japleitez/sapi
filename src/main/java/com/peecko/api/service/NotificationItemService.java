@@ -5,6 +5,7 @@ import com.peecko.api.repository.NotificationItemRepo;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 @Service
 public class NotificationItemService {
 

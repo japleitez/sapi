@@ -10,9 +10,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import java.io.Serializable;
 import java.time.LocalDate;
 
-/**
- * A Notification.
- */
 @Entity
 @Table(name = "notification")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)

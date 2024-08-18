@@ -7,7 +7,5 @@ import lombok.Setter;
 @Data
 @Setter @Getter
 public class CreatePlaylistRequest {
-
     String name;
-
 }

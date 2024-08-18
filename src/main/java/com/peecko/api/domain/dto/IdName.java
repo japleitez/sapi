@@ -1,6 +1,5 @@
 package com.peecko.api.domain.dto;
 
-
 import lombok.*;
 import lombok.experimental.Accessors;
 

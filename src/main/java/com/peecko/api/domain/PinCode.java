@@ -3,8 +3,6 @@ package com.peecko.api.domain;
 import com.peecko.api.domain.enumeration.Verification;
 import org.hibernate.annotations.GenericGenerator;
 import jakarta.persistence.*;
-
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 

@@ -36,7 +36,7 @@ public class MembershipController extends BaseController {
         if (!StringUtils.hasLength(license) && license.length() != 20) {
             return ResponseEntity.ok(new MessageResponse(ERROR, message("membership.valid.nok")));
         }
-        boolean activated = accountService.activateUserLicense(getUsername(), Common.currentYearMonth(), license);
+        boolean activated = accountService.activateUserLicense(getUsername(), Common.currentPeriod(), license);
         if (activated) {
             return ResponseEntity.ok(new MessageResponse(OK, message("membership.activate.ok")));
         } else {

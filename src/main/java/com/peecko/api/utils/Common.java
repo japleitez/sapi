@@ -10,19 +10,14 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.time.temporal.TemporalAdjusters;
+
 public abstract class Common {
 
     private static final int MAX = 9;
-
     private static final int MIN = 0;
-
     public static final int MAX_ALLOWED = 3;
-
     public static final String OK = "OK";
-
     public static final String ERROR = "ERROR";
-
     private static final Random RANDOM = new Random();
 
     public static void main(String[] args) {
@@ -112,25 +107,26 @@ public abstract class Common {
         return apsDevice;
     }
 
-
-    public static int currentYearMonth() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMM");
-        String yearMonthString = LocalDate.now().format(formatter);
-        return Integer.parseInt(yearMonthString);
+    public static int currentPeriod() {
+        LocalDate today = LocalDate.now();
+        int year = today.getYear();
+        int month = today.getMonthValue();
+        return year * 100 + month;
     }
 
     public static String lastDayOfMonthAsString() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         LocalDate lastDayOfMonth = lastDayOfMonth();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         return lastDayOfMonth.format(formatter);
     }
 
     public static LocalDate lastDayOfMonth() {
-        LocalDate currentDate = LocalDate.now();
-        return currentDate.with(TemporalAdjusters.lastDayOfMonth());
+        LocalDate today = LocalDate.now();
+        YearMonth yearMonth = YearMonth.of(today.getYear(), today.getMonth());
+        return yearMonth.atEndOfMonth();
     }
 
-    public static Lang toLanguage(String lang) {
+    public static Lang toLang(String lang) {
         if (lang == null) {
             return Lang.EN;
         }
@@ -141,7 +137,7 @@ public abstract class Common {
         }
     }
 
-    public static String generateRandomDigitString(int length) {
+    public static String randomDigitsAsString(int length) {
         Random random = new Random();
         StringBuilder stringBuilder = new StringBuilder(length);
 

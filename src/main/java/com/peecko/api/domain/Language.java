@@ -2,7 +2,6 @@ package com.peecko.api.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 
 @Entity
 public class Language {

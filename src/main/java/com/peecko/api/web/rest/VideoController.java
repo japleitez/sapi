@@ -39,12 +39,10 @@ public class VideoController extends BaseController {
     final VideoService videoService;
     final LabelService labelService;
     final ApsUserService apsUserService;
-
     final PlayListRepo playListRepo;
     final VideoRepo videoRepo;
     final VideoItemRepo videoItemRepo;
     final VideoCategoryRepo videoCategoryRepo;
-
     final PlayListService playListService;
 
     public VideoController(MessageSource messageSource, ResourceLoader resourceLoader, VideoService videoService, LabelService labelService, ApsUserService apsUserService, PlayListRepo playListRepo, VideoRepo videoRepo, VideoItemRepo videoItemRepo, VideoCategoryRepo videoCategoryRepo, PlayListService playListService) {

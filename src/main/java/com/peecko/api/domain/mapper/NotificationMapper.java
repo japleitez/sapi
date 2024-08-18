@@ -3,8 +3,6 @@ package com.peecko.api.domain.mapper;
 import com.peecko.api.domain.Notification;
 import com.peecko.api.domain.dto.NotificationDTO;
 import com.peecko.api.utils.Common;
-
-import java.util.List;
 import java.util.Set;
 
 public class NotificationMapper {

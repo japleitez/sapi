@@ -9,7 +9,6 @@ import lombok.Setter;
 public class UpdateUserRequest {
 
     String username;
-
     String name;
 
 }

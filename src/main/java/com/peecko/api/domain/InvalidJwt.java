@@ -1,7 +1,6 @@
 package com.peecko.api.domain;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity

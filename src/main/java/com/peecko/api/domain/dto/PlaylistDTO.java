@@ -2,7 +2,6 @@ package com.peecko.api.domain.dto;
 
 import lombok.*;
 import lombok.experimental.Accessors;
-
 import java.util.ArrayList;
 import java.util.List;
 

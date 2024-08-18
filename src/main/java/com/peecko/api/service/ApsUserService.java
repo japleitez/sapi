@@ -99,7 +99,7 @@ public class ApsUserService {
         ApsUser apsUser = new ApsUser();
         apsUser.username(request.getUsername().toLowerCase());
         apsUser.name(NameUtils.camel(request.getName()));
-        apsUser.language(Common.toLanguage(request.getLanguage()));
+        apsUser.language(Common.toLang(request.getLanguage()));
         apsUser.password(passwordEncoder.encode(request.getPassword()));
         apsUserRepo.save(apsUser);
         return ApsUserMapper.userDTO(apsUser);
@@ -127,7 +127,7 @@ public class ApsUserService {
     }
 
     private UserProfileResponse buildLoginResponse(ApsUser apsUser) {
-        int currentPeriod = Common.currentYearMonth();
+        int currentPeriod = Common.currentPeriod();
         int deviceCount = apsUser.getApsDevices().size();
         UserProfileResponse response = new UserProfileResponse();
         response.setToken(apsUser.getJwt());
