@@ -13,7 +13,7 @@ public interface VideoCategoryRepo extends JpaRepository<VideoCategory, Long> {
 
     Optional<VideoCategory> findByCode(String code);
 
-    @Query("SELECT vc.id FROM VideoCategory vc WHERE vc.released <= :today AND vc.archived IS NULL")
-    List<Long> findReleasedAsOfToday(Instant today);
+    @Query("SELECT vc FROM VideoCategory vc WHERE vc.released <= :today AND vc.archived IS NULL")
+    List<VideoCategory> findReleasedAsOfToday(Instant today);
 
 }

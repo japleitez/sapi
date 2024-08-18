@@ -10,6 +10,8 @@ import com.peecko.api.domain.mapper.VideoMapper;
 import com.peecko.api.repository.UserFavoriteVideoRepo;
 import com.peecko.api.repository.VideoCategoryRepo;
 import com.peecko.api.repository.VideoRepo;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -44,22 +46,14 @@ public class VideoService {
     public List<CategoryDTO> getLibrary(Long apsUserId) {
         Instant today = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant();
         Set<Long> favoriteIds = userFavoriteVideoRepo.findVideoIdsByApsUserId(apsUserId);
-        List<Long> categoryIDs = videoCategoryRepo.findReleasedAsOfToday(today).stream().toList();
-        int limit  = MAX_VIDEOS_BY_CATEGORY * categoryIDs.size();
-        return  videoRepo
-                .findTopByCategories(categoryIDs, limit)
-                .stream()
-                .map(v -> resolveFavorite(v, favoriteIds))
-                .collect(Collectors.groupingBy(Video::getVideoCategory))
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> entry.getValue().stream()
-                                .sorted(Comparator.comparing(Video::getReleased).reversed())
-                                .limit(MAX_VIDEOS_BY_CATEGORY)
-                                .collect(Collectors.toList())
-                ))
+        List<VideoCategory> videoCategories = videoCategoryRepo.findReleasedAsOfToday(today);
+        Map<VideoCategory, List<Video>> latestVideosByCategory = new HashMap<>();
+        for (VideoCategory category : videoCategories) {
+            List<Video> latestVideos = videoRepo.findTopReleasedAndNotArchived(category, today, PageRequest.of(0, 5));
+            latestVideos.forEach(v -> resolveFavorite(v, favoriteIds));
+            latestVideosByCategory.put(category, latestVideos);
+        }
+        return latestVideosByCategory
                 .entrySet()
                 .stream()
                 .map(VideoCategoryMapper::categoryDTO)
