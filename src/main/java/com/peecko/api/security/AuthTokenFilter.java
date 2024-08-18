@@ -1,6 +1,5 @@
 package com.peecko.api.security;
 
-import com.peecko.api.repository.fake.UserRepository;
 import com.peecko.api.service.UserDetailsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,9 +27,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     @Autowired
     UserDetailsServiceImpl userDetailsService;
-
-    @Autowired
-    UserRepository userRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
@@ -63,10 +59,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     }
 
     private boolean notInBlackList(String jwt) {
-        if (userRepository.isInvalidJwt(jwt)) {
-            logger.info("JWT was in logged out list");
-            return false;
-        }
+        //TODO return false if jwt is in black list
         return true;
     }
 
