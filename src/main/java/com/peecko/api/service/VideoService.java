@@ -5,7 +5,6 @@ import com.peecko.api.domain.Video;
 import com.peecko.api.domain.VideoCategory;
 import com.peecko.api.domain.dto.VideoDTO;
 import com.peecko.api.domain.enumeration.Lang;
-import com.peecko.api.domain.mapper.VideoMapper;
 import com.peecko.api.repository.UserFavoriteVideoRepo;
 import com.peecko.api.repository.VideoCategoryRepo;
 import com.peecko.api.repository.VideoRepo;
@@ -21,18 +20,20 @@ import java.util.stream.Collectors;
 
 @Service
 public class VideoService {
+
+    final VideoMapper videoMapper;
     final VideoRepo videoRepo;
     final CacheManager cacheManager;
     final VideoCategoryRepo videoCategoryRepo;
     final UserFavoriteVideoRepo userFavoriteVideoRepo;
 
-    public VideoService(VideoRepo videoRepo, CacheManager cacheManager, VideoCategoryRepo videoCategoryRepo, UserFavoriteVideoRepo userFavoriteVideoRepo) {
+    public VideoService(VideoMapper videoMapper, VideoRepo videoRepo, CacheManager cacheManager, VideoCategoryRepo videoCategoryRepo, UserFavoriteVideoRepo userFavoriteVideoRepo) {
+        this.videoMapper = videoMapper;
         this.videoRepo = videoRepo;
         this.cacheManager = cacheManager;
         this.videoCategoryRepo = videoCategoryRepo;
         this.userFavoriteVideoRepo = userFavoriteVideoRepo;
     }
-
 
     @Cacheable(value = "todayVideos")
     public List<Video> getTodayVideos() {
@@ -69,10 +70,7 @@ public class VideoService {
     }
 
     public void removeFavoriteVideo(Long apsUserId, String videoCode) {
-        Video video = videoRepo.findByCode(videoCode).orElse(null);
-        if (video != null) {
-            userFavoriteVideoRepo.deleteByApsUserIdAndVideo(apsUserId, video);
-        }
+        videoRepo.findByCode(videoCode).ifPresent(video -> userFavoriteVideoRepo.deleteByApsUserIdAndVideo(apsUserId, video));
     }
 
     public void deleteFavoriteVideosForUser(Long apsUserId) {
@@ -84,7 +82,7 @@ public class VideoService {
                 .findByApsUserIdOrderByIdDesc(apsUserId)
                 .stream()
                 .map(UserFavoriteVideo::getVideo)
-                .map(VideoMapper::favoriteVideoDTO)
+                .map(videoMapper::favoriteVideoDTO)
                 .collect(Collectors.toList());
     }
 

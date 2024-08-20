@@ -3,8 +3,7 @@ package com.peecko.api.web.rest;
 import com.peecko.api.domain.*;
 import com.peecko.api.domain.dto.*;
 import com.peecko.api.domain.enumeration.Lang;
-import com.peecko.api.domain.mapper.VideoCategoryMapper;
-import com.peecko.api.domain.mapper.VideoMapper;
+import com.peecko.api.service.VideoMapper;
 import com.peecko.api.repository.*;
 import com.peecko.api.security.Licensed;
 import com.peecko.api.service.ApsUserService;
@@ -30,6 +29,7 @@ import static com.peecko.api.utils.Common.ERROR;
 @RequestMapping("/api/videos")
 public class VideoController extends BaseController {
 
+    final VideoMapper videoMapper;
     final VideoRepo videoRepo;
     final PlayListRepo playListRepo;
     final LabelService labelService;
@@ -40,10 +40,9 @@ public class VideoController extends BaseController {
     final PlayListService playListService;
     final VideoCategoryRepo videoCategoryRepo;
     final UserFavoriteVideoRepo userFavoriteVideoRepo;
-    private final ApsUserRepo apsUserRepo;
 
-    public VideoController(VideoRepo videoRepo, PlayListRepo playListRepo, LabelService labelService, VideoService videoService, VideoItemRepo videoItemRepo, MessageSource messageSource, ApsUserService apsUserService, PlayListService playListService, VideoCategoryRepo videoCategoryRepo, UserFavoriteVideoRepo userFavoriteVideoRepo,
-                           ApsUserRepo apsUserRepo) {
+    public VideoController(VideoMapper videoMapper, VideoRepo videoRepo, PlayListRepo playListRepo, LabelService labelService, VideoService videoService, VideoItemRepo videoItemRepo, MessageSource messageSource, ApsUserService apsUserService, PlayListService playListService, VideoCategoryRepo videoCategoryRepo, UserFavoriteVideoRepo userFavoriteVideoRepo) {
+        this.videoMapper = videoMapper;
         this.videoRepo = videoRepo;
         this.playListRepo = playListRepo;
         this.labelService = labelService;
@@ -54,26 +53,25 @@ public class VideoController extends BaseController {
         this.playListService = playListService;
         this.videoCategoryRepo = videoCategoryRepo;
         this.userFavoriteVideoRepo = userFavoriteVideoRepo;
-        this.apsUserRepo = apsUserRepo;
     }
 
     @Licensed
     @GetMapping("/today")
     public ResponseEntity<TodayResponse> getTodayVideos() {
-        String greeting = labelService.getLabel("greeting.today");
+        String greeting = labelService.getLabel("greeting.today", Lang.EN);
         List<Video> todayVideos = videoService.getTodayVideos();
         Set<Long> favoriteIds = userFavoriteVideoRepo.findVideoIdsByApsUserId(getApsUserId());
         if (!favoriteIds.isEmpty()) {
             todayVideos.forEach(v -> v.setFavorite(favoriteIds.contains(v.getId())));
         }
-        List<VideoDTO> videos = todayVideos.stream().map(VideoMapper::videoDTO).collect(Collectors.toList());
+        List<VideoDTO> videos = todayVideos.stream().map(videoMapper::videoDTO).collect(Collectors.toList());
         List<String> tags = Common.getVideoTags(videos);
         return ResponseEntity.ok(new TodayResponse(greeting, videos, tags));
     }
 
     @GetMapping("/categories")
     public ResponseEntity<LibraryResponse> getLibrary() {
-        String greeting = labelService.getLabel("greeting.library");
+        String greeting = labelService.getLabel("greeting.library", Lang.EN);
         Lang lang = apsUserService.getUserLang(getUsername());
         Map<VideoCategory, List<Video>> latestVideosByCategory = videoService.getVideoLibrary(lang);
         Set<Long> favoriteIds = userFavoriteVideoRepo.findVideoIdsByApsUserId(getApsUserId());
@@ -86,14 +84,14 @@ public class VideoController extends BaseController {
         List<CategoryDTO> categories = latestVideosByCategory
                 .entrySet()
                 .stream()
-                .map(VideoCategoryMapper::categoryDTO)
+                .map(videoMapper::categoryDTO)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(new LibraryResponse(greeting, categories));
     }
 
     @GetMapping("/favorites")
     public ResponseEntity<?> getFavorites() {
-        String greeting = labelService.getLabel("greeting.favorites");
+        String greeting = labelService.getLabel("greeting.favorites", Lang.EN);
         List<VideoDTO> videos = videoService.findUserFavoriteVideos(getApsUserId());
         List<String> tags = Common.getVideoTags(videos);
         return ResponseEntity.ok(new TodayResponse(greeting, videos, tags));
@@ -195,7 +193,7 @@ public class VideoController extends BaseController {
         if (!favoriteIds.isEmpty()) {
             videos.forEach(v -> v.setFavorite(favoriteIds.contains(v.getId())));
         }
-        CategoryDTO category = VideoCategoryMapper.categoryDTO(videoCategory, videos);
+        CategoryDTO category = videoMapper.categoryDTO(videoCategory, videos);
         return ResponseEntity.ok(category);
     }
 

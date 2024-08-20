@@ -9,7 +9,6 @@ import com.peecko.api.domain.dto.PlaylistDTO;
 import com.peecko.api.domain.dto.VideoDTO;
 import com.peecko.api.domain.dto.VideoItemDTO;
 import com.peecko.api.domain.mapper.PlayListMapper;
-import com.peecko.api.domain.mapper.VideoMapper;
 import com.peecko.api.domain.sorter.VideoListSorter;
 import com.peecko.api.repository.PlayListRepo;
 import com.peecko.api.repository.UserFavoriteVideoRepo;
@@ -23,13 +22,15 @@ import java.util.stream.Collectors;
 @Service
 public class PlayListService {
 
+    final VideoMapper videoMapper;
     final PlayListRepo playListRepo;
     final VideoItemRepo videoItemRepo;
     final VideoRepo videoRepo;
     final UserFavoriteVideoRepo userFavoriteVideoRepo;
 
 
-    public PlayListService(PlayListRepo playListRepo, VideoItemRepo videoItemRepo, VideoRepo videoRepo, UserFavoriteVideoRepo userFavoriteVideoRepo) {
+    public PlayListService(VideoMapper videoMapper, PlayListRepo playListRepo, VideoItemRepo videoItemRepo, VideoRepo videoRepo, UserFavoriteVideoRepo userFavoriteVideoRepo) {
+        this.videoMapper = videoMapper;
         this.playListRepo = playListRepo;
         this.videoItemRepo = videoItemRepo;
         this.videoRepo = videoRepo;
@@ -91,7 +92,7 @@ public class PlayListService {
         if (video != null) {
             VideoItemDTO itemDTO = new VideoItemDTO();
             itemDTO.setCode(videoItem.getCode());
-            VideoDTO videoDTO = VideoMapper.videoDTO(video);
+            VideoDTO videoDTO = videoMapper.videoDTO(video);
             videoDTO.setFavorite(favIds.contains(video.getId()));
             itemDTO.setVideo(videoDTO);
             if (videoItem.getPrevious() != null) {

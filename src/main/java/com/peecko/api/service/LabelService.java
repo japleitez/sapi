@@ -1,17 +1,25 @@
 package com.peecko.api.service;
 
+import com.peecko.api.domain.Label;
+import com.peecko.api.domain.enumeration.Lang;
+import com.peecko.api.repository.LabelRepo;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
 public class LabelService {
-    private static final Map<String, String> LABELS = new HashMap<>();
 
-    static {
-        LABELS.put("greeting", "Here is your daily dose of Fitness and Wellness.");
+    final LabelRepo labelRepo;
+
+    public LabelService(LabelRepo labelRepo) {
+        this.labelRepo = labelRepo;
     }
-    public String getLabel(String name) {
-        return LABELS.getOrDefault(name, name);
+
+    @Cacheable(value = "labels", key = "#code + '-' + #lang.name()")
+    public String getLabel(String code, Lang lang) {
+        return labelRepo.findByCodeAndLang(code, lang).map(Label::getText).orElse(code);
     }
+
 }

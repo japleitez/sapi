@@ -14,7 +14,7 @@ public class CacheConfig {
 
     @Bean
     public CaffeineCacheManager cacheManager() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager("todayVideos", "videoLibrary", "videosByCategory");
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager("labels", "todayVideos", "videoLibrary", "videosByCategory");
         cacheManager.setCaffeine(caffeineCacheBuilder());
         return cacheManager;
     }

@@ -9,7 +9,7 @@ public class Label {
 
     @Id
     private Long id;
-    private String name;
+    private String code;
     private Lang lang;
     private String text;
 
@@ -21,12 +21,12 @@ public class Label {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getCode() {
+        return code;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public Lang getLang() {
