@@ -77,6 +77,10 @@ public class ApsUserService {
         return Locale.forLanguageTag(lang.name());
     }
 
+    public Lang getUserLang(String username) {
+        return apsUserRepo.findByUsername(username.toLowerCase()).map(ApsUser::getLanguage).orElse(Lang.EN);
+    }
+
     public void activeUser(String username) {
         Optional<ApsUser> optional = apsUserRepo.findByUsername(username.toLowerCase());
         if (optional.isPresent()) {
