@@ -4,6 +4,7 @@ import com.peecko.api.domain.UserFavoriteVideo;
 import com.peecko.api.domain.Video;
 import com.peecko.api.domain.VideoCategory;
 import com.peecko.api.domain.dto.VideoDTO;
+import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.domain.mapper.VideoMapper;
 import com.peecko.api.repository.UserFavoriteVideoRepo;
 import com.peecko.api.repository.VideoCategoryRepo;
@@ -38,26 +39,22 @@ public class VideoService {
         return videoRepo.findAll();
     }
 
-    @Cacheable(value = "videoLibrary")
-    public Map<VideoCategory, List<Video>> getVideoLibrary() {
+    @Cacheable(value = "videoLibrary", key = "#lang.name()")
+    public Map<VideoCategory, List<Video>> getVideoLibrary(Lang lang) {
         Instant today = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant();
         List<VideoCategory> videoCategories = videoCategoryRepo.findReleasedAsOfToday(today);
         Map<VideoCategory, List<Video>> latestVideosByCategory = new HashMap<>();
         for (VideoCategory category : videoCategories) {
-            List<Video> latestVideos = videoRepo.findTopReleasedAndNotArchived(category, today, PageRequest.of(0, 5));
+            List<Video> latestVideos = videoRepo.findLatestVideosByCategoryAndLang(category, lang, today, PageRequest.of(0, 5));
             latestVideosByCategory.put(category, latestVideos);
         }
         return latestVideosByCategory;
     }
 
-    @Cacheable(value = "videosByCategory", key = "#code + '-' + #language")
-    public List<Video> getVideosByCategoryAndLang(String code, String language) {
-        VideoCategory videoCategory = videoCategoryRepo.findByCode(code).orElse(null);
-        if (videoCategory != null) {
-            Instant today = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant();
-            return videoRepo.findReleasedAndNotArchived(videoCategory, today);
-        }
-        return new ArrayList<>();
+    @Cacheable(value = "videosByCategory", key = "#videoCategory.code + '-' + #lang.name()")
+    public List<Video> getVideosByCategoryAndLang(VideoCategory videoCategory, Lang lang) {
+        Instant today = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant();
+        return videoRepo.findReleasedByCategoryAndLang(videoCategory, lang, today);
     }
 
     public void addFavoriteVideo(Long apsUserId, String videoCode) {

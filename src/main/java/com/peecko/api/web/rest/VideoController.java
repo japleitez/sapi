@@ -74,7 +74,8 @@ public class VideoController extends BaseController {
     @GetMapping("/categories")
     public ResponseEntity<LibraryResponse> getLibrary() {
         String greeting = labelService.getLabel("greeting.library");
-        Map<VideoCategory, List<Video>> latestVideosByCategory = videoService.getVideoLibrary();
+        Lang lang = apsUserService.getUserLang(getUsername());
+        Map<VideoCategory, List<Video>> latestVideosByCategory = videoService.getVideoLibrary(lang);
         Set<Long> favoriteIds = userFavoriteVideoRepo.findVideoIdsByApsUserId(getApsUserId());
         if (!favoriteIds.isEmpty()) {
             latestVideosByCategory
@@ -186,16 +187,16 @@ public class VideoController extends BaseController {
     public ResponseEntity<CategoryDTO> getCategory(@PathVariable String code) {
         VideoCategory videoCategory = videoCategoryRepo.findByCode(code).orElse(null);
         if (videoCategory == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.notFound().build(); // 404 Not Found
         }
         Lang lang = apsUserService.getUserLang(getUsername());
-        List<Video> videos = videoService.getVideosByCategoryAndLang(code, lang.name());
+        List<Video> videos = videoService.getVideosByCategoryAndLang(videoCategory, lang);
         Set<Long> favoriteIds = userFavoriteVideoRepo.findVideoIdsByApsUserId(getApsUserId());
         if (!favoriteIds.isEmpty()) {
             videos.forEach(v -> v.setFavorite(favoriteIds.contains(v.getId())));
         }
         CategoryDTO category = VideoCategoryMapper.categoryDTO(videoCategory, videos);
-        return ResponseEntity.ok(category); // 404 Not Found
+        return ResponseEntity.ok(category);
     }
 
     @PutMapping("/favorites/{code}")
