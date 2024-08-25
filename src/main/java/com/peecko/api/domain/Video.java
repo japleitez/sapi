@@ -7,6 +7,8 @@ import com.peecko.api.domain.enumeration.Player;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Table(name = "video")
@@ -64,6 +66,10 @@ public class Video implements Serializable {
 
     @Column(name = "archived")
     private Instant archived;
+
+    LocalDate publicationDate;
+
+    public int selectionCount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnoreProperties(value = { "videos" }, allowSetters = true)
@@ -226,5 +232,14 @@ public class Video implements Serializable {
 
     public void setFavorite(boolean favorite) {
         this.favorite = favorite;
+    }
+
+
+    public void incrementSelectionCount() {
+        this.selectionCount++;
+    }
+
+    public long getDaysSincePublication() {
+        return ChronoUnit.DAYS.between(publicationDate, LocalDate.now());
     }
 }

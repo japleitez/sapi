@@ -1,10 +1,8 @@
 package com.peecko.api.service;
 
 import com.peecko.api.domain.PinCode;
-import com.peecko.api.domain.dto.PinCodeDTO;
 import com.peecko.api.domain.dto.UserDTO;
 import com.peecko.api.domain.enumeration.Verification;
-import com.peecko.api.domain.mapper.PinCodeMapper;
 import com.peecko.api.repository.PinCodeRepo;
 import com.peecko.api.service.context.EmailContext;
 import com.peecko.api.utils.Common;
@@ -36,8 +34,8 @@ public class PinCodeService {
         this.apsUserService = apsUserService;
     }
 
-    public PinCode findByRequestId(UUID uuid) {
-        return pinCodeRepo.findById(uuid).orElse(null);
+    public PinCode findByRequestId(String requestId) {
+        return pinCodeRepo.findById(UUID.fromString(requestId)).orElse(null);
     }
 
     @Transactional
@@ -56,11 +54,7 @@ public class PinCodeService {
 
     public boolean isPinCodeValid(String requestId, String code) {
         UUID uuid = UUID.fromString(requestId);
-        return pinCodeRepo.findById(uuid).map(pinCode -> isCodeValid(pinCode, code)).orElse(false);
-    }
-
-    private boolean isCodeValid(PinCode pinCode, String code) {
-        return code.equals(pinCode.getCode());
+        return pinCodeRepo.findById(uuid).map(pinCode -> Objects.equals(pinCode.getCode(), code)).orElse(false);
     }
 
     private class NotifyPinCode implements TransactionSynchronization {

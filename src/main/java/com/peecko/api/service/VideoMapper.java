@@ -9,9 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,10 +21,15 @@ public class VideoMapper {
         this.labelService = labelService;
     }
 
-    public VideoDTO videoDTO(Video video) {
-        if (video == null) {
-            return null;
-        }
+    public CategoryDTO toCategoryDTO(VideoCategory videoCategory, List<Video> videos, Lang lang) {
+        CategoryDTO dto = new CategoryDTO();
+        dto.setCode(videoCategory.getCode());
+        dto.setTitle(labelService.getCachedLabel(videoCategory.getLabel(), lang));
+        dto.setVideos(videos.stream().map(video -> toVideoDTO(video, lang)).collect(Collectors.toList()));
+        return dto;
+    }
+
+    public VideoDTO toVideoDTO(Video video, Lang lang) {
         VideoDTO dto  = new VideoDTO();
         dto.setCode(video.getCode());
         dto.setCategory(video.getVideoCategory().getCode());
@@ -35,9 +38,6 @@ public class VideoMapper {
         dto.setCoach(video.getCoach().getName());
         dto.setImage(video.getThumbnail());
         dto.setUrl(video.getUrl());
-        dto.setAudience(labelService.getLabel(video.getAudience(), Lang.EN));
-        dto.setIntensity(labelService.getLabel(video.getIntensity().name(), Lang.EN));
-        dto.setTags(convertToList(video.getTags())); //TODO, translate label (e.g. energy, endurance)
         dto.setDescription(video.getDescription());
         dto.setResume(video.getCoach().getResume());
         dto.setPlayer(video.getPlayer().name());
@@ -45,42 +45,29 @@ public class VideoMapper {
         dto.setCoachWebsite(video.getCoach().getWebsite());
         dto.setCoachEmail(video.getCoach().getEmail());
         dto.setCoachInstagram(video.getCoach().getInstagram());
+        dto.setFavorite(video.isFavorite());
+        if (StringUtils.hasText(video.getAudience())) {
+            dto.setAudience(labelService.getCachedLabel(video.getAudience(), lang));
+        }
+        if (video.getIntensity() != null) {
+            dto.setIntensity(labelService.getCachedLabel(video.getIntensity().name(), lang));
+        }
+        if (StringUtils.hasText(video.getTags())) {
+            dto.setTags(tagsAsLabelList(video.getTags(), lang));
+        }
         return dto;
     }
 
-    private List<String> getLabelsAsList(String codes, Lang lang) {
-        if (StringUtils.hasText(codes)) {
-            return null;
-        }
+    private List<String> tagsAsLabelList(String codes, Lang lang) {
         List<String> list = new ArrayList<>();
-        String[] codeArray = codes.split(",");
-        for(String code: codeArray) {
-            list.add(labelService.getLabel(code, lang));
+        String[] array = codes.split(",");
+        for(String code: array) {
+            code = code.trim();
+            if (StringUtils.hasText(code)) {
+                list.add(labelService.getCachedLabel("video.tag." + code, lang));
+            }
         }
         return list;
-    }
-
-    public VideoDTO favoriteVideoDTO(Video video) {
-        VideoDTO dto = videoDTO(video);
-        dto.setFavorite(true);
-        return dto;
-    }
-
-    private List<String> convertToList(String values) {
-        return StringUtils.hasText(values)? Arrays.asList(values.split(",")) : new ArrayList<>();
-    }
-
-    public CategoryDTO categoryDTO(Map.Entry<VideoCategory, List<Video>> entry) {
-        return categoryDTO(entry.getKey(), entry.getValue());
-
-    }
-
-    public CategoryDTO categoryDTO(VideoCategory videoCategory, List<Video> videos) {
-        CategoryDTO dto = new CategoryDTO();
-        dto.setCode(videoCategory.getCode());
-        dto.setTitle(labelService.getLabel(videoCategory.getLabel(), Lang.EN));
-        dto.setVideos(videos.stream().map(this::videoDTO).collect(Collectors.toList()));
-        return dto;
     }
 
 }

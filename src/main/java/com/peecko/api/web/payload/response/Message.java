@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Data
 @AllArgsConstructor @Setter @Getter
-public class MessageResponse {
+public class Message {
     String code;
     String message;
 }

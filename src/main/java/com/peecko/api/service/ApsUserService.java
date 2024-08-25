@@ -59,35 +59,23 @@ public class ApsUserService {
         return apsUserRepo.findByUsername(username).map(ApsUser::getLanguage).orElse(Lang.EN);
     }
 
-    public boolean authenticate(String username, String password) {
-        Optional<ApsUser> optionalApsUser = apsUserRepo.findByUsername(username);
-        if (optionalApsUser.isPresent()) {
-            ApsUser apsUser = optionalApsUser.get();
-            return passwordEncoder.matches(password, apsUser.getPassword());
-        }
-        return false;
+    @Transactional(readOnly = true)
+    public boolean authenticated(String username, String password) {
+        return apsUserRepo.findByUsername(username)
+                .filter(apsUser -> passwordEncoder.matches(password, apsUser.getPassword()))
+                .isPresent();
     }
 
     public boolean exists(String username) {
         return apsUserRepo.existsByUsername(username.toLowerCase());
     }
 
-    public Locale getUserLocale(String username) {
-        Lang lang = apsUserRepo.findByUsername(username.toLowerCase()).map(ApsUser::getLanguage).orElse(Lang.EN);
-        return Locale.forLanguageTag(lang.name());
+    public boolean doesNotExist(String username) {
+        return !apsUserRepo.existsByUsername(username.toLowerCase());
     }
 
-    public Lang getUserLang(String username) {
-        return apsUserRepo.findByUsername(username.toLowerCase()).map(ApsUser::getLanguage).orElse(Lang.EN);
-    }
-
-    public void activeUser(String username) {
-        Optional<ApsUser> optional = apsUserRepo.findByUsername(username.toLowerCase());
-        if (optional.isPresent()) {
-            ApsUser apsUser = optional.get();
-            apsUser.setActive(true);
-            apsUserRepo.save(apsUser);
-        }
+    public void setUserActive(String username, boolean active) {
+        apsUserRepo.setActive(username.toLowerCase(), active);
     }
 
     public void setUserLanguage(String username, String langCode) {
@@ -102,34 +90,35 @@ public class ApsUserService {
     public void signUp(SignUpRequest request) {
         ApsUser apsUser = new ApsUser();
         apsUser.username(request.getUsername().toLowerCase());
-        apsUser.name(NameUtils.camel(request.getName()));
+        apsUser.name(NameUtils.toCamelCase(request.getName()));
         apsUser.language(Common.toLang(request.getLanguage()));
         apsUser.password(passwordEncoder.encode(request.getPassword()));
         apsUserRepo.save(apsUser);
     }
 
     @Transactional
-    public UserProfileResponse signIn(SignInRequest request, String jwt) {
-        Optional<ApsUser> optional = apsUserRepo.findByUsername(request.getUsername());
-        if (optional.isPresent()) {
-            ApsUser apsUser = optional.get();
-            apsUser.setJwt(jwt);
-            apsUser.addApsDevice(Common.toApsDevice(request));
-            apsUserRepo.save(apsUser);
-            return buildLoginResponse(apsUser);
-        }
-        return new UserProfileResponse();
+    public UserProfileResponse signIn(SignInRequest request) {
+        return apsUserRepo.findByUsername(request.getUsername())
+                .map(apsUser -> {
+                    apsUser.addApsDevice(Common.toApsDevice(request));
+                    apsUserRepo.save(apsUser);
+                    return buildProfileResponse(apsUser);
+                }).orElseGet(UserProfileResponse::new);
     }
 
     public UserProfileResponse getProfile(String username) {
-        UserProfileResponse notFound = new UserProfileResponse();
-        notFound.setUsername(username);
         return apsUserRepo.findByUsername(username.toLowerCase())
-                .map(this::buildLoginResponse)
-                .orElse(notFound);
+                .map(this::buildProfileResponse)
+                .orElse(buildProfileNotFound(username));
     }
 
-    private UserProfileResponse buildLoginResponse(ApsUser apsUser) {
+    private UserProfileResponse buildProfileNotFound(String username) {
+        UserProfileResponse notFound = new UserProfileResponse();
+        notFound.setUsername(username);
+        return notFound;
+    }
+
+    private UserProfileResponse buildProfileResponse(ApsUser apsUser) {
         int currentPeriod = Common.currentPeriod();
         int deviceCount = apsUser.getApsDevices().size();
         UserProfileResponse response = new UserProfileResponse();
@@ -157,41 +146,30 @@ public class ApsUserService {
     @Transactional
     public void signOut(SignOutRequest request) {
         String deviceId = request.getDeviceId();
-        Optional<ApsUser> optional = apsUserRepo.findByUsername(request.getUsername());
-        if (optional.isPresent()) {
-            ApsUser apsUser = optional.get();
-            apsUser.getApsDevices().stream().filter(device -> deviceId.equals(device.getDeviceId())).findAny().ifPresent(apsUser::removeApsDevice);
-            apsUserRepo.save(apsUser);
-        }
+        apsUserRepo.findByUsername(request.getUsername()).ifPresent(apsUser -> {
+                    apsUser.getApsDevices().removeIf(device -> deviceId.equals(device.getDeviceId()));
+                    apsUserRepo.save(apsUser);
+                });
     }
 
-    public List<DeviceDTO> getDevices(String username) {
-        Optional<ApsUser> optional = apsUserRepo.findByUsername(username.toLowerCase());
-        if (optional.isPresent()) {
-            ApsUser apsUser = optional.get();
-            return apsUser.getApsDevices().stream()
-                    .map(ApsDeviceMapper::deviceDTO)
-                    .collect(Collectors.toList());
-        }
-        return new ArrayList<>();
+    public List<DeviceDTO> getUserDevicesAsDTO(String username) {
+        return apsUserRepo.findByUsername(username.toLowerCase())
+                .map(apsUser -> apsUser.getApsDevices().stream().map(ApsDeviceMapper::deviceDTO).collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
     }
 
     public void updateUserPassword(String username, String password) {
-        Optional<ApsUser> optional = apsUserRepo.findByUsername(username.toLowerCase());
-        if (optional.isPresent()) {
-            ApsUser apsUser = optional.get();
-            apsUser.password(passwordEncoder.encode(password));
-            apsUserRepo.save(apsUser);
-        }
+        apsUserRepo.setPassword(username.toLowerCase(), passwordEncoder.encode(password));
     }
 
-    public void updateUserInfo(UpdateUserRequest request) {
-        Optional<ApsUser> optional = apsUserRepo.findByUsername(request.getUsername().toLowerCase());
-        if (optional.isPresent()) {
-            ApsUser apsUser = optional.get();
-            apsUser.name(request.getName());
-            apsUserRepo.save(apsUser);
-        }
+    public void updateUserName(UpdateUserRequest request) {
+        apsUserRepo.setName(request.getUsername().toLowerCase(), request.getName());
+    }
+
+    public boolean passwordDoesNotMatch(String username, String password) {
+        return !apsUserRepo.findByUsername(username.toLowerCase())
+                .filter(apsUser -> passwordEncoder.matches(password, apsUser.getPassword()))
+                .isPresent();
     }
 
 }

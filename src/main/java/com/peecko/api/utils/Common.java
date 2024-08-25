@@ -46,12 +46,6 @@ public abstract class Common {
         }
     }
 
-    public static List<String> getVideoTags(List<VideoDTO> videos) {
-        Set<String> tags = new LinkedHashSet<>();
-        videos.forEach(videoDTO -> tags.addAll(videoDTO.getTags()));
-        return tags.stream().sorted().toList();
-    }
-
     public static VideoDTO clone(VideoDTO v) {
         VideoDTO nv = new VideoDTO();
         nv.setCode(v.getCode());
@@ -107,6 +101,10 @@ public abstract class Common {
         return apsDevice;
     }
 
+    public static Instant endOfDay() {
+        return LocalDate.now().atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant();
+    }
+
     public static int currentPeriod() {
         LocalDate today = LocalDate.now();
         int year = today.getYear();
@@ -147,6 +145,19 @@ public abstract class Common {
         }
 
         return stringBuilder.toString();
+    }
+
+    public static boolean isNotValidUUID(String input) {
+        return !isValidUUID(input);
+    }
+
+    public static boolean isValidUUID(String input) {
+        try {
+            UUID.fromString(input);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
 }

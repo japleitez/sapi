@@ -36,6 +36,18 @@ public class PlayList implements Serializable {
 
     @OneToMany(mappedBy = "playlist", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VideoItem> videoItems = new ArrayList<>();
+
+    public PlayList() {
+    }
+
+    public PlayList(Long id) {
+        this.id = id;
+    }
+
+    public static PlayList of(Long id) {
+        return new PlayList(id);
+    }
+
     public Long getId() {
         return this.id;
     }
@@ -124,12 +136,12 @@ public class PlayList implements Serializable {
 
     public void addVideoItem(VideoItem videoItem) {
         videoItems.add(videoItem);
-        videoItem.setPlaylist(this);
+        videoItem.setPlayList(this);
     }
 
     public void removeVideoItem(VideoItem videoItem) {
         videoItems.remove(videoItem);
-        videoItem.setPlaylist(null);
+        videoItem.setPlayList(null);
     }
 
 }

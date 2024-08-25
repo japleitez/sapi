@@ -18,7 +18,7 @@ public class VideoItem {
     private VideoItem next;
 
     @ManyToOne
-    private PlayList playlist;
+    private PlayList playList;
 
     public VideoItem() {
     }
@@ -51,12 +51,12 @@ public class VideoItem {
         this.next = next;
     }
 
-    public PlayList getPlaylist() {
-        return playlist;
+    public PlayList getPlayList() {
+        return playList;
     }
 
-    public void setPlaylist(PlayList playlist) {
-        this.playlist = playlist;
+    public void setPlayList(PlayList playList) {
+        this.playList = playList;
     }
 
 }

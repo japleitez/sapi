@@ -1,5 +1,6 @@
 package com.peecko.api.service;
 
+import com.peecko.api.domain.ApsUser;
 import com.peecko.api.domain.dto.UserDTO;
 import com.peecko.api.domain.mapper.UserDTOMapper;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,5 +23,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return UserDTOMapper.userDetails(userDTO);
     }
 
+    public ApsUser findByUsername(String username) {
+        return apsUserService.findByUsername(username);
+    }
 
 }

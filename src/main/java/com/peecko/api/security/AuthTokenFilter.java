@@ -1,5 +1,8 @@
 package com.peecko.api.security;
 
+import com.peecko.api.domain.ApsUser;
+import com.peecko.api.domain.mapper.ApsUserMapper;
+import com.peecko.api.repository.ApsUserRepo;
 import com.peecko.api.repository.InvalidJwtRepo;
 import com.peecko.api.service.UserDetailsServiceImpl;
 import org.slf4j.Logger;
@@ -17,6 +20,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.util.StringUtils;
 import java.io.IOException;
+import java.util.Optional;
 
 public class AuthTokenFilter extends OncePerRequestFilter {
 
@@ -29,6 +33,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     UserDetailsServiceImpl userDetailsService;
 
+    @Autowired
+    ApsUserRepo apsUserRepo;
+
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
     @Override
@@ -37,10 +44,15 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             String jwt = parseJwt(request);
             if (jwt != null && jwtUtils.validateAuthToken(jwt) && hasNotBeenInvalidated(jwt)) {
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                Optional<ApsUser> optionalApsUser = apsUserRepo.findByUsername(username);
+                if (optionalApsUser.isPresent()) {
+                    ApsUser apsUser = optionalApsUser.get();
+                    request.setAttribute(Login.CURRENT_USER, apsUser);
+                    UserDetails userDetails = ApsUserMapper.userDetails(optionalApsUser.get());
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
         } catch (Exception e) {
             logger.error("Cannot set user authentication", e);

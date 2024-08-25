@@ -5,8 +5,6 @@ import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.repository.LabelRepo;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class LabelService {
@@ -18,7 +16,7 @@ public class LabelService {
     }
 
     @Cacheable(value = "labels", key = "#code + '-' + #lang.name()")
-    public String getLabel(String code, Lang lang) {
+    public String getCachedLabel(String code, Lang lang) {
         return labelRepo.findByCodeAndLang(code, lang).map(Label::getText).orElse(code);
     }
 

@@ -3,10 +3,12 @@ package com.peecko.api.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.peecko.api.domain.enumeration.Lang;
 import jakarta.persistence.*;
+import org.checkerframework.checker.units.qual.A;
 
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 @Entity
@@ -67,6 +69,22 @@ public class ApsUser implements Serializable {
 
     public Long getId() {
         return this.id;
+    }
+
+    public ApsUser() {
+    }
+
+    public ApsUser(Long id) {
+        this.id = id;
+    }
+
+    public ApsUser(Long id, Lang lang) {
+        this.id = id;
+        this.lang = lang;
+    }
+
+    public static ApsUser of(Long id) {
+        return new ApsUser(id);
     }
 
     public ApsUser id(Long id) {
@@ -296,4 +314,15 @@ public class ApsUser implements Serializable {
         playList.setApsUser(null);
         return this;
     }
+
+    public Locale getLocale() {
+        return lang != null? Locale.forLanguageTag(lang.name()): Locale.ENGLISH;
+    }
+
+    public ApsUser cloneID() {
+        ApsUser user = new ApsUser();
+        user.setId(id);
+        return user;
+    }
+
 }

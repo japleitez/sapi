@@ -39,16 +39,9 @@ public class AccountService {
     }
 
     public boolean activateUserLicense(String username, Integer period, String license) {
-        boolean activated = false;
-        Optional<ApsMembership> optApsMembership = apsMembershipRepo.findByUsernameAndPeriodAndLicense(username, period, license);
-        if (optApsMembership.isPresent()) {
-            Optional<ApsUser> optApsUser = apsUserRepo.findByUsername(username);
-            if (optApsUser.isPresent()) {
-                ApsUser apsUser = optApsUser.get();
-                apsUser.license(license);
-                apsUserRepo.save(apsUser);
-                activated = true;
-            }
+        boolean activated = apsMembershipRepo.existsByUsernameAndPeriodAndLicense(username, period, license);
+        if (activated) {
+            apsUserRepo.setLicense(username, license);
         }
         return activated;
     }

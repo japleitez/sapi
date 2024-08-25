@@ -8,6 +8,7 @@ import com.peecko.api.domain.dto.IdName;
 import com.peecko.api.domain.dto.PlaylistDTO;
 import com.peecko.api.domain.dto.VideoDTO;
 import com.peecko.api.domain.dto.VideoItemDTO;
+import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.domain.mapper.PlayListMapper;
 import com.peecko.api.domain.sorter.VideoListSorter;
 import com.peecko.api.repository.PlayListRepo;
@@ -38,19 +39,21 @@ public class PlayListService {
     }
 
     public boolean existsPlayList(ApsUser apsUser, String name) {
-        List<PlayList> list = playListRepo.findByApsUserAAndName(apsUser, name);
-        return !list.isEmpty();
+        return playListRepo.findByApsUserAndName(apsUser, name).isPresent();
     }
 
-    public PlaylistDTO createPlayList(ApsUser apsUser, String name) {
+    public PlayList createPlayList(Long apsUserId, String name) {
         Instant now = Instant.now();
         PlayList playList = new PlayList();
-        playList.setCounter(0);
-        playList.setApsUser(apsUser);
+        playList.setApsUser(ApsUser.of(apsUserId));
         playList.setName(name);
+        playList.setCounter(0);
         playList.setCreated(now);
         playList.setUpdated(now);
-        playList = playListRepo.save(playList);
+        return playListRepo.save(playList);
+    }
+
+    public PlaylistDTO toPlayListDTO(PlayList playList) {
         return PlayListMapper.playlistDTO(playList);
     }
 
@@ -66,134 +69,130 @@ public class PlayListService {
                 .collect(Collectors.toList());
     }
 
-    public PlaylistDTO getPlayListDTO(Long apsUserId, Long playListId) {
-        Optional<PlayList> optionalPlayList = playListRepo.findById(playListId);
-        if (optionalPlayList.isPresent()) {
-            PlaylistDTO dto =  new PlaylistDTO();
-            PlayList playList = optionalPlayList.get();
-            dto.setId(playList.getId());
-            dto.setName(playList.getName());
-            if (!playList.getVideoItems().isEmpty()) {
-                Set<Long> favIds = userFavoriteVideoRepo.findVideoIdsByApsUserId(apsUserId);
-                List<VideoItemDTO> videoItemDTOS = playList.getVideoItems()
-                        .stream()
-                        .map(item -> getVideoItemDTO(item, favIds))
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList());
-                dto.getVideoItemDTOS().addAll(VideoListSorter.sortVideoList(videoItemDTOS));
-            }
-            return dto;
+    public PlaylistDTO getPlayListAsDTO(Long playListId, Long apsUserId) {
+        PlayList playList = playListRepo.findById(playListId).orElse(null);
+        if (playList == null) {
+            return null;
         }
-        return null;
+        return buildPlaylistDTO(playList, apsUserId);
     }
 
-    private VideoItemDTO getVideoItemDTO(VideoItem videoItem, Set<Long> favIds) {
-        Video video = videoRepo.findByCode(videoItem.getCode()).orElse(null);
-        if (video != null) {
-            VideoItemDTO itemDTO = new VideoItemDTO();
-            itemDTO.setCode(videoItem.getCode());
-            VideoDTO videoDTO = videoMapper.videoDTO(video);
-            videoDTO.setFavorite(favIds.contains(video.getId()));
-            itemDTO.setVideo(videoDTO);
-            if (videoItem.getPrevious() != null) {
-                itemDTO.setPrevious(videoItem.getPrevious().getCode());
-            }
-            if (videoItem.getNext() != null) {
-                itemDTO.setNext(videoItem.getNext().getCode());
-            }
-            return itemDTO;
+    private PlaylistDTO buildPlaylistDTO(PlayList playList, Long apsUserId) {
+        PlaylistDTO playlistDTO =  new PlaylistDTO();
+        playlistDTO.setId(playList.getId());
+        playlistDTO.setName(playList.getName());
+        if (!playList.getVideoItems().isEmpty()) {
+            List<String> videoCodes = playList.getVideoItems()
+                    .stream()
+                    .map(VideoItem::getCode)
+                    .collect(Collectors.toList());
+            Set<Video> videos = videoRepo.findByCodes(videoCodes);
+            Set<Long> favIds = userFavoriteVideoRepo.findVideoIdsByApsUserId(apsUserId);
+            List<VideoItemDTO> videoItemDTOs = playList.getVideoItems()
+                    .stream()
+                    .map(videoItem -> buildVideoItemDTO(videoItem, videos, favIds))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+            playlistDTO.getVideoItemDTOS().addAll(VideoListSorter.sortVideoList(videoItemDTOs));
         }
-        return null;
+        return playlistDTO;
+    }
+
+    private VideoItemDTO buildVideoItemDTO(VideoItem videoItem, Set<Video> videos, Set<Long> favIds) {
+        Video video = videos.stream().filter(v -> v.getCode().equals(videoItem.getCode())).findFirst().orElse(null);
+        if (video == null) {
+            return null;
+        }
+        video.setFavorite(favIds.contains(video.getId()));
+        VideoItemDTO itemDTO = new VideoItemDTO();
+        itemDTO.setCode(videoItem.getCode());
+        VideoDTO videoDTO = videoMapper.toVideoDTO(video, Lang.EN); //TODO parametrize language
+        itemDTO.setVideo(videoDTO);
+        if (videoItem.getPrevious() != null) {
+            itemDTO.setPrevious(videoItem.getPrevious().getCode());
+        }
+        if (videoItem.getNext() != null) {
+            itemDTO.setNext(videoItem.getNext().getCode());
+        }
+        return itemDTO;
+    }
+
+    public void moveVideoItemBelowAnother(Long playlistId, String movingVideoCode, String targetVideoCode) {
+
+        VideoItem movingVideo = videoItemRepo.findByPlayListIdAndVideoCode(playlistId, movingVideoCode).orElse(null);
+        VideoItem targetVideo = videoItemRepo.findByPlayListIdAndVideoCode(playlistId, targetVideoCode).orElse(null);
+        if (movingVideo == null || targetVideo == null || movingVideo.getCode().equals(targetVideo.getCode())) {
+            return;
+        }
+
+        // Disconnect movingVideo from its current position
+        VideoItem previousVideo = movingVideo.getPrevious();
+        VideoItem nextVideo = movingVideo.getNext();
+
+        if (previousVideo != null) {
+            previousVideo.setNext(nextVideo);
+        }
+        if (nextVideo != null) {
+            nextVideo.setPrevious(previousVideo);
+        }
+
+        // Insert movingVideo below targetVideo
+        VideoItem targetNext = targetVideo.getNext();
+
+        movingVideo.setPrevious(targetVideo);
+        movingVideo.setNext(targetNext);
+
+        targetVideo.setNext(movingVideo);
+        if (targetNext != null) {
+            targetNext.setPrevious(movingVideo);
+        }
+
+        // Save changes
+        videoItemRepo.save(movingVideo);
+        videoItemRepo.save(targetVideo);
+        if (previousVideo != null) {
+            videoItemRepo.save(previousVideo);
+        }
+        if (nextVideo != null) {
+            videoItemRepo.save(nextVideo);
+        }
+        if (targetNext != null) {
+            videoItemRepo.save(targetNext);
+        }
 
     }
 
-    public PlayList moveVideoItemBelowAnother(Long playlistId, String movingVideoCode, String targetVideoCode) {
+    public void addVideoItemToTop(Long playlistId, VideoItem newVideoItem) {
 
-        Optional<PlayList> playlistOptional = playListRepo.findById(playlistId);
-
-        if (playlistOptional.isPresent()) {
-            PlayList playlist = playlistOptional.get();
-
-            VideoItem movingVideo = videoItemRepo.findById(movingVideoCode).orElse(null);
-            VideoItem targetVideo = videoItemRepo.findById(targetVideoCode).orElse(null);
-
-            if (movingVideo != null && targetVideo != null && movingVideo != targetVideo) {
-                // Disconnect movingVideo from its current position
-                VideoItem previousVideo = movingVideo.getPrevious();
-                VideoItem nextVideo = movingVideo.getNext();
-
-                if (previousVideo != null) {
-                    previousVideo.setNext(nextVideo);
-                }
-                if (nextVideo != null) {
-                    nextVideo.setPrevious(previousVideo);
-                }
-
-                // Insert movingVideo below targetVideo
-                VideoItem targetNext = targetVideo.getNext();
-
-                movingVideo.setPrevious(targetVideo);
-                movingVideo.setNext(targetNext);
-
-                targetVideo.setNext(movingVideo);
-                if (targetNext != null) {
-                    targetNext.setPrevious(movingVideo);
-                }
-
-                // Save changes to the repository
-                videoItemRepo.save(movingVideo);
-                videoItemRepo.save(targetVideo);
-                if (previousVideo != null) {
-                    videoItemRepo.save(previousVideo);
-                }
-                if (nextVideo != null) {
-                    videoItemRepo.save(nextVideo);
-                }
-                if (targetNext != null) {
-                    videoItemRepo.save(targetNext);
-                }
-
-                return playlist;
-            }
-        }
-        return null;
-    }
-
-    public PlayList addVideoItemToTop(Long playlistId, VideoItem newVideoItem) {
-        Optional<PlayList> playlistOptional = playListRepo.findById(playlistId);
-
-        if (playlistOptional.isPresent()) {
-            PlayList playlist = playlistOptional.get();
-
-            VideoItem currentTop = null;
-
-            if (!playlist.getVideoItems().isEmpty()) {
-                // Get the current top VideoItem
-                currentTop = playlist.getVideoItems().stream()
-                        .filter(videoItem -> videoItem.getPrevious() == null)
-                        .findFirst()
-                        .orElse(null);
-            }
-
-            // Set the new VideoItem's previous to null as it's going to be the new top
-            newVideoItem.setPrevious(null);
-            newVideoItem.setNext(currentTop);
-
-            if (currentTop != null) {
-                currentTop.setPrevious(newVideoItem);
-            }
-
-            playlist.addVideoItem(newVideoItem);
-            videoItemRepo.save(newVideoItem);
-
-            if (currentTop != null) {
-                videoItemRepo.save(currentTop);
-            }
-
-            return playListRepo.save(playlist);
+        PlayList playlist =  playListRepo.findById(playlistId).orElse(null);
+        if (playlist == null) {
+            return;
         }
 
-        return null;
+        VideoItem currentTop = null;
+        if (!playlist.getVideoItems().isEmpty()) {
+            // Get the current top VideoItem
+            currentTop = playlist.getVideoItems().stream()
+                    .filter(videoItem -> videoItem.getPrevious() == null)
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        // Set the new VideoItem's previous to null as it's going to be the new top
+        newVideoItem.setPrevious(null);
+        newVideoItem.setNext(currentTop);
+        if (currentTop != null) {
+            currentTop.setPrevious(newVideoItem);
+        }
+
+        playlist.addVideoItem(newVideoItem);
+        videoItemRepo.save(newVideoItem);
+
+        if (currentTop != null) {
+            videoItemRepo.save(currentTop);
+        }
+        playListRepo.save(playlist);
+
     }
 
     public PlayList addVideoItemToBottom(Long playlistId, VideoItem newVideoItem) {
@@ -235,17 +234,11 @@ public class PlayListService {
     }
 
     public void removeVideoItems(Long playlistId, List<String> videoCodes) {
-        PlayList playList = playListRepo.findById(playlistId).orElse(null);
-        if (playList == null) {
-            return;
-        }
-        videoCodes.forEach(code -> this.removeVideoItem(code, playList));
+        videoCodes.forEach(code -> this.removeVideoItem(playlistId, code));
     }
 
-    public void removeVideoItem(String code, PlayList playList) {
-
-        VideoItem videoItem = videoItemRepo.findByCodeAAndPlaylist(code, playList).orElse(null);
-
+    public void removeVideoItem(Long playlistId, String code) {
+        VideoItem videoItem = videoItemRepo.findByPlayListIdAndVideoCode(playlistId, code).orElse(null);
         if (videoItem == null) {
             return;
         }
@@ -269,5 +262,8 @@ public class PlayListService {
         videoItemRepo.delete(videoItem);
     }
 
+    public boolean existsById(Long playlistId) {
+        return playListRepo.existsById(playlistId);
+    }
 }
 

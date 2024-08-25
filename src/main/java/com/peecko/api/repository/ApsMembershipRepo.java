@@ -13,4 +13,6 @@ public interface ApsMembershipRepo extends JpaRepository<ApsMembership, Long> {
 
     Optional<ApsMembership> findByUsernameAndPeriodAndLicense(String username, Integer period, String license);
 
+    boolean existsByUsernameAndPeriodAndLicense(String username, Integer period, String license);
+
 }
