@@ -35,8 +35,7 @@ public class AccountResource extends BaseResource {
 
     @PutMapping("/notifications/{id}")
     public ResponseEntity<Void> updateNotification(@PathVariable Long id) {
-        ApsUser apsUser = Login.getUser();
-        accountService.addNotificationItem(apsUser.getId(), id);
+        accountService.addNotificationItem(Login.getUserId(), id);
         return ResponseEntity.ok().build();
     }
 

@@ -3,6 +3,7 @@ package com.peecko.api.domain;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.time.Instant;
 
 @Entity
 @Table(name = "notification_item", uniqueConstraints = {
@@ -27,6 +28,10 @@ public class NotificationItem implements Serializable {
     @Column(name = "notification_id", nullable = false)
     private Long notificationId;
 
+    @Column(name = "viewed_at", nullable = false)
+    private Instant viewedAt;
+
+
     public Long getId() {
         return id;
     }
@@ -50,4 +55,13 @@ public class NotificationItem implements Serializable {
     public void setNotificationId(Long notificationId) {
         this.notificationId = notificationId;
     }
+
+    public Instant getViewedAt() {
+        return viewedAt;
+    }
+
+    public void setViewedAt(Instant viewedAt) {
+        this.viewedAt = viewedAt;
+    }
+
 }

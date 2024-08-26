@@ -92,6 +92,13 @@ public class Customer implements Serializable {
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
+    public Customer() {
+    }
+
+    public Customer(Long id) {
+        this.id = id;
+    }
+
     public static Customer of(Long id) {
         Customer customer = new Customer();
         customer.setId(id);

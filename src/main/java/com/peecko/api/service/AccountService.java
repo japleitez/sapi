@@ -11,9 +11,7 @@ import com.peecko.api.utils.Common;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -47,39 +45,35 @@ public class AccountService {
     }
 
     public List<NotificationDTO> getNotifications(String username) {
-        Optional<ApsUser> optUser = apsUserRepo.findByUsername(username);
-        if (optUser.isPresent()) {
-            ApsUser apsUser = optUser.get();
-            Optional<ApsMembership> optMembership = apsMembershipRepo.findByUsernameAndPeriod(username, Common.currentPeriod());
-            if (optMembership.isPresent()) {
-                Customer customer = Customer.of(optMembership.get().getCustomerId());
-                List<Notification> notifications = getActiveNotificationsForCustomer(customer);
-                if (!notifications.isEmpty()) {
-                    List<Long> notificationIds = notifications.stream().map(Notification::getId).toList();
-                    Set<Long> viewedIds = getViewedNotificationIdsForApsUser(apsUser.getId(), notificationIds);
-                    return notifications.stream().map(n -> NotificationMapper.notificationDTO(n, viewedIds)).toList();
-                }
-            }
+        //TODO need to improve performance by having today's notifications already selected by customer or license
+        //TODO the precooked data should be done by the backoffice application
+        ApsUser apsUser = apsUserRepo.findByUsername(username).orElse(null);
+        if (apsUser == null) {
+            return List.of();
         }
-        return new ArrayList<>();
-     }
-
-    public List<Notification> getActiveNotificationsForCustomer(Customer customer) {
-        LocalDate today = LocalDate.now();
-        return notificationRepo.findByCustomerAndExpiresAfter(customer, today);
+        ApsMembership membership = apsMembershipRepo.findByUsernameAndPeriod(username, Common.currentPeriod()).orElse(null);
+        if (membership == null) {
+            return List.of();
+        }
+        List<Notification> notifications = notificationRepo.findByCustomerIdAndForToday(membership.getCustomerId(), LocalDate.now());
+        if (notifications == null) {
+            return List.of();
+        }
+        List<Long> notificationIds = notifications.stream().map(Notification::getId).toList();
+        Set<Long> viewedIds = getViewedNotificationIds(apsUser.getId(), notificationIds);
+        return notifications.stream().map(n -> NotificationMapper.notificationDTO(n, viewedIds)).toList();
     }
 
-    public Set<Long> getViewedNotificationIdsForApsUser(Long apsUserId, List<Long> notificationIds) {
-        List<NotificationItem> notificationItems = notificationItemRepo.findByApsUserIdAndNotificationIdIn(apsUserId, notificationIds);
-        return notificationItems.stream()
+    private Set<Long> getViewedNotificationIds(Long apsUserId, List<Long> notificationIds) {
+        return notificationItemRepo
+                .findByApsUserIdAndNotificationIdIn(apsUserId, notificationIds)
+                .stream()
                 .map(NotificationItem::getNotificationId)
                 .collect(Collectors.toSet());
     }
 
     public void addNotificationItem(Long apsUserId, Long notificationId) {
-        if (apsUserId != null && notificationId != null) {
-            notificationItemService.addNotificationItem(apsUserId, notificationId);
-        }
+        notificationItemService.addNotificationItem(apsUserId, notificationId);
     }
 
     public List<Help> findHelpByLang(Lang lang) {
