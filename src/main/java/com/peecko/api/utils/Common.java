@@ -124,17 +124,6 @@ public abstract class Common {
         return yearMonth.atEndOfMonth();
     }
 
-    public static Lang toLang(String lang) {
-        if (lang == null) {
-            return Lang.EN;
-        }
-        try {
-            return Lang.valueOf(lang.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return Lang.EN;
-        }
-    }
-
     public static String randomDigitsAsString(int length) {
         Random random = new Random();
         StringBuilder stringBuilder = new StringBuilder(length);

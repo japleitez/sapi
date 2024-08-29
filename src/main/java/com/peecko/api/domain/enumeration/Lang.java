@@ -1,7 +1,5 @@
 package com.peecko.api.domain.enumeration;
 
-import org.springframework.util.StringUtils;
-
 public enum Lang {
     EN,
     FR,
@@ -9,12 +7,9 @@ public enum Lang {
     ES;
 
     public static Lang fromString(String langCode) {
-        if (StringUtils.hasText(langCode)) {
-            return EN;
-        }
         try {
             return Lang.valueOf(langCode.toUpperCase());
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             return EN;
         }
     }

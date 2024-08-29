@@ -20,11 +20,11 @@ import java.util.*;
 
 @Service
 public class PinCodeService {
-    private final PinCodeRepo pinCodeRepo;
-    private final EmailService emailService;
-    private final MessageSource messageSource;
-    private final TemplateEngine templateEngine;
-    private final ApsUserService apsUserService;
+    final PinCodeRepo pinCodeRepo;
+    final EmailService emailService;
+    final MessageSource messageSource;
+    final TemplateEngine templateEngine;
+    final ApsUserService apsUserService;
 
     public PinCodeService(PinCodeRepo pinCodeRepo, EmailService emailService, MessageSource messageSource, TemplateEngine templateEngine, ApsUserService apsUserService) {
         this.pinCodeRepo = pinCodeRepo;

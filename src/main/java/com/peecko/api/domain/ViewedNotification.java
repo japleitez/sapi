@@ -9,7 +9,7 @@ import java.time.Instant;
 @Table(name = "notification_item", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"apsUserId", "notificationId"})
 })
-public class NotificationItem implements Serializable {
+public class ViewedNotification implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

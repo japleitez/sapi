@@ -11,7 +11,6 @@ import java.util.Locale;
 public class Login {
 
     public final static String CURRENT_USER = "currentUser";
-
     private final static ApsUser UNDEFINED_APS_USER = new ApsUser(0L, Lang.EN);
 
     public static ApsUser getUser() {
@@ -20,12 +19,12 @@ public class Login {
         return apsUser != null? apsUser : UNDEFINED_APS_USER;
     }
 
-    public static Long getUserId() {
-        return getUser().getId();
-    }
+    public static Long getUserId() {return getUser().getId(); }
 
-    public static Locale getLocale() {
+    public static Locale getUserLocale() {
         return getUser().getLocale();
     }
+
+    public static Lang getUserLanguage() {return getUser().getLanguage(); }
 
 }

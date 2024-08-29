@@ -17,7 +17,7 @@ import java.util.Objects;
 public class EmailService {
 
     @Autowired
-    private  JavaMailSender mailSender;
+    private JavaMailSender mailSender;
 
     @Async
     public boolean sendEmail(EmailContext cxt) {

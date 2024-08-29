@@ -1,9 +1,10 @@
-package com.peecko.api.security;
+package com.peecko.api.service;
 
 import com.peecko.api.domain.ApsUser;
 import com.peecko.api.repository.ApsMembershipRepo;
 import com.peecko.api.repository.ApsUserRepo;
 import com.peecko.api.repository.InvalidJwtRepo;
+import com.peecko.api.security.JwtUtils;
 import com.peecko.api.service.ApsUserService;
 import com.peecko.api.utils.Common;
 import org.springframework.security.core.context.SecurityContextHolder;

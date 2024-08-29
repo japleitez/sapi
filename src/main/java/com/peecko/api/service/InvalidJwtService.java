@@ -24,8 +24,4 @@ public class InvalidJwtService {
         invalidJwtRepo.save(invalidJwt);
     }
 
-    public boolean isJwtInvalid(String jti) {
-        return invalidJwtRepo.findByJti(jti).isPresent();
-    }
-
 }

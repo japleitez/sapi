@@ -47,7 +47,7 @@ public class MembershipResource extends BaseResource {
     }
 
     private String message(String code) {
-        return messageSource.getMessage(code, null, Login.getLocale());
+        return messageSource.getMessage(code, null, Login.getUserLocale());
     }
 
 }

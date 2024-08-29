@@ -14,4 +14,5 @@ public class VideoItemService {
     public boolean existsByPlayListIdAndVideoCode(Long playlistId, String videoCode) {
         return videoItemRepo.existsByPlayListIdAndVideoCode(playlistId, videoCode);
     }
+
 }

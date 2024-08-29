@@ -29,10 +29,11 @@ import java.util.stream.Collectors;
 @Service
 public class ApsUserService {
 
-    private final ApsUserRepo apsUserRepo;
-    private final CustomerRepo customerRepo;
-    private final ApsMembershipRepo apsMembershipRepo;
-    private final PasswordEncoder passwordEncoder;
+    final ApsUserRepo apsUserRepo;
+    final CustomerRepo customerRepo;
+    final ApsMembershipRepo apsMembershipRepo;
+    final PasswordEncoder passwordEncoder;
+
     public static final int MAX_NUMBER_DEVICES = 3;
 
     public ApsUserService(ApsUserRepo apsUserRepo, CustomerRepo customerRepo, ApsMembershipRepo apsMembershipRepo, PasswordEncoder passwordEncoder) {
@@ -49,14 +50,6 @@ public class ApsUserService {
 
     public ApsUser findByUsername(String username) {
         return apsUserRepo.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found " + username));
-    }
-
-    public Long findIdByUsername(String username) {
-        return apsUserRepo.findByUsername(username).map(ApsUser::getId).orElse(null);
-    }
-
-    public Lang findLangByUsername(String username) {
-        return apsUserRepo.findByUsername(username).map(ApsUser::getLanguage).orElse(Lang.EN);
     }
 
     @Transactional(readOnly = true)
@@ -78,20 +71,15 @@ public class ApsUserService {
         apsUserRepo.setActive(username.toLowerCase(), active);
     }
 
-    public void setUserLanguage(String username, String langCode) {
-        Optional<ApsUser> optional = apsUserRepo.findByUsername(username.toLowerCase());
-        if (optional.isPresent()) {
-            ApsUser apsUser = optional.get();
-            apsUser.language(Lang.fromString(langCode));
-            apsUserRepo.save(apsUser);
-        }
+    public void setUserLanguage(String username, Lang lang) {
+        apsUserRepo.setLanguage(username, lang);
     }
 
     public void signUp(SignUpRequest request) {
         ApsUser apsUser = new ApsUser();
         apsUser.username(request.getUsername().toLowerCase());
         apsUser.name(NameUtils.toCamelCase(request.getName()));
-        apsUser.language(Common.toLang(request.getLanguage()));
+        apsUser.language(Lang.fromString(request.getLanguage()));
         apsUser.password(passwordEncoder.encode(request.getPassword()));
         apsUserRepo.save(apsUser);
     }

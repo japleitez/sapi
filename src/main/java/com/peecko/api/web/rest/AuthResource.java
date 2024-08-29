@@ -255,7 +255,7 @@ public class AuthResource extends BaseResource {
     }
 
     private Message message(String code, String key) {
-        String message = messageSource.getMessage(key, null, Login.getLocale());
+        String message = messageSource.getMessage(key, null, Login.getUserLocale());
         return new Message(code, message);
     }
 

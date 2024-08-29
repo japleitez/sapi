@@ -69,12 +69,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     }
 
     boolean hasNotBeenInvalidated(String jwt) {
-        boolean invalidated = false;
-        String jti = jwtUtils.getJtiFromAuthToken(jwt);
-        if (jti != null) {
-            invalidated = invalidJwtRepo.findByJti(jti).isPresent();
-        }
-        return !invalidated;
+        return invalidJwtRepo.findByJti(jwtUtils.getJtiFromAuthToken(jwt)).isEmpty();
     }
 
 }

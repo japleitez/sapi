@@ -4,10 +4,10 @@ import com.peecko.api.domain.ApsUser;
 import com.peecko.api.domain.dto.Help;
 import com.peecko.api.domain.dto.LanguageDTO;
 import com.peecko.api.domain.dto.NotificationDTO;
+import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.security.Login;
-import com.peecko.api.service.AccountService;
-import com.peecko.api.service.ApsUserService;
-import com.peecko.api.service.LanguageService;
+import com.peecko.api.service.*;
+import com.peecko.api.utils.Common;
 import com.peecko.api.web.payload.response.LanguageResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,45 +18,63 @@ import java.util.List;
 @RequestMapping("/api/account")
 public class AccountResource extends BaseResource {
 
+    final HelpService helpService;
     final AccountService accountService;
     final ApsUserService apsUserService;
     final LanguageService languageService;
+    final NotificationService notificationService;
 
-    public AccountResource(AccountService accountService, ApsUserService apsUserService, LanguageService languageService) {
+    public AccountResource(HelpService helpService, AccountService accountService, ApsUserService apsUserService, LanguageService languageService, NotificationService notificationService) {
+        this.helpService = helpService;
         this.accountService = accountService;
         this.apsUserService = apsUserService;
         this.languageService = languageService;
+        this.notificationService = notificationService;
     }
 
-    @GetMapping("/notifications")
-    public ResponseEntity<List<NotificationDTO>> getNotifications() {
-        return ResponseEntity.ok(accountService.getNotifications(getUsername()));
-    }
-
-    @PutMapping("/notifications/{id}")
-    public ResponseEntity<Void> updateNotification(@PathVariable Long id) {
-        accountService.addNotificationItem(Login.getUserId(), id);
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/help")
-    public ResponseEntity<List<Help>> getHelp() {
-        ApsUser apsUser = Login.getUser();
-        List<Help> helpList = accountService.findHelpByLang(apsUser.getLanguage());
-        return ResponseEntity.ok(helpList);
-    }
-
+    /**
+     * Get the list of available languages.
+     */
     @GetMapping("/languages")
     public ResponseEntity<LanguageResponse> getLanguages() {
-        String language = Login.getUser().getLanguage().name();
-        List<LanguageDTO> activeLanguages = languageService.findActiveLanguages();
-        return ResponseEntity.ok(new LanguageResponse(language, activeLanguages));
+        List<LanguageDTO> languages = languageService.findActiveLanguages();
+        return ResponseEntity.ok(new LanguageResponse(Login.getUserLanguage().name(), languages));
     }
 
+    /**
+     * Set user's language.
+     */
     @PutMapping("/languages/{lang}")
-    public ResponseEntity<Void> setLanguage(@PathVariable("lang")  String lang) {
-        apsUserService.setUserLanguage(getUsername(), lang);
+    public ResponseEntity<Void> setUserLanguage(@PathVariable("lang")  String lang) {
+        apsUserService.setUserLanguage(getUsername(), Lang.fromString(lang));
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Get user's notifications for the current period.
+     */
+    @GetMapping("/notifications")
+    public ResponseEntity<List<NotificationDTO>> getNotifications() {
+        List<NotificationDTO> list = notificationService.getNotifications(Login.getUser(), Common.currentPeriod());
+        return ResponseEntity.ok(list);
+    }
+
+    /**
+     * Add a notification as viewed.
+     */
+    @PutMapping("/notifications/{id}")
+    public ResponseEntity<Void> addViewedNotification(@PathVariable Long id) {
+        notificationService.addViewedNotification(Login.getUserId(), id);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Get the list of questions & answers (help).
+     */
+    @GetMapping("/help")
+    public ResponseEntity<List<Help>> getHelp() {
+        List<Help> helpList = helpService.findHelpByLang(Login.getUserLanguage());
+        return ResponseEntity.ok(helpList);
     }
 
 }
