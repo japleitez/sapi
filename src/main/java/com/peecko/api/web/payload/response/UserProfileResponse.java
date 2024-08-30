@@ -1,15 +1,12 @@
-package com.peecko.api.service.response;
+package com.peecko.api.web.payload.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import static com.peecko.api.utils.Common.MAX_DEVICES_ALLOWED;
 
 @Data
-@Setter @Getter
 public class UserProfileResponse {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

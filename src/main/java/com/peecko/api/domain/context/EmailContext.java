@@ -1,4 +1,4 @@
-package com.peecko.api.service.context;
+package com.peecko.api.domain.context;
 
 import lombok.Data;
 

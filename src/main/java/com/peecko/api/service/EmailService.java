@@ -1,6 +1,6 @@
 package com.peecko.api.service;
 
-import com.peecko.api.service.context.EmailContext;
+import com.peecko.api.domain.context.EmailContext;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;

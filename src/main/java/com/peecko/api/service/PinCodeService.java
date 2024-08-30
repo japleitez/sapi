@@ -1,13 +1,11 @@
 package com.peecko.api.service;
 
+import com.peecko.api.domain.context.EmailContext;
 import com.peecko.api.domain.PinCode;
 import com.peecko.api.domain.dto.UserDTO;
 import com.peecko.api.domain.enumeration.Verification;
 import com.peecko.api.repository.PinCodeRepo;
-import com.peecko.api.service.context.EmailContext;
-import com.peecko.api.utils.Common;
 import com.peecko.api.utils.PinUtils;
-import com.peecko.api.web.payload.request.PinCodeRequest;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

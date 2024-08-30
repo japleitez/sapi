@@ -11,7 +11,7 @@ import com.peecko.api.domain.mapper.ApsUserMapper;
 import com.peecko.api.repository.ApsMembershipRepo;
 import com.peecko.api.repository.ApsUserRepo;
 import com.peecko.api.repository.CustomerRepo;
-import com.peecko.api.service.response.UserProfileResponse;
+import com.peecko.api.web.payload.response.UserProfileResponse;
 import com.peecko.api.utils.Common;
 import com.peecko.api.utils.NameUtils;
 import com.peecko.api.web.payload.request.SignInRequest;
