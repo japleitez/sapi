@@ -46,10 +46,6 @@ public class ApsUserService {
         return ApsUserMapper.userDTO(apsUser);
     }
 
-    public ApsUser findByUsername(String username) {
-        return apsUserRepo.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found " + username));
-    }
-
     @Transactional(readOnly = true)
     public boolean authenticated(String username, String password) {
         return apsUserRepo.findByUsername(username)
@@ -152,9 +148,9 @@ public class ApsUserService {
     }
 
     public boolean passwordDoesNotMatch(String username, String password) {
-        return !apsUserRepo.findByUsername(username.toLowerCase())
+        return apsUserRepo.findByUsername(username.toLowerCase())
                 .filter(apsUser -> passwordEncoder.matches(password, apsUser.getPassword()))
-                .isPresent();
+                .isEmpty();
     }
 
 }
