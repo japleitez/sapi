@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-import static com.peecko.api.utils.Common.MAX_ALLOWED;
+import static com.peecko.api.utils.Common.MAX_DEVICES_ALLOWED;
 
 @Data
 @Setter @Getter
@@ -31,7 +31,7 @@ public class UserProfileResponse {
     int devicesCount = 0;
 
     @JsonProperty("devices-max") // maxAllowed
-    int devicesMax = MAX_ALLOWED;
+    int devicesMax = MAX_DEVICES_ALLOWED;
 
     @JsonProperty("membership")
     String membership = "";

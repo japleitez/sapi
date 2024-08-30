@@ -30,11 +30,11 @@ public class MembershipResource extends BaseResource {
     }
 
     /**
-     * Activate user membership by license in the current period
+     * Activate user membership by license within the current period
      */
     @PutMapping("/activate")
     public ResponseEntity<?> activate(@Valid @RequestBody ActivationRequest activationRequest) {
-        String license = activationRequest.getLicense();
+        String license = activationRequest.license();
         if (!StringUtils.hasLength(license) && license.length() != 20) {
             return ResponseEntity.ok(new Message(ERROR, message("membership.valid.nok")));
         }

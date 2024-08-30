@@ -30,6 +30,7 @@ public class VideoResource extends BaseResource {
     final VideoItemService videoItemService;
     final VideoCategoryService videoCategoryService;
 
+
     public VideoResource(LabelService labelService, VideoService videoService, MessageSource messageSource, PlayListService playListService, VideoItemService videoItemService, VideoCategoryService videoCategoryService) {
         this.labelService = labelService;
         this.videoService = videoService;
@@ -120,13 +121,13 @@ public class VideoResource extends BaseResource {
     @Licensed
     @PostMapping("/playlists/")
     public ResponseEntity<?> createPlaylist(@Valid @RequestBody CreatePlaylistRequest request) {
-        if (!StringUtils.hasText(request.getName())) {
+        if (!StringUtils.hasText(request.name())) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.name.required")));
         }
-        if (playListService.existsPlayList(Login.getUser(), request.getName())) {
+        if (playListService.existsPlayList(Login.getUser(), request.name())) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.duplicate")));
         }
-        PlayList created = playListService.createPlayList(Login.getUserId(), request.getName());
+        PlayList created = playListService.createPlayList(Login.getUserId(), request.name());
         PlaylistDTO playlistDTO = playListService.toPlayListDTO(created);
         return ResponseEntity.ok(playlistDTO);
     }
@@ -144,20 +145,20 @@ public class VideoResource extends BaseResource {
     /**
      * Add a video to the specified playlist.
      */
-    @PutMapping("/playlists/{playlistId}/{videoCode}")
-    public ResponseEntity<?> addVideoToPlayList(@PathVariable Long playlistId, @PathVariable String videoCode) {
-        if (playListService.existsById(playlistId)) {
+    @PutMapping("/playlists/{listId}/{videoCode}")
+    public ResponseEntity<?> addVideoToPlayList(@PathVariable Long listId, @PathVariable String videoCode) {
+        if (playListService.existsById(listId)) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.invalid")));
         }
         if (videoService.existsByCode(videoCode)) {
             return ResponseEntity.ok(new Message(ERROR, message("video.invalid")));
         }
-        if (videoItemService.existsByPlayListIdAndVideoCode(playlistId, videoCode)) {
+        if (videoItemService.existsByPlayListIdAndVideoCode(listId, videoCode)) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.video.added.already")));
         }
         VideoItem newVideoItem = new VideoItem(videoCode);
-        playListService.addVideoItemToTop(playlistId, newVideoItem);
-        PlaylistDTO playlistDTO = playListService.getPlayListAsDTO(playlistId, Login.getUserId());
+        playListService.addVideoItemToTop(listId, newVideoItem);
+        PlaylistDTO playlistDTO = playListService.getPlayListAsDTO(listId, Login.getUserId());
         return ResponseEntity.ok(playlistDTO);
     }
 
@@ -166,18 +167,18 @@ public class VideoResource extends BaseResource {
      * Move a video item bellow another in the playlist.
      */
     @PutMapping("/playlists/{listId}/{videoCode}/drag-beneath/{targetVideoCode}")
-    public  ResponseEntity<?> moveVideoItemBelowAnother(@PathVariable Long playlistId, @PathVariable String videoCode, @PathVariable String targetVideoCode) {
-        if (playListService.existsById(playlistId)) {
+    public  ResponseEntity<?> moveVideoItemBelowAnother(@PathVariable Long listId, @PathVariable String videoCode, @PathVariable String targetVideoCode) {
+        if (playListService.existsById(listId)) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.invalid")));
         }
-        if (!videoItemService.existsByPlayListIdAndVideoCode(playlistId, videoCode)) {
+        if (!videoItemService.existsByPlayListIdAndVideoCode(listId, videoCode)) {
             return ResponseEntity.ok(new Message(ERROR, message("video.item.invalid")));
         }
-        if (!videoItemService.existsByPlayListIdAndVideoCode(playlistId, targetVideoCode)) {
+        if (!videoItemService.existsByPlayListIdAndVideoCode(listId, targetVideoCode)) {
             return ResponseEntity.ok(new Message(ERROR, message("video.item.new.previous.invalid")));
         }
-        playListService.moveVideoItemBelowAnother(playlistId, videoCode, targetVideoCode);
-        PlaylistDTO playlistDTO = playListService.getPlayListAsDTO(playlistId, Login.getUserId());
+        playListService.moveVideoItemBelowAnother(listId, videoCode, targetVideoCode);
+        PlaylistDTO playlistDTO = playListService.getPlayListAsDTO(listId, Login.getUserId());
         return ResponseEntity.ok(playlistDTO);
     }
 

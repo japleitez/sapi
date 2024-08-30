@@ -1,6 +1,5 @@
 package com.peecko.api.web.rest;
 
-import com.peecko.api.domain.ApsUser;
 import com.peecko.api.domain.dto.Help;
 import com.peecko.api.domain.dto.LanguageDTO;
 import com.peecko.api.domain.dto.NotificationDTO;
@@ -76,5 +75,4 @@ public class AccountResource extends BaseResource {
         List<Help> helpList = helpService.findHelpByLang(Login.getUserLanguage());
         return ResponseEntity.ok(helpList);
     }
-
 }

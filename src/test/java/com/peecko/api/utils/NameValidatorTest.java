@@ -1,5 +1,6 @@
 package com.peecko.api.utils;
 
+import com.peecko.api.validator.NameValidator;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

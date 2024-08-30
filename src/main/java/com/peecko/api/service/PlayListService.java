@@ -10,7 +10,7 @@ import com.peecko.api.domain.dto.VideoDTO;
 import com.peecko.api.domain.dto.VideoItemDTO;
 import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.domain.mapper.PlayListMapper;
-import com.peecko.api.domain.sorter.VideoListSorter;
+import com.peecko.api.utils.VideoListSorter;
 import com.peecko.api.repository.PlayListRepo;
 import com.peecko.api.repository.UserFavoriteVideoRepo;
 import com.peecko.api.repository.VideoItemRepo;

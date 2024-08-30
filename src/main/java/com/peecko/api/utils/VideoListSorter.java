@@ -1,4 +1,4 @@
-package com.peecko.api.domain.sorter;
+package com.peecko.api.utils;
 
 import com.peecko.api.domain.dto.VideoItemDTO;
 

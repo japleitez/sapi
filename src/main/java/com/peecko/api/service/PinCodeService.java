@@ -6,6 +6,7 @@ import com.peecko.api.domain.enumeration.Verification;
 import com.peecko.api.repository.PinCodeRepo;
 import com.peecko.api.service.context.EmailContext;
 import com.peecko.api.utils.Common;
+import com.peecko.api.utils.PinUtils;
 import com.peecko.api.web.payload.request.PinCodeRequest;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -39,12 +40,12 @@ public class PinCodeService {
     }
 
     @Transactional
-    public String generatePinCode(PinCodeRequest request, Verification verification) {
-        UserDTO user = apsUserService.findByUsernameOrElseThrow(request.getUsername());
+    public String generatePinCode(String username, Verification verification) {
+        UserDTO user = apsUserService.findByUsernameOrElseThrow(username);
         PinCode pinCode = new PinCode();
         pinCode.setLanguage(user.language());
-        pinCode.setEmail(request.getUsername().toLowerCase());
-        pinCode.setCode(Common.randomDigitsAsString(4));
+        pinCode.setEmail(username);
+        pinCode.setCode(PinUtils.randomDigitsAsString(4));
         pinCode.setExpireAt(LocalDateTime.now().plusMinutes(10));
         pinCode.setVerification(verification);
         pinCodeRepo.save(pinCode);

@@ -14,9 +14,7 @@ import com.peecko.api.repository.CustomerRepo;
 import com.peecko.api.service.response.UserProfileResponse;
 import com.peecko.api.utils.Common;
 import com.peecko.api.utils.NameUtils;
-import com.peecko.api.web.payload.request.UpdateUserRequest;
 import com.peecko.api.web.payload.request.SignInRequest;
-import com.peecko.api.web.payload.request.SignOutRequest;
 import com.peecko.api.web.payload.request.SignUpRequest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -77,18 +75,18 @@ public class ApsUserService {
 
     public void signUp(SignUpRequest request) {
         ApsUser apsUser = new ApsUser();
-        apsUser.username(request.getUsername().toLowerCase());
-        apsUser.name(NameUtils.toCamelCase(request.getName()));
-        apsUser.language(Lang.fromString(request.getLanguage()));
-        apsUser.password(passwordEncoder.encode(request.getPassword()));
+        apsUser.username(request.username().toLowerCase());
+        apsUser.name(NameUtils.toCamelCase(request.name()));
+        apsUser.language(Lang.fromString(request.language()));
+        apsUser.password(passwordEncoder.encode(request.password()));
         apsUserRepo.save(apsUser);
     }
 
     @Transactional
     public UserProfileResponse signIn(SignInRequest request) {
-        return apsUserRepo.findByUsername(request.getUsername())
+        return apsUserRepo.findByUsername(request.username())
                 .map(apsUser -> {
-                    apsUser.addApsDevice(Common.toApsDevice(request));
+                    apsUser.addApsDevice(ApsDeviceMapper.toApsDevice(request));
                     apsUserRepo.save(apsUser);
                     return buildProfileResponse(apsUser);
                 }).orElseGet(UserProfileResponse::new);
@@ -132,9 +130,8 @@ public class ApsUserService {
     }
 
     @Transactional
-    public void signOut(SignOutRequest request) {
-        String deviceId = request.getDeviceId();
-        apsUserRepo.findByUsername(request.getUsername()).ifPresent(apsUser -> {
+    public void signOut(String username, String deviceId) {
+        apsUserRepo.findByUsername(username).ifPresent(apsUser -> {
                     apsUser.getApsDevices().removeIf(device -> deviceId.equals(device.getDeviceId()));
                     apsUserRepo.save(apsUser);
                 });
@@ -150,8 +147,8 @@ public class ApsUserService {
         apsUserRepo.setPassword(username.toLowerCase(), passwordEncoder.encode(password));
     }
 
-    public void updateUserName(UpdateUserRequest request) {
-        apsUserRepo.setName(request.getUsername().toLowerCase(), request.getName());
+    public void updateUserName(String username, String name) {
+        apsUserRepo.setName(username, name);
     }
 
     public boolean passwordDoesNotMatch(String username, String password) {

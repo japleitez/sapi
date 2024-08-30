@@ -2,7 +2,6 @@ package com.peecko.api.service;
 
 import com.peecko.api.service.context.EmailContext;
 import jakarta.mail.internet.MimeMessage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -12,15 +11,19 @@ import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class EmailService {
 
-    @Autowired
-    private JavaMailSender mailSender;
+    final JavaMailSender mailSender;
+
+    public EmailService(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+    }
 
     @Async
-    public boolean sendEmail(EmailContext cxt) {
+    public void sendEmail(EmailContext cxt) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -34,8 +37,9 @@ public class EmailService {
             }
             mailSender.send(message);
         } catch (Exception e) {
-            return false;
+            CompletableFuture.completedFuture(false);
+            return;
         }
-        return true;
+        CompletableFuture.completedFuture(true);
     }
 }

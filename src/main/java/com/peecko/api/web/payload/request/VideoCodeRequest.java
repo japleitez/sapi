@@ -1,12 +1,4 @@
 package com.peecko.api.web.payload.request;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
-@Data
-@Setter
-@Getter
-public class VideoCodeRequest {
-    String code;
+public record VideoCodeRequest(String code) {
 }

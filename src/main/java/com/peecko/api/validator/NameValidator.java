@@ -1,4 +1,4 @@
-package com.peecko.api.utils;
+package com.peecko.api.validator;
 
 import java.util.regex.Pattern;
 
