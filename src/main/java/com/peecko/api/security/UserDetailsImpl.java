@@ -9,9 +9,7 @@ import java.util.Objects;
 public class UserDetailsImpl implements UserDetails {
 
     private final String name;
-
     private final String username;
-
     @JsonIgnore
     private final String password;
 

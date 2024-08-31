@@ -4,7 +4,6 @@ import com.peecko.api.domain.ApsUser;
 import com.peecko.api.domain.mapper.ApsUserMapper;
 import com.peecko.api.repository.ApsUserRepo;
 import com.peecko.api.repository.InvalidJwtRepo;
-import com.peecko.api.service.UserDetailsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,13 +27,10 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     JwtUtils jwtUtils;
 
     @Autowired
-    InvalidJwtRepo invalidJwtRepo;
-
-    @Autowired
-    UserDetailsServiceImpl userDetailsService;
-
-    @Autowired
     ApsUserRepo apsUserRepo;
+
+    @Autowired
+    InvalidJwtRepo invalidJwtRepo;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
@@ -48,7 +44,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 if (optionalApsUser.isPresent()) {
                     ApsUser apsUser = optionalApsUser.get();
                     request.setAttribute(Login.CURRENT_USER, apsUser);
-                    UserDetails userDetails = ApsUserMapper.userDetails(optionalApsUser.get());
+                    UserDetails userDetails = ApsUserMapper.toUserDetails(optionalApsUser.get());
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);

@@ -1,12 +1,14 @@
 package com.peecko.api.service;
 
+import com.peecko.api.domain.ApsUser;
 import com.peecko.api.domain.context.EmailContext;
 import com.peecko.api.domain.PinCode;
-import com.peecko.api.domain.dto.UserDTO;
 import com.peecko.api.domain.enumeration.Verification;
+import com.peecko.api.repository.ApsUserRepo;
 import com.peecko.api.repository.PinCodeRepo;
 import com.peecko.api.utils.PinUtils;
 import org.springframework.context.MessageSource;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -23,13 +25,15 @@ public class PinCodeService {
     final EmailService emailService;
     final MessageSource messageSource;
     final TemplateEngine templateEngine;
+    final ApsUserRepo apsUserRepo;
     final ApsUserService apsUserService;
 
-    public PinCodeService(PinCodeRepo pinCodeRepo, EmailService emailService, MessageSource messageSource, TemplateEngine templateEngine, ApsUserService apsUserService) {
+    public PinCodeService(PinCodeRepo pinCodeRepo, EmailService emailService, MessageSource messageSource, TemplateEngine templateEngine, ApsUserRepo apsUserRepo, ApsUserService apsUserService) {
         this.pinCodeRepo = pinCodeRepo;
         this.emailService = emailService;
         this.messageSource = messageSource;
         this.templateEngine = templateEngine;
+        this.apsUserRepo = apsUserRepo;
         this.apsUserService = apsUserService;
     }
 
@@ -39,9 +43,9 @@ public class PinCodeService {
 
     @Transactional
     public String generatePinCode(String username, Verification verification) {
-        UserDTO user = apsUserService.findByUsernameOrElseThrow(username);
+        ApsUser apsUser = apsUserRepo.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found " + username));
         PinCode pinCode = new PinCode();
-        pinCode.setLanguage(user.language());
+        pinCode.setLanguage(apsUser.getLanguage().name());
         pinCode.setEmail(username);
         pinCode.setCode(PinUtils.randomDigitsAsString(4));
         pinCode.setExpireAt(LocalDateTime.now().plusMinutes(10));

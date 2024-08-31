@@ -53,12 +53,12 @@ public class VideoMapper {
             dto.setIntensity(labelService.getCachedLabel(video.getIntensity().name(), lang));
         }
         if (StringUtils.hasText(video.getTags())) {
-            dto.setTags(tagsAsLabelList(video.getTags(), lang));
+            dto.setTags(buildVideoTagsAsLabelList(video.getTags(), lang));
         }
         return dto;
     }
 
-    private List<String> tagsAsLabelList(String codes, Lang lang) {
+    private List<String> buildVideoTagsAsLabelList(String codes, Lang lang) {
         List<String> list = new ArrayList<>();
         String[] array = codes.split(",");
         for(String code: array) {

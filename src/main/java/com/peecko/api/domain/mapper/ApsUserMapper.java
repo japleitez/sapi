@@ -3,16 +3,13 @@ package com.peecko.api.domain.mapper;
 import com.peecko.api.domain.ApsUser;
 import com.peecko.api.domain.dto.UserDTO;
 import com.peecko.api.security.UserDetailsImpl;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class ApsUserMapper {
-    public static UserDTO userDTO(ApsUser apsUser) {
+
+    public static UserDTO toUserDTO(ApsUser apsUser) {
         if (apsUser == null) {
             return null;
         }
@@ -24,7 +21,7 @@ public class ApsUserMapper {
         return dto;
     }
 
-    public static UserDetails userDetails(ApsUser apsUser) {
+    public static UserDetails toUserDetails(ApsUser apsUser) {
         if (apsUser == null) {
             return null;
         }

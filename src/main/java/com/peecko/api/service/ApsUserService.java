@@ -42,11 +42,6 @@ public class ApsUserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UserDTO findByUsernameOrElseThrow(String username) {
-        ApsUser apsUser = apsUserRepo.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found " + username));
-        return ApsUserMapper.userDTO(apsUser);
-    }
-
     @Transactional(readOnly = true)
     public boolean authenticated(String username, String password) {
         return apsUserRepo.findByUsername(username)

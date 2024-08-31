@@ -17,14 +17,12 @@ public class LicenseService {
     final JwtUtils jwtUtils;
     final InvalidJwtRepo invalidJwtRepo;
     final ApsUserRepo apsUserRepo;
-    final ApsUserService apsUserService;
     final ApsMembershipRepo apsMembershipRepo;
 
-    public LicenseService(JwtUtils jwtUtils, InvalidJwtRepo invalidJwtRepo, ApsUserRepo apsUserRepo, ApsUserService apsUserService, ApsMembershipRepo apsMembershipRepo) {
+    public LicenseService(JwtUtils jwtUtils, InvalidJwtRepo invalidJwtRepo, ApsUserRepo apsUserRepo, ApsMembershipRepo apsMembershipRepo) {
         this.jwtUtils = jwtUtils;
         this.invalidJwtRepo = invalidJwtRepo;
         this.apsUserRepo = apsUserRepo;
-        this.apsUserService = apsUserService;
         this.apsMembershipRepo = apsMembershipRepo;
     }
 
