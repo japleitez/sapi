@@ -1,5 +1,7 @@
 package com.peecko.api.domain;
 
+import com.peecko.api.web.payload.request.SignUpRequest;
+
 public abstract class EntityBuilder {
 
     public static ApsUser buildApsUser() {
@@ -15,6 +17,14 @@ public abstract class EntityBuilder {
         apsMembership.setPeriod(EntityDefault.PERIOD);
         apsMembership.setLicense(EntityDefault.LICENSE);
         return apsMembership;
+    }
+
+    public static SignUpRequest buildSignUpRequest() {
+        return new SignUpRequest(
+                EntityDefault.NAME,
+                EntityDefault.USERNAME,
+                EntityDefault.PASSWORD,
+                EntityDefault.LANGUAGE);
     }
 
 }

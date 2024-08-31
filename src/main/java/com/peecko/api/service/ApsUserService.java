@@ -62,6 +62,7 @@ public class ApsUserService {
         apsUserRepo.setLanguage(username, lang, Instant.now());
     }
 
+    @Transactional
     public void signUp(SignUpRequest request) {
         ApsUser apsUser = new ApsUser();
         apsUser.username(request.username().toLowerCase());
@@ -132,10 +133,12 @@ public class ApsUserService {
                 .orElse(Collections.emptyList());
     }
 
+    @Transactional
     public void updateUserPassword(String username, String password) {
         apsUserRepo.setPassword(username.toLowerCase(), passwordEncoder.encode(password));
     }
 
+    @Transactional
     public void updateUserName(String username, String name) {
         apsUserRepo.setName(username, name);
     }
