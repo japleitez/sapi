@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
-@EntityScan(basePackages = "com.peecko.api.domain")
 class ApsUserServiceTest {
 
     @Autowired
