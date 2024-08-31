@@ -42,7 +42,7 @@ public class VideoService {
 
     @Cacheable(value = "todayVideos", key = "#lang.name()")
     public List<Video> getCachedTodayVideos(Lang lang) {
-        TodayVideo latestTodayVideo = todayVideoRepo.findFirstByLangAndOrderByReleaseDateDesc(lang);
+        TodayVideo latestTodayVideo = todayVideoRepo.findFirstByLanguageOrderByReleaseDateDesc(lang);
         if (latestTodayVideo != null) {
             return videoRepo.findByIdIn(latestTodayVideo.getVideoIds());
         }

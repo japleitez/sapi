@@ -11,7 +11,7 @@ import java.util.List;
 @Accessors(chain = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlaylistDTO {
+public class PlayListDTO {
     private String username;
     private Long id;
     private String name;

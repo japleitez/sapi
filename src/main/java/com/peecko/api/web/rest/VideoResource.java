@@ -102,16 +102,16 @@ public class VideoResource extends BaseResource {
      */
     @GetMapping("/playlists")
     public ResponseEntity<?> getPlaylists() {
-        List<IdName> listIdNames = playListService.getPlayListIdNames(Login.getUser());
+        List<IdName> listIdNames = playListService.getPlayListsAsIdNames(Login.getUser());
         return ResponseEntity.ok(listIdNames);
     }
 
     /**
      * Get the playlist by its id.
      */
-    @GetMapping("/playlists/{listId}")
-    public ResponseEntity<?> getPlaylist(@PathVariable Long listId) {
-        PlaylistDTO playlist = playListService.getPlayListAsDTO(listId, Login.getUserId());
+    @GetMapping("/playlists/{id}")
+    public ResponseEntity<?> getPlaylist(@PathVariable Long id) {
+        PlayListDTO playlist = playListService.getPlayListAsDTO(id, Login.getUserId());
         return ResponseEntity.ok(Objects.requireNonNullElseGet(playlist, () -> new Message(ERROR, message("playlist.invalid"))));
     }
 
@@ -128,37 +128,37 @@ public class VideoResource extends BaseResource {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.duplicate")));
         }
         PlayList created = playListService.createPlayList(Login.getUserId(), request.name());
-        PlaylistDTO playlistDTO = playListService.toPlayListDTO(created);
+        PlayListDTO playlistDTO = playListService.toPlayListDTO(created);
         return ResponseEntity.ok(playlistDTO);
     }
 
     /**
      * Delete a playlist by its id.
      */
-    @DeleteMapping("/playlists/{listId}")
-    public ResponseEntity<?> deletePlaylist(@PathVariable Long listId) {
-        playListService.deletePlayList(listId);
-        List<IdName> listIdNames = playListService.getPlayListIdNames(Login.getUser());
+    @DeleteMapping("/playlists/{id}")
+    public ResponseEntity<?> deletePlaylist(@PathVariable Long id) {
+        playListService.deletePlayList(id);
+        List<IdName> listIdNames = playListService.getPlayListsAsIdNames(Login.getUser());
         return ResponseEntity.ok(listIdNames);
     }
 
     /**
      * Add a video to the specified playlist.
      */
-    @PutMapping("/playlists/{listId}/{videoCode}")
-    public ResponseEntity<?> addVideoToPlayList(@PathVariable Long listId, @PathVariable String videoCode) {
-        if (playListService.existsById(listId)) {
+    @PutMapping("/playlists/{playListId}/{videoCode}")
+    public ResponseEntity<?> addVideoToPlayList(@PathVariable Long playListId, @PathVariable String videoCode) {
+        if (playListService.existsById(playListId)) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.invalid")));
         }
         if (videoService.existsByCode(videoCode)) {
             return ResponseEntity.ok(new Message(ERROR, message("video.invalid")));
         }
-        if (videoItemService.existsByPlayListIdAndVideoCode(listId, videoCode)) {
+        if (videoItemService.existsByPlayListIdAndCode(playListId, videoCode)) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.video.added.already")));
         }
         VideoItem newVideoItem = new VideoItem(videoCode);
-        playListService.addVideoItemToTop(listId, newVideoItem);
-        PlaylistDTO playlistDTO = playListService.getPlayListAsDTO(listId, Login.getUserId());
+        playListService.addVideoItemToTop(playListId, newVideoItem);
+        PlayListDTO playlistDTO = playListService.getPlayListAsDTO(playListId, Login.getUserId());
         return ResponseEntity.ok(playlistDTO);
     }
 
@@ -166,50 +166,50 @@ public class VideoResource extends BaseResource {
     /**
      * Move a video item bellow another in the playlist.
      */
-    @PutMapping("/playlists/{listId}/{videoCode}/drag-beneath/{targetVideoCode}")
-    public  ResponseEntity<?> moveVideoItemBelowAnother(@PathVariable Long listId, @PathVariable String videoCode, @PathVariable String targetVideoCode) {
-        if (playListService.existsById(listId)) {
+    @PutMapping("/playlists/{playListId}/{videoCode}/drag-beneath/{targetVideoCode}")
+    public  ResponseEntity<?> moveVideoItemBelowAnother(@PathVariable Long playListId, @PathVariable String videoCode, @PathVariable String targetVideoCode) {
+        if (playListService.existsById(playListId)) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.invalid")));
         }
-        if (!videoItemService.existsByPlayListIdAndVideoCode(listId, videoCode)) {
+        if (!videoItemService.existsByPlayListIdAndCode(playListId, videoCode)) {
             return ResponseEntity.ok(new Message(ERROR, message("video.item.invalid")));
         }
-        if (!videoItemService.existsByPlayListIdAndVideoCode(listId, targetVideoCode)) {
+        if (!videoItemService.existsByPlayListIdAndCode(playListId, targetVideoCode)) {
             return ResponseEntity.ok(new Message(ERROR, message("video.item.new.previous.invalid")));
         }
-        playListService.moveVideoItemBelowAnother(listId, videoCode, targetVideoCode);
-        PlaylistDTO playlistDTO = playListService.getPlayListAsDTO(listId, Login.getUserId());
+        playListService.moveVideoItemBelowAnother(playListId, videoCode, targetVideoCode);
+        PlayListDTO playlistDTO = playListService.getPlayListAsDTO(playListId, Login.getUserId());
         return ResponseEntity.ok(playlistDTO);
     }
 
     /**
      * Delete video items from the playlist.
      */
-    @DeleteMapping("/playlists/{playlistId}/bulk-delete")
-    public ResponseEntity<?> removePlaylistVideoItems(@PathVariable Long playlistId, @RequestBody List<String> codes) {
-        if (playListService.existsById(playlistId)) {
+    @DeleteMapping("/playlists/{playListId}/bulk-delete")
+    public ResponseEntity<?> removePlaylistVideoItems(@PathVariable Long playListId, @RequestBody List<String> codes) {
+        if (playListService.existsById(playListId)) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.invalid")));
         }
-        playListService.removeVideoItems(playlistId, codes);
-        PlaylistDTO playlistDTO = playListService.getPlayListAsDTO(playlistId, Login.getUserId());
+        playListService.removeVideoItems(playListId, codes);
+        PlayListDTO playlistDTO = playListService.getPlayListAsDTO(playListId, Login.getUserId());
         return ResponseEntity.ok(playlistDTO);
     }
 
     /**
      * Add a video to the user's favorite video list.
      */
-    @PutMapping("/favorites/{code}")
-    public ResponseEntity<?> addFavorite(@PathVariable String code) {
-        videoService.addUserFavoriteVideo(Login.getUserId(), code);
+    @PutMapping("/favorites/{videoCode}")
+    public ResponseEntity<?> addFavorite(@PathVariable String videoCode) {
+        videoService.addUserFavoriteVideo(Login.getUserId(), videoCode);
         return ResponseEntity.ok().build();
     }
 
     /**
      * Remove a video from the user's favorite video list.
      */
-    @DeleteMapping("/favorites/{code}")
-    public ResponseEntity<?> removeFavorite(@PathVariable String code) {
-        videoService.removeUserFavoriteVideo(Login.getUserId(), code);
+    @DeleteMapping("/favorites/{videoCode}")
+    public ResponseEntity<?> removeFavorite(@PathVariable String videoCode) {
+        videoService.removeUserFavoriteVideo(Login.getUserId(), videoCode);
         return ResponseEntity.ok().build();
     }
 

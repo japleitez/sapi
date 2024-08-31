@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TodayVideoRepo extends JpaRepository<TodayVideo, Long> {
 
-    /*** finds the TodayVideo with the latest release date in the database. */
-    TodayVideo findFirstByLangAndOrderByReleaseDateDesc(Lang lang);
+    TodayVideo findFirstByLanguageOrderByReleaseDateDesc(Lang lang);
 
 }

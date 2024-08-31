@@ -3,7 +3,6 @@ package com.peecko.api.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.peecko.api.domain.enumeration.Lang;
 import jakarta.persistence.*;
-import org.checkerframework.checker.units.qual.A;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -284,11 +283,11 @@ public class ApsUser implements Serializable {
         return this;
     }
 
-    public Set<PlayList> getPlayLists() {
+    public Set<PlayList> getPlaylists() {
         return this.playLists;
     }
 
-    public void setPlayLists(Set<PlayList> playLists) {
+    public void setPlaylists(Set<PlayList> playLists) {
         if (this.playLists != null) {
             this.playLists.forEach(i -> i.setApsUser(null));
         }
@@ -298,18 +297,18 @@ public class ApsUser implements Serializable {
         this.playLists = playLists;
     }
 
-    public ApsUser playLists(Set<PlayList> playLists) {
-        this.setPlayLists(playLists);
+    public ApsUser playlists(Set<PlayList> playLists) {
+        this.setPlaylists(playLists);
         return this;
     }
 
-    public ApsUser addPlayList(PlayList playList) {
+    public ApsUser addPlaylist(PlayList playList) {
         this.playLists.add(playList);
         playList.setApsUser(this);
         return this;
     }
 
-    public ApsUser removePlayList(PlayList playList) {
+    public ApsUser removePlaylist(PlayList playList) {
         this.playLists.remove(playList);
         playList.setApsUser(null);
         return this;

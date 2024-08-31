@@ -33,7 +33,7 @@ public class ApsDevice implements Serializable {
     private Instant installedOn;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnoreProperties(value = { "apsDevices", "playLists" }, allowSetters = true)
+    @JsonIgnoreProperties(value = { "apsDevices", "playlists" }, allowSetters = true)
     private ApsUser apsUser;
 
     public Long getId() {

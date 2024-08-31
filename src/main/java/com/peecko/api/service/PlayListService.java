@@ -5,7 +5,7 @@ import com.peecko.api.domain.PlayList;
 import com.peecko.api.domain.Video;
 import com.peecko.api.domain.VideoItem;
 import com.peecko.api.domain.dto.IdName;
-import com.peecko.api.domain.dto.PlaylistDTO;
+import com.peecko.api.domain.dto.PlayListDTO;
 import com.peecko.api.domain.dto.VideoDTO;
 import com.peecko.api.domain.dto.VideoItemDTO;
 import com.peecko.api.domain.enumeration.Lang;
@@ -53,34 +53,34 @@ public class PlayListService {
         return playListRepo.save(playList);
     }
 
-    public PlaylistDTO toPlayListDTO(PlayList playList) {
-        return PlayListMapper.playlistDTO(playList);
+    public PlayListDTO toPlayListDTO(PlayList playList) {
+        return PlayListMapper.toPlayListDTO(playList);
     }
 
     public void deletePlayList(Long playlistId) {
         playListRepo.deleteById(playlistId);
     }
 
-    public List<IdName> getPlayListIdNames(ApsUser apsUser) {
+    public List<IdName> getPlayListsAsIdNames(ApsUser apsUser) {
         return playListRepo
                 .findByApsUser(apsUser)
                 .stream()
-                .map(PlayListMapper::idName)
+                .map(PlayListMapper::toIdName)
                 .collect(Collectors.toList());
     }
 
-    public PlaylistDTO getPlayListAsDTO(Long playListId, Long apsUserId) {
+    public PlayListDTO getPlayListAsDTO(Long playListId, Long apsUserId) {
         PlayList playList = playListRepo.findById(playListId).orElse(null);
         if (playList == null) {
             return null;
         }
-        return buildPlaylistDTO(playList, apsUserId);
+        return buildPlayListDTO(playList, apsUserId);
     }
 
-    private PlaylistDTO buildPlaylistDTO(PlayList playList, Long apsUserId) {
-        PlaylistDTO playlistDTO =  new PlaylistDTO();
-        playlistDTO.setId(playList.getId());
-        playlistDTO.setName(playList.getName());
+    private PlayListDTO buildPlayListDTO(PlayList playList, Long apsUserId) {
+        PlayListDTO playListDTO =  new PlayListDTO();
+        playListDTO.setId(playList.getId());
+        playListDTO.setName(playList.getName());
         if (!playList.getVideoItems().isEmpty()) {
             List<String> videoCodes = playList.getVideoItems()
                     .stream()
@@ -93,9 +93,9 @@ public class PlayListService {
                     .map(videoItem -> buildVideoItemDTO(videoItem, videos, favIds))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
-            playlistDTO.getVideoItemDTOS().addAll(VideoListSorter.sortVideoList(videoItemDTOs));
+            playListDTO.getVideoItemDTOS().addAll(VideoListSorter.sortVideoList(videoItemDTOs));
         }
-        return playlistDTO;
+        return playListDTO;
     }
 
     private VideoItemDTO buildVideoItemDTO(VideoItem videoItem, Set<Video> videos, Set<Long> favIds) {
@@ -117,10 +117,10 @@ public class PlayListService {
         return itemDTO;
     }
 
-    public void moveVideoItemBelowAnother(Long playlistId, String movingVideoCode, String targetVideoCode) {
+    public void moveVideoItemBelowAnother(Long playListId, String movingVideoCode, String targetVideoCode) {
 
-        VideoItem movingVideo = videoItemRepo.findByPlayListIdAndVideoCode(playlistId, movingVideoCode).orElse(null);
-        VideoItem targetVideo = videoItemRepo.findByPlayListIdAndVideoCode(playlistId, targetVideoCode).orElse(null);
+        VideoItem movingVideo = videoItemRepo.findByPlayListIdAndCode(playListId, movingVideoCode).orElse(null);
+        VideoItem targetVideo = videoItemRepo.findByPlayListIdAndCode(playListId, targetVideoCode).orElse(null);
         if (movingVideo == null || targetVideo == null || movingVideo.getCode().equals(targetVideo.getCode())) {
             return;
         }
@@ -162,9 +162,9 @@ public class PlayListService {
 
     }
 
-    public void addVideoItemToTop(Long playlistId, VideoItem newVideoItem) {
+    public void addVideoItemToTop(Long playListId, VideoItem newVideoItem) {
 
-        PlayList playlist =  playListRepo.findById(playlistId).orElse(null);
+        PlayList playlist =  playListRepo.findById(playListId).orElse(null);
         if (playlist == null) {
             return;
         }
@@ -233,12 +233,12 @@ public class PlayListService {
         return null;
     }
 
-    public void removeVideoItems(Long playlistId, List<String> videoCodes) {
-        videoCodes.forEach(code -> this.removeVideoItem(playlistId, code));
+    public void removeVideoItems(Long playListId, List<String> videoCodes) {
+        videoCodes.forEach(code -> this.removeVideoItem(playListId, code));
     }
 
-    public void removeVideoItem(Long playlistId, String code) {
-        VideoItem videoItem = videoItemRepo.findByPlayListIdAndVideoCode(playlistId, code).orElse(null);
+    public void removeVideoItem(Long playListId, String code) {
+        VideoItem videoItem = videoItemRepo.findByPlayListIdAndCode(playListId, code).orElse(null);
         if (videoItem == null) {
             return;
         }
@@ -262,8 +262,8 @@ public class PlayListService {
         videoItemRepo.delete(videoItem);
     }
 
-    public boolean existsById(Long playlistId) {
-        return playListRepo.existsById(playlistId);
+    public boolean existsById(Long playListId) {
+        return playListRepo.existsById(playListId);
     }
 }
 

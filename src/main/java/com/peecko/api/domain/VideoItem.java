@@ -1,26 +1,34 @@
 package com.peecko.api.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 
 @Entity
 public class VideoItem {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String code;
 
-    @ManyToOne
-    private VideoItem previous;
-
-    @ManyToOne
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "previous_video_item_id")
     private VideoItem next;
 
-    @ManyToOne
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "next_video_item_id")
+    private VideoItem previous;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "playlist_id", nullable = false)
     private PlayList playList;
 
     public VideoItem() {
+    }
+
+    public VideoItem(String code, PlayList playList) {
+        this.code = code;
+        this.playList = playList;
     }
 
     public VideoItem(String code) {

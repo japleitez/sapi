@@ -11,8 +11,9 @@ public class VideoItemService {
     public VideoItemService(VideoItemRepo videoItemRepo) {
         this.videoItemRepo = videoItemRepo;
     }
-    public boolean existsByPlayListIdAndVideoCode(Long playlistId, String videoCode) {
-        return videoItemRepo.existsByPlayListIdAndVideoCode(playlistId, videoCode);
+
+    public boolean existsByPlayListIdAndCode(Long playlistId, String code) {
+        return videoItemRepo.existsByPlayListIdAndCode(playlistId, code);
     }
 
 }
