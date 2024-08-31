@@ -1,5 +1,6 @@
 package com.peecko.api.domain;
 
+import com.peecko.api.web.payload.request.SignInRequest;
 import com.peecko.api.web.payload.request.SignUpRequest;
 
 public abstract class EntityBuilder {
@@ -27,4 +28,13 @@ public abstract class EntityBuilder {
                 EntityDefault.LANGUAGE);
     }
 
+    public static SignInRequest buildSignInRequest() {
+        return new SignInRequest(
+                EntityDefault.USERNAME,
+                EntityDefault.PASSWORD,
+                EntityDefault.PHONE_MODEL,
+                EntityDefault.OS_VERSION,
+                EntityDefault.DEVICE_ID
+        );
+    }
 }

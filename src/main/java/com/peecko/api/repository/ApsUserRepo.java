@@ -16,6 +16,9 @@ public interface ApsUserRepo extends JpaRepository<ApsUser, Long> {
 
     Optional<ApsUser> findByUsername(String username);
 
+    @Query("SELECT u FROM ApsUser u LEFT JOIN FETCH u.apsDevices WHERE u.username = :username")
+    Optional<ApsUser> findByUsernameWithDevices(@Param("username") String username);
+
     boolean existsByUsername(String username);
 
     @Modifying

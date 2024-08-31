@@ -58,7 +58,8 @@ public class ApsUser implements Serializable {
     @Column(name = "jwt")
     private String jwt;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "apsUser")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "aps_user_id")
     @JsonIgnoreProperties(value = { "apsUser" }, allowSetters = true)
     private Set<ApsDevice> apsDevices = new HashSet<>();
 

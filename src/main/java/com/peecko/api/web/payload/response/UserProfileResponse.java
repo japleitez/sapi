@@ -45,4 +45,22 @@ public class UserProfileResponse {
     @JsonProperty("membership-sponsor-logo")
     String membershipSponsorLogo = "";
 
+
+    @Override
+    public String toString() {
+        return "UserProfileResponse{" +
+                "token='" + token + '\'' +
+                ", name='" + name + '\'' +
+                ", username='" + username + '\'' +
+                ", emailVerified=" + emailVerified +
+                ", devicesExceeded=" + devicesExceeded +
+                ", devicesCount=" + devicesCount +
+                ", devicesMax=" + devicesMax +
+                ", membership='" + membership + '\'' +
+                ", membershipActivated=" + membershipActivated +
+                ", membershipExpiration='" + membershipExpiration + '\'' +
+                ", membershipSponsor='" + membershipSponsor + '\'' +
+                ", membershipSponsorLogo='" + membershipSponsorLogo + '\'' +
+                '}';
+    }
 }

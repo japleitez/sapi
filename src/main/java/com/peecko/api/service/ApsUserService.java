@@ -54,10 +54,12 @@ public class ApsUserService {
         return !apsUserRepo.existsByUsername(username.toLowerCase());
     }
 
+    @Transactional
     public void setUserActive(String username, boolean active) {
         apsUserRepo.setActive(username.toLowerCase(), active);
     }
 
+    @Transactional
     public void setUserLanguage(String username, Lang lang) {
         apsUserRepo.setLanguage(username, lang, Instant.now());
     }
@@ -69,6 +71,11 @@ public class ApsUserService {
         apsUser.name(NameUtils.toCamelCase(request.name()));
         apsUser.language(Lang.fromString(request.language()));
         apsUser.password(passwordEncoder.encode(request.password()));
+        apsUser.active(false);
+        apsUser.license(null);
+        apsUser.created(Instant.now());
+        apsUser.updated(Instant.now());
+        apsUser.usernameVerified(false);
         apsUserRepo.save(apsUser);
     }
 
@@ -83,7 +90,7 @@ public class ApsUserService {
     }
 
     public UserProfileResponse getProfile(String username) {
-        return apsUserRepo.findByUsername(username.toLowerCase())
+        return apsUserRepo.findByUsernameWithDevices(username.toLowerCase())
                 .map(this::buildProfileResponse)
                 .orElse(buildProfileNotFound(username));
     }
