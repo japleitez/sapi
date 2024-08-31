@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.Optional;
 
 @Repository
@@ -26,8 +27,8 @@ public interface ApsUserRepo extends JpaRepository<ApsUser, Long> {
     void setActive(@Param("username") String username, @Param("active") Boolean active);
 
     @Modifying
-    @Query("UPDATE ApsUser a SET a.lang = :lang, a.updated = CURRENT_TIMESTAMP WHERE a.username = :username")
-    void setLanguage(@Param("username") String username, @Param("lang") Lang lang);
+    @Query("UPDATE ApsUser a SET a.lang = :lang, a.updated = :today WHERE a.username = :username")
+    void setLanguage(@Param("username") String username, @Param("lang") Lang lang, @Param("today") Instant today);
 
     @Modifying
     @Query("UPDATE ApsUser a SET a.password = :password WHERE a.username = :username")

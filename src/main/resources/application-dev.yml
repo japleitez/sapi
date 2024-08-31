@@ -6,14 +6,6 @@
 # Standard Spring Boot properties. Full reference is available at:
 # http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 # ===================================================================
-
-logging:
-  level:
-    ROOT: DEBUG
-    tech.jhipster: DEBUG
-    org.hibernate.SQL: DEBUG
-    com.peecko.one: DEBUG
-
 spring:
   devtools:
     restart:
@@ -40,6 +32,15 @@ spring:
     cache-duration: PT1S # 1 second, see the ISO 8601 standard
   thymeleaf:
     cache: false
+
+# ===================================================================
+# Logging properties
+# ===================================================================
+logging:
+  level:
+    ROOT: DEBUG
+    org.hibernate.SQL: DEBUG
+    com.peecko.one: DEBUG
 
 # ===================================================================
 # Application specific properties

@@ -9,9 +9,35 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
+  jackson:
+    serialization:
+      indent-output: true
+  mail:
+    host: smtp.office365.com
+    port: 587
+    username: info@peecko.com
+    password: InfoPeecko@2022
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
 
+# ===================================================================
+# Logging properties
+# ===================================================================
 logging:
   level:
-    org:
-      hibernate: DEBUG
-      springframework.orm.jpa: DEBUG
+    ROOT: DEBUG
+    org.hibernate.SQL: DEBUG
+    com.peecko.one: DEBUG
+
+# ===================================================================
+# Application specific properties
+# ===================================================================
+app:
+  api:
+    jwtSecret: peeckoSecretKey
+    jwtExpirationMs: 36000000

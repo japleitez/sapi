@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -66,7 +67,7 @@ public class ApsUserService {
     }
 
     public void setUserLanguage(String username, Lang lang) {
-        apsUserRepo.setLanguage(username, lang);
+        apsUserRepo.setLanguage(username, lang, Instant.now());
     }
 
     public void signUp(SignUpRequest request) {
