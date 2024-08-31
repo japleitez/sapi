@@ -41,4 +41,5 @@ public interface ApsUserRepo extends JpaRepository<ApsUser, Long> {
     @Modifying
     @Query("UPDATE ApsUser a SET a.name = :name WHERE a.username = :username")
     void setName(@Param("username") String username, @Param("name") String name);
+
 }

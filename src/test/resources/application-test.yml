@@ -30,9 +30,9 @@ spring:
 # ===================================================================
 logging:
   level:
-    ROOT: DEBUG
-    org.hibernate.SQL: DEBUG
-    com.peecko.one: DEBUG
+    ROOT: INFO
+    org.hibernate.SQL: INFO
+    com.peecko.one: INFO
 
 # ===================================================================
 # Application specific properties

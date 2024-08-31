@@ -3,7 +3,9 @@ package com.peecko.api.service;
 import com.peecko.api.domain.ApsUser;
 import com.peecko.api.domain.EntityBuilder;
 import com.peecko.api.domain.EntityDefault;
+import com.peecko.api.domain.dto.DeviceDTO;
 import com.peecko.api.domain.enumeration.Lang;
+import com.peecko.api.repository.ApsDeviceRepo;
 import com.peecko.api.repository.ApsUserRepo;
 import com.peecko.api.utils.NameUtils;
 import com.peecko.api.web.payload.request.SignInRequest;
@@ -16,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -23,6 +27,9 @@ class ApsUserServiceTest {
 
     @Autowired
     ApsUserRepo apsUserRepo;
+
+    @Autowired
+    ApsDeviceRepo apsDeviceRepo;
 
     @Autowired
     ApsUserService apsUserService;
@@ -33,6 +40,8 @@ class ApsUserServiceTest {
 
     @BeforeEach
     void beforeEach() {
+        apsDeviceRepo.deleteAll();
+        apsDeviceRepo.flush();
         apsUserRepo.deleteAll();
         apsUserRepo.flush();
     }
@@ -73,10 +82,6 @@ class ApsUserServiceTest {
         assertFalse(response.isMembershipActivated());
         assertEquals(1, response.getDevicesCount());
         assertEquals(EntityDefault.USERNAME, response.getUsername());
-
-        ApsUser apsUser = apsUserRepo.findByUsername(signUpRequest.username()).orElseThrow();
-        apsUserRepo.delete(apsUser);
-        apsUserRepo.flush();
 
     }
 
@@ -169,21 +174,92 @@ class ApsUserServiceTest {
 
     @Test
     void signOut() {
+        //GIVEN
+        SignUpRequest signUp = EntityBuilder.buildSignUpRequest();
+        apsUserService.signUp(signUp);
+
+        //WHEN
+        SignInRequest signIn = EntityBuilder.buildSignInRequest();
+        UserProfileResponse response = apsUserService.signIn(signIn);
+        //THEN
+        assertEquals(1, response.getDevicesCount());
+
+        //WHEN
+        int deviceCount = apsUserService.signOut(signIn.username(), signIn.deviceId());
+        ApsUser apsUser = apsUserRepo.findByUsernameWithDevices(signIn.username()).orElseThrow();
+
+        //THEN
+        assertEquals(0, deviceCount);
+        assertEquals(0, apsUser.getApsDevices().size());
+
+
     }
 
     @Test
     void getUserDevicesAsDTO() {
+        //GIVEN
+        SignUpRequest signUp = EntityBuilder.buildSignUpRequest();
+        apsUserService.signUp(signUp);
+
+        SignInRequest signIn = EntityBuilder.buildSignInRequest();
+        UserProfileResponse response = apsUserService.signIn(signIn);
+
+        //WHEN
+        List<DeviceDTO> devices = apsUserService.getUserDevicesAsDTO(signIn.username());
+
+        //THEN
+        assertEquals(1, devices.size());
+
     }
 
     @Test
     void updateUserPassword() {
+        //GIVEN
+        SignUpRequest signUp = EntityBuilder.buildSignUpRequest();
+        apsUserService.signUp(signUp);
+
+        SignInRequest signIn = EntityBuilder.buildSignInRequest();
+        UserProfileResponse response = apsUserService.signIn(signIn);
+
+        //WHEN
+        String newPassword = "newPassword";
+        apsUserService.updateUserPassword(signIn.username(), newPassword);
+
+        //THEN
+        ApsUser updated = apsUserRepo.findByUsername(signIn.username()).orElseThrow();
+        assertTrue(passwordEncoder.matches(newPassword, updated.getPassword()));
     }
 
     @Test
     void updateUserName() {
+        //GIVEN
+        SignUpRequest signUp = EntityBuilder.buildSignUpRequest();
+        apsUserService.signUp(signUp);
+
+        SignInRequest signIn = EntityBuilder.buildSignInRequest();
+        UserProfileResponse response = apsUserService.signIn(signIn);
+
+        //WHEN
+        String otherName = "John Smith";
+        apsUserService.updateUserName(signIn.username(), otherName);
+
+        //THEN
+        ApsUser updated = apsUserRepo.findByUsername(signIn.username()).orElseThrow();
+        assertEquals(otherName, updated.getName());
     }
 
     @Test
     void passwordDoesNotMatch() {
+        //GIVEN
+        SignUpRequest signUp = EntityBuilder.buildSignUpRequest();
+        apsUserService.signUp(signUp);
+
+        //WHEN
+        String wrongPassword = "wrongPassword";
+        boolean doesNotMatch = apsUserService.passwordDoesNotMatch(signUp.username(), wrongPassword);
+
+        //THEN
+        assertTrue(doesNotMatch);
     }
+
 }

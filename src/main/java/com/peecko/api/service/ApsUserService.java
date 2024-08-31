@@ -1,11 +1,13 @@
 package com.peecko.api.service;
 
+import com.peecko.api.domain.ApsDevice;
 import com.peecko.api.domain.ApsMembership;
 import com.peecko.api.domain.ApsUser;
 import com.peecko.api.domain.Customer;
 import com.peecko.api.domain.dto.DeviceDTO;
 import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.domain.mapper.ApsDeviceMapper;
+import com.peecko.api.repository.ApsDeviceRepo;
 import com.peecko.api.repository.ApsMembershipRepo;
 import com.peecko.api.repository.ApsUserRepo;
 import com.peecko.api.repository.CustomerRepo;
@@ -26,14 +28,16 @@ import java.util.stream.Collectors;
 public class ApsUserService {
 
     final ApsUserRepo apsUserRepo;
+    final ApsDeviceRepo apsDeviceRepo;
     final CustomerRepo customerRepo;
     final ApsMembershipRepo apsMembershipRepo;
     final PasswordEncoder passwordEncoder;
 
     public static final int MAX_NUMBER_DEVICES = 3;
 
-    public ApsUserService(ApsUserRepo apsUserRepo, CustomerRepo customerRepo, ApsMembershipRepo apsMembershipRepo, PasswordEncoder passwordEncoder) {
+    public ApsUserService(ApsUserRepo apsUserRepo, ApsDeviceRepo apsDeviceRepo, CustomerRepo customerRepo, ApsMembershipRepo apsMembershipRepo, PasswordEncoder passwordEncoder) {
         this.apsUserRepo = apsUserRepo;
+        this.apsDeviceRepo = apsDeviceRepo;
         this.customerRepo = customerRepo;
         this.apsMembershipRepo = apsMembershipRepo;
         this.passwordEncoder = passwordEncoder;
@@ -81,7 +85,7 @@ public class ApsUserService {
 
     @Transactional
     public UserProfileResponse signIn(SignInRequest request) {
-        return apsUserRepo.findByUsername(request.username())
+        return apsUserRepo.findByUsernameWithDevices(request.username())
                 .map(apsUser -> {
                     apsUser.addApsDevice(ApsDeviceMapper.toApsDevice(request));
                     apsUserRepo.save(apsUser);
@@ -127,15 +131,25 @@ public class ApsUserService {
     }
 
     @Transactional
-    public void signOut(String username, String deviceId) {
-        apsUserRepo.findByUsername(username).ifPresent(apsUser -> {
-                    apsUser.getApsDevices().removeIf(device -> deviceId.equals(device.getDeviceId()));
-                    apsUserRepo.save(apsUser);
-                });
+    public int signOut(String username, String deviceId) {
+        ApsUser apsUser = apsUserRepo.findByUsernameWithDevices(username).orElse(null);
+        if (Objects.nonNull(apsUser)) {
+            ApsDevice toRemove = apsUser.getApsDevices()
+                    .stream()
+                    .filter(device -> deviceId.equals(device.getDeviceId()))
+                    .findFirst()
+                    .orElse(null);
+            if (Objects.nonNull(toRemove)) {
+                apsUser.removeApsDevice(toRemove);
+                apsUserRepo.save(apsUser);
+            }
+            return apsUser.getApsDevices().size();
+        }
+        return 0;
     }
 
     public List<DeviceDTO> getUserDevicesAsDTO(String username) {
-        return apsUserRepo.findByUsername(username.toLowerCase())
+        return apsUserRepo.findByUsernameWithDevices(username.toLowerCase())
                 .map(apsUser -> apsUser.getApsDevices().stream().map(ApsDeviceMapper::deviceDTO).collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
     }
