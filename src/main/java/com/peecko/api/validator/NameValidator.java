@@ -6,9 +6,7 @@ public class NameValidator {
 
     private static final int MIN_LENGTH = 2;
     private static final int MAX_LENGTH = 100;
-
-    private static final String NAME_REGEX = "^[A-Za-zÁÉÍÓÚáéíóúüÑñ]+([ '-][A-Za-zÁÉÍÓÚáéíóúüÑñ]+)*$";
-
+    private static final String NAME_REGEX = "^[A-ZÀ-ÖØ-öø-ÿ][a-zA-ZÀ-ÖØ-öø-ÿ'\\- .,’]{1,99}$";
     private static final Pattern NAME_PATTERN = Pattern.compile(NAME_REGEX);
 
     public static boolean isNotValid(String name) {

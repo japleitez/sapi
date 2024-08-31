@@ -1,6 +1,7 @@
 package com.peecko.api.service;
 
 import com.peecko.api.domain.ApsUser;
+import com.peecko.api.domain.EntityBuilder;
 import com.peecko.api.repository.ApsUserRepo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +17,12 @@ class ApsUserServiceTest {
     @Autowired
     ApsUserService apsUserService;
 
-    final static String DEFAULT_USERNAME = "default@gmail.com";
-
     @Test
     void exists() {
-        ApsUser apsUser = new ApsUser();
-        apsUser.username(DEFAULT_USERNAME);
+        ApsUser apsUser = EntityBuilder.buildApsUser();
         apsUserRepo.save(apsUser);
-        assertTrue(apsUserService.exists(DEFAULT_USERNAME));
+        assertTrue(apsUserService.exists(apsUser.getUsername()));
         apsUserRepo.delete(apsUser);
     }
+
 }

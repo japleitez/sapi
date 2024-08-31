@@ -41,6 +41,13 @@ class NameValidatorTest {
         assertTrue(NameValidator.isValid("Ruby O. Fee"));
         assertTrue(NameValidator.isValid("Astrid M. Fünderich"));
 
+        assertTrue(NameValidator.isValid("Louis-Philippe, Duke of Orléans"));
+        assertTrue(NameValidator.isValid("Dr. John Watson"));
+        assertTrue(NameValidator.isValid("A.B. de Ville"));
+        assertTrue(NameValidator.isValid("Niall O’Connor"));
+        assertTrue(NameValidator.isValid("Lukasz Piszczek"));
+        assertTrue(NameValidator.isValid("Émilie du Châtelet"));
+
     }
 
     @Test

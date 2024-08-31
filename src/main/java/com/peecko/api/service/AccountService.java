@@ -1,12 +1,8 @@
 package com.peecko.api.service;
 
-import com.peecko.api.domain.dto.Help;
-import com.peecko.api.domain.enumeration.Lang;
-import com.peecko.api.domain.mapper.HelpItemMapper;
 import com.peecko.api.repository.*;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AccountService {
@@ -19,6 +15,7 @@ public class AccountService {
         this.apsMembershipRepo = apsMembershipRepo;
     }
 
+    @Transactional
     public boolean activateUserLicense(String username, Integer period, String license) {
         boolean activated = apsMembershipRepo.existsByUsernameAndPeriodAndLicense(username, period, license);
         if (activated) {
