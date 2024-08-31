@@ -39,7 +39,6 @@ class AccountServiceTest {
         apsMembershipRepo.save(aspsMembership);
         apsMembershipRepo.flush();
 
-
         //WHEN
         boolean activated = accountService.activateUserLicense(apsUser.getUsername(), aspsMembership.getPeriod(), aspsMembership.getLicense());
         ApsUser updated = apsUserRepo.findByUsername(apsUser.getUsername()).orElseThrow();
