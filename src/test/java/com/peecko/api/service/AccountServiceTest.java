@@ -7,6 +7,7 @@ import com.peecko.api.domain.EntityDefault;
 import com.peecko.api.repository.ApsMembershipRepo;
 import com.peecko.api.repository.ApsUserRepo;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,13 +19,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AccountServiceTest {
 
     @Autowired
-    ApsUserRepo apsUserRepo;
-
-    @Autowired
     ApsMembershipRepo apsMembershipRepo;
 
     @Autowired
+    ApsUserRepo apsUserRepo;
+
+    @Autowired
     AccountService accountService;
+
+    @BeforeEach
+    void beforeEach() {
+        apsMembershipRepo.deleteAll();
+        apsMembershipRepo.flush();
+        apsUserRepo.deleteAll();
+        apsUserRepo.flush();
+    }
 
     @Test
     void testActivateUserLicense_Success() {
@@ -42,10 +51,10 @@ class AccountServiceTest {
 
         //WHEN
         boolean activated = accountService.activateUserLicense(apsUser.getUsername(), aspsMembership.getPeriod(), aspsMembership.getLicense());
+        ApsUser updated = apsUserRepo.findByUsername(apsUser.getUsername()).orElseThrow();
 
         //THEN
         assertTrue(activated);
-        ApsUser updated = apsUserRepo.findByUsername(apsUser.getUsername()).orElseThrow();
         Assertions.assertEquals(EntityDefault.LICENSE, updated.getLicense());
         
     }

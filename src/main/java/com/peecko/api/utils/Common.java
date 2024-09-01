@@ -34,6 +34,12 @@ public abstract class Common {
         return year * 100 + month;
     }
 
+    public static int previousPeriod() {
+        LocalDate today = LocalDate.now();
+        LocalDate previousMonth = today.minusMonths(1);
+        return previousMonth.getYear() * 100 + previousMonth.getMonthValue();
+    }
+
     public static LocalDate lastDayOfMonth() {
         LocalDate today = LocalDate.now();
         YearMonth yearMonth = YearMonth.of(today.getYear(), today.getMonth());

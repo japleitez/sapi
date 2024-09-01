@@ -19,7 +19,7 @@ public class LicenseAuthAspect {
 
     @Around("@annotation(com.peecko.api.security.Licensed)")
     public Object validate(ProceedingJoinPoint call) throws Throwable {
-        if (licenseService.authorize()) {
+        if (licenseService.isAuthorized()) {
             return call.proceed();
         } else {
             throw new AccessDeniedException("License is invalid or expired.");

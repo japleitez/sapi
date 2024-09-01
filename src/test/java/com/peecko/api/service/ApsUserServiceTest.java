@@ -6,6 +6,7 @@ import com.peecko.api.domain.EntityDefault;
 import com.peecko.api.domain.dto.DeviceDTO;
 import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.repository.ApsDeviceRepo;
+import com.peecko.api.repository.ApsMembershipRepo;
 import com.peecko.api.repository.ApsUserRepo;
 import com.peecko.api.utils.NameUtils;
 import com.peecko.api.web.payload.request.SignInRequest;
@@ -26,10 +27,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class ApsUserServiceTest {
 
     @Autowired
-    ApsUserRepo apsUserRepo;
+    ApsMembershipRepo apsMembershipRepo;
 
     @Autowired
     ApsDeviceRepo apsDeviceRepo;
+
+    @Autowired
+    ApsUserRepo apsUserRepo;
 
     @Autowired
     ApsUserService apsUserService;
@@ -37,9 +41,10 @@ class ApsUserServiceTest {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-
     @BeforeEach
     void beforeEach() {
+        apsMembershipRepo.deleteAll();
+        apsMembershipRepo.flush();
         apsDeviceRepo.deleteAll();
         apsDeviceRepo.flush();
         apsUserRepo.deleteAll();
@@ -78,8 +83,10 @@ class ApsUserServiceTest {
         //THEN
         assertTrue(authenticated);
         assertTrue(response.isEmailVerified());
+
         assertFalse(response.isDevicesExceeded());
         assertFalse(response.isMembershipActivated());
+
         assertEquals(1, response.getDevicesCount());
         assertEquals(EntityDefault.USERNAME, response.getUsername());
 
@@ -164,12 +171,11 @@ class ApsUserServiceTest {
         UserProfileResponse response = apsUserService.getProfile(request.username());
 
         //THEN
+        assertNull(response.getMembership());
         assertTrue(response.isEmailVerified());
         assertFalse(response.isDevicesExceeded());
         assertFalse(response.isMembershipActivated());
         assertEquals(1, response.getDevicesCount());
-        assertNull(response.getMembership());
-        assertFalse(response.isMembershipActivated());
     }
 
     @Test
@@ -191,7 +197,6 @@ class ApsUserServiceTest {
         //THEN
         assertEquals(0, deviceCount);
         assertEquals(0, apsUser.getApsDevices().size());
-
 
     }
 

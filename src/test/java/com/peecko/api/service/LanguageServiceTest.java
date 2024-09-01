@@ -4,6 +4,7 @@ import com.peecko.api.domain.Language;
 import com.peecko.api.domain.dto.LanguageDTO;
 import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.repository.LanguageRepo;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +21,12 @@ class LanguageServiceTest {
 
     @Autowired
     LanguageRepo languageRepo;
+
+    @BeforeEach
+    void beforeEach() {
+        languageRepo.deleteAll();
+        languageRepo.flush();
+    }
 
     @Test
     void findActiveLanguages() {

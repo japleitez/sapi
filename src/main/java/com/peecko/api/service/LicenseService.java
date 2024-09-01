@@ -3,8 +3,6 @@ package com.peecko.api.service;
 import com.peecko.api.domain.ApsUser;
 import com.peecko.api.repository.ApsMembershipRepo;
 import com.peecko.api.repository.ApsUserRepo;
-import com.peecko.api.repository.InvalidJwtRepo;
-import com.peecko.api.security.JwtUtils;
 import com.peecko.api.utils.Common;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,41 +12,36 @@ import java.time.LocalDate;
 
 @Service
 public class LicenseService {
-    final JwtUtils jwtUtils;
-    final InvalidJwtRepo invalidJwtRepo;
     final ApsUserRepo apsUserRepo;
     final ApsMembershipRepo apsMembershipRepo;
+    final int GRACE_PERIOD_IN_DAYS = 10;
 
-    public LicenseService(JwtUtils jwtUtils, InvalidJwtRepo invalidJwtRepo, ApsUserRepo apsUserRepo, ApsMembershipRepo apsMembershipRepo) {
-        this.jwtUtils = jwtUtils;
-        this.invalidJwtRepo = invalidJwtRepo;
+    public LicenseService(ApsUserRepo apsUserRepo, ApsMembershipRepo apsMembershipRepo) {
         this.apsUserRepo = apsUserRepo;
         this.apsMembershipRepo = apsMembershipRepo;
     }
 
-    public boolean authorize() {
+    public boolean isAuthorized() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username = userDetails.getUsername();
+        return isAuthorized(userDetails.getUsername());
+    }
+
+    protected boolean isAuthorized(String username) {
         ApsUser apsUser = apsUserRepo.findByUsername(username).orElse(null);
         if (apsUser == null) {
             return false;
         }
+        // if the user has a valid license in the current period, we return true
         if (apsMembershipRepo
                 .findByUsernameAndPeriodAndLicense(username, Common.currentPeriod(), apsUser.getLicense())
                 .isPresent()) {
-            // the user has a valid license in the current period
             return true;
         }
-        //otherwise, we grant the user access for up to 10 days if he had a license in the previous period
-        LocalDate today = LocalDate.now();
-        if (today.getDayOfMonth() > 10) {
-            return false;
-        }
-        LocalDate previousMonth = today.minusMonths(1);
-        int previousYearMonth = previousMonth.getYear() * 100 + previousMonth.getMonthValue();
-        return apsMembershipRepo
-                .findByUsernameAndPeriod(username, previousYearMonth)
-                .isPresent();
+        // otherwise, grant grace period if the user had any license in the previous period
+        return GRACE_PERIOD_IN_DAYS > LocalDate.now().getDayOfMonth() &&
+                apsMembershipRepo
+                        .findByUsernameAndPeriod(username, Common.previousPeriod())
+                        .isPresent();
     }
 
 }

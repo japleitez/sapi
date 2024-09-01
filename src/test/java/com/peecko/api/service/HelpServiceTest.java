@@ -3,6 +3,7 @@ package com.peecko.api.service;
 import com.peecko.api.domain.HelpItem;
 import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.repository.HelpItemRepo;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +18,12 @@ class HelpServiceTest {
 
     @Autowired
     HelpItemRepo helpItemRepo;
+
+    @BeforeEach
+    void beforeEach() {
+        helpItemRepo.deleteAll();
+        helpItemRepo.flush();
+    }
 
     @Test
     void findByLang() {
