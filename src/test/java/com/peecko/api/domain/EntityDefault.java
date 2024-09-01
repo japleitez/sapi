@@ -15,4 +15,6 @@ public abstract class EntityDefault {
     public static final String OS_VERSION = "default-version";
     public static final String DEVICE_ID = "default-device";
 
+    public static final String JTI = "jti";
+
 }

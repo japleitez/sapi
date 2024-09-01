@@ -72,7 +72,7 @@ public class AccountResource extends BaseResource {
      */
     @GetMapping("/help")
     public ResponseEntity<List<Help>> getHelp() {
-        List<Help> helpList = helpService.findHelpByLang(Login.getUserLanguage());
+        List<Help> helpList = helpService.findByLang(Login.getUserLanguage());
         return ResponseEntity.ok(helpList);
     }
 }

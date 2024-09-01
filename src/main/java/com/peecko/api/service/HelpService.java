@@ -17,7 +17,7 @@ public class HelpService {
         this.helpItemRepo = helpItemRepo;
     }
 
-    public List<Help> findHelpByLang(Lang lang) {
+    public List<Help> findByLang(Lang lang) {
         return helpItemRepo.findByLang(lang).stream().map(HelpItemMapper::help).toList();
     }
 

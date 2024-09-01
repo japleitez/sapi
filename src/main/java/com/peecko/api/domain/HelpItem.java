@@ -1,16 +1,35 @@
 package com.peecko.api.domain;
 
 import com.peecko.api.domain.enumeration.Lang;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
+@Table(name = "help_item")
 public class HelpItem {
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
+    @SequenceGenerator(name = "sequenceGenerator")
+    @Column(name = "id")
     private Long id;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "language", nullable = false)
     private Lang lang;
+
+    @Column(name = "question")
     private String question;
+
+    @Column(name = "answer")
     private String answer;
+
+    public HelpItem() {
+    }
+
+    public HelpItem(Lang lang, String question, String answer) {
+        this.lang = lang;
+        this.question = question;
+        this.answer = answer;
+    }
 
     public Long getId() {
         return id;

@@ -1,16 +1,25 @@
 package com.peecko.api.domain;
 
 import jakarta.persistence.*;
+
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "invalid_jwt")
 public class InvalidJwt {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
+    @SequenceGenerator(name = "sequenceGenerator")
+    @Column(name = "id")
     private Long id;
+
+    @Column(name = "jti")
     private String jti;
-    private LocalDateTime invalidatedAt;
+
+    @Column(name = "invalidated_at")
+    private Instant invalidatedAt;
 
     public Long getId() {
         return id;
@@ -28,11 +37,11 @@ public class InvalidJwt {
         this.jti = jti;
     }
 
-    public LocalDateTime getInvalidatedAt() {
+    public Instant getInvalidatedAt() {
         return invalidatedAt;
     }
 
-    public void setInvalidatedAt(LocalDateTime invalidatedAt) {
+    public void setInvalidatedAt(Instant invalidatedAt) {
         this.invalidatedAt = invalidatedAt;
     }
 
