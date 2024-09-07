@@ -54,7 +54,7 @@ public class AccountResource extends BaseResource {
      */
     @GetMapping("/notifications")
     public ResponseEntity<List<NotificationDTO>> getNotifications() {
-        List<NotificationDTO> list = notificationService.getNotifications(Login.getUser(), Common.currentPeriod());
+        List<NotificationDTO> list = notificationService.getNotificationsForUserAndPeriod(Login.getUser(), Common.currentPeriod());
         return ResponseEntity.ok(list);
     }
 

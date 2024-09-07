@@ -46,7 +46,7 @@ public class NotificationService {
         });
     }
 
-    public List<NotificationDTO> getNotifications(ApsUser apsUser, int period) {
+    public List<NotificationDTO> getNotificationsForUserAndPeriod(ApsUser apsUser, int period) {
         ApsMembership membership = apsMembershipRepo.findByUsernameAndPeriod(apsUser.getUsername(), period).orElse(null);
         if (membership == null) {
             return List.of();

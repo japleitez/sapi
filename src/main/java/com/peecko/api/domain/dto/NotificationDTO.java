@@ -4,11 +4,6 @@ import lombok.*;
 import lombok.experimental.Accessors;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Setter
-@Getter
-@Accessors(chain = true)
 public class NotificationDTO {
     private Long id;
     private String title;
@@ -17,4 +12,8 @@ public class NotificationDTO {
     private String video;
     private String date;
     private Boolean viewed = false;
+
+    public boolean isViewed() {
+        return false;
+    }
 }

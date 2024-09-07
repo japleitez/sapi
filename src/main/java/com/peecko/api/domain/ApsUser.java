@@ -3,6 +3,7 @@ package com.peecko.api.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.peecko.api.domain.enumeration.Lang;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -21,9 +22,11 @@ public class ApsUser implements Serializable {
     @Column(name = "id")
     private Long id;
 
+    @NotNull
     @Column(name = "name")
     private String name;
 
+    @NotNull
     @Column(name = "username")
     private String username;
 
@@ -36,6 +39,7 @@ public class ApsUser implements Serializable {
     @Column(name = "private_verified")
     private Boolean privateVerified;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "language")
     private Lang lang;
