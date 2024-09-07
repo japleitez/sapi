@@ -25,13 +25,13 @@ public class PinCode {
     @Column(name = "email", nullable = false)
     String email;
 
-    @Column(name = "agency_email", nullable = false)
+    @Column(name = "agency_email")
     String agencyEmail;
 
-    @Column(name = "language", nullable = false)
+    @Column(name = "language")
     String language;
 
-    @Column(name = "template", nullable = false)
+    @Column(name = "template")
     String template;
 
     @Column(name = "expire_at", nullable = false)
