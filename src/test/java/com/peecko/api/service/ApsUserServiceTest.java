@@ -18,12 +18,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 class ApsUserServiceTest {
 
     @Autowired
@@ -40,16 +42,6 @@ class ApsUserServiceTest {
 
     @Autowired
     PasswordEncoder passwordEncoder;
-
-    @BeforeEach
-    void beforeEach() {
-        apsMembershipRepo.deleteAll();
-        apsMembershipRepo.flush();
-        apsDeviceRepo.deleteAll();
-        apsDeviceRepo.flush();
-        apsUserRepo.deleteAll();
-        apsUserRepo.flush();
-    }
 
     @Test
     void signUp() {

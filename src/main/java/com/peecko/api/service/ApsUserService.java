@@ -60,12 +60,17 @@ public class ApsUserService {
 
     @Transactional
     public void setUserActive(String username, boolean active) {
-        apsUserRepo.setActive(username.toLowerCase(), active);
+        ApsUser apsUser = apsUserRepo.findByUsername(username).orElseThrow();
+        apsUser.active(active);
+        apsUserRepo.save(apsUser);
     }
 
     @Transactional
     public void setUserLanguage(String username, Lang lang) {
-        apsUserRepo.setLanguage(username, lang, Instant.now());
+        ApsUser apsUser = apsUserRepo.findByUsername(username).orElseThrow();
+        apsUser.language(lang);
+        apsUser.updated(Instant.now());
+        apsUserRepo.save(apsUser);
     }
 
     @Transactional
@@ -156,12 +161,18 @@ public class ApsUserService {
 
     @Transactional
     public void updateUserPassword(String username, String password) {
-        apsUserRepo.setPassword(username.toLowerCase(), passwordEncoder.encode(password));
+        ApsUser apsUser = apsUserRepo.findByUsername(username).orElseThrow();
+        apsUser.password(passwordEncoder.encode(password));
+        apsUser.updated(Instant.now());
+        apsUserRepo.save(apsUser);
     }
 
     @Transactional
     public void updateUserName(String username, String name) {
-        apsUserRepo.setName(username, name);
+        ApsUser apsUser = apsUserRepo.findByUsername(username).orElseThrow();
+        apsUser.name(name);
+        apsUser.updated(Instant.now());
+        apsUserRepo.save(apsUser);
     }
 
     public boolean passwordDoesNotMatch(String username, String password) {

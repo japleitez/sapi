@@ -6,10 +6,12 @@ import com.peecko.api.domain.enumeration.CustomerState;
 import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.repository.*;
 import com.peecko.api.utils.Common;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 class NotificationServiceTest {
 
     @Autowired
@@ -36,15 +39,6 @@ class NotificationServiceTest {
 
     @Autowired
     private ApsMembershipRepo apsMembershipRepo;
-
-    @BeforeEach
-    void beforeEach() {
-        viewedNotificationRepo.deleteAll();
-        notificationRepo.deleteAll();
-        apsMembershipRepo.deleteAll();
-        apsUserRepo.deleteAll();
-        customerRepo.deleteAll();
-    }
 
     @Test
     void addViewedNotification() {

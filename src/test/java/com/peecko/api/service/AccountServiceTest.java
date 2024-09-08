@@ -11,11 +11,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@Transactional
 class AccountServiceTest {
 
     @Autowired
@@ -27,14 +29,6 @@ class AccountServiceTest {
     @Autowired
     AccountService accountService;
 
-    @BeforeEach
-    void beforeEach() {
-        apsMembershipRepo.deleteAll();
-        apsMembershipRepo.flush();
-        apsUserRepo.deleteAll();
-        apsUserRepo.flush();
-    }
-
     @Test
     void testActivateUserLicense_Success() {
         //GIVEN
@@ -42,11 +36,9 @@ class AccountServiceTest {
         ApsUser apsUser = EntityBuilder.buildApsUser();
         apsUser.license(null);
         apsUserRepo.save(apsUser);
-        apsUserRepo.flush();
 
         ApsMembership aspsMembership = EntityBuilder.buildApsMembership(apsUser.getUsername(), EntityDefault.CUSTOMER_ID);
         apsMembershipRepo.save(aspsMembership);
-        apsMembershipRepo.flush();
 
         //WHEN
         boolean activated = accountService.activateUserLicense(apsUser.getUsername(), aspsMembership.getPeriod(), aspsMembership.getLicense());

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.MessageSource;
+import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
 
 import java.time.LocalDateTime;
@@ -21,6 +22,7 @@ import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 class PinCodeServiceTest {
 
     @Autowired
@@ -43,15 +45,6 @@ class PinCodeServiceTest {
 
     @Autowired
     PinCodeService pinCodeService;
-
-    @BeforeEach
-    void beforeEach() {
-        pinCodeRepo.deleteAll();
-        pinCodeRepo.flush();
-
-        apsUserRepo.deleteAll();
-        apsUserRepo.flush();
-    }
 
     @Test
     void generatePinCode() {

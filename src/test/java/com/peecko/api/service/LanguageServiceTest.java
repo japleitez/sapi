@@ -8,12 +8,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 class LanguageServiceTest {
 
     @Autowired
@@ -21,12 +23,6 @@ class LanguageServiceTest {
 
     @Autowired
     LanguageRepo languageRepo;
-
-    @BeforeEach
-    void beforeEach() {
-        languageRepo.deleteAll();
-        languageRepo.flush();
-    }
 
     @Test
     void findActiveLanguages() {
@@ -46,7 +42,5 @@ class LanguageServiceTest {
         assertEquals(languages.stream().filter(l -> l.getName().equals("French")).count(), 1);
         assertEquals(languages.stream().filter(l -> l.getName().equals("Deutsch")).count(), 1);
     }
-
-
 
 }

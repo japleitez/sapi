@@ -7,7 +7,7 @@ public abstract class EntityDefault {
 
     public static final String PLAYLIST_NAME = "default-playlist-name";
     public static final String NAME = "Default Name";
-    public static final String USERNAME = "defaul.namet@gmail.com";
+    public static final String USERNAME = "defaul.name@mail.com";
     public static final String PASSWORD = "default-password";
     public static final Lang LANG = Lang.FR;
     public static final String COUNTRY = "FR";

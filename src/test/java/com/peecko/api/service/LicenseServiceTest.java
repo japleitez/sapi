@@ -20,9 +20,11 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @SpringBootTest
+@Transactional
 class LicenseServiceTest {
 
     @Autowired
@@ -33,14 +35,6 @@ class LicenseServiceTest {
 
     @Autowired
     LicenseService licenseService;
-
-    @BeforeEach
-    void beforeEach() {
-        apsMembershipRepo.deleteAll();
-        apsMembershipRepo.flush();
-        apsUserRepo.deleteAll();
-        apsUserRepo.flush();
-    }
 
     @Test
     void isAuthorized() {
