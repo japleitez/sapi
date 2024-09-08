@@ -71,11 +71,11 @@ public class Video implements Serializable {
 
     public int selectionCount;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnoreProperties(value = { "videos" }, allowSetters = true)
     private VideoCategory videoCategory;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnoreProperties(value = { "videos", "articles" }, allowSetters = true)
     private Coach coach;
 

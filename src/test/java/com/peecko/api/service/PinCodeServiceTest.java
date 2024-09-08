@@ -8,6 +8,7 @@ import com.peecko.api.domain.enumeration.Verification;
 import com.peecko.api.repository.ApsUserRepo;
 import com.peecko.api.repository.PinCodeRepo;
 import com.peecko.api.utils.PinUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,6 +43,15 @@ class PinCodeServiceTest {
 
     @Autowired
     PinCodeService pinCodeService;
+
+    @BeforeEach
+    void beforeEach() {
+        pinCodeRepo.deleteAll();
+        pinCodeRepo.flush();
+
+        apsUserRepo.deleteAll();
+        apsUserRepo.flush();
+    }
 
     @Test
     void generatePinCode() {
@@ -85,10 +95,8 @@ class PinCodeServiceTest {
 
     @Test
     void isPinCodeValid() {
-
-        String code = PinUtils.randomDigitsAsString(4);
-
         // GIVEN
+        String code = PinUtils.randomDigitsAsString(4);
         PinCode pinCode = new PinCode();
         pinCode.setLanguage(Lang.FR.name());
         pinCode.setEmail(EntityDefault.USERNAME);

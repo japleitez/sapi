@@ -50,7 +50,7 @@ class LicenseServiceTest {
         apsUserRepo.save(apsUser);
         apsUserRepo.flush();
 
-        apsMembershipRepo.save(EntityBuilder.buildApsMembership());
+        apsMembershipRepo.save(EntityBuilder.buildApsMembership(apsUser.getUsername(), EntityDefault.CUSTOMER_ID));
         apsMembershipRepo.flush();
 
         // when
@@ -68,7 +68,7 @@ class LicenseServiceTest {
         apsUserRepo.save(apsUser);
         apsUserRepo.flush();
 
-        apsMembershipRepo.save(EntityBuilder.buildApsMembership());
+        apsMembershipRepo.save(EntityBuilder.buildApsMembership(apsUser.getUsername(), EntityDefault.CUSTOMER_ID));
         apsMembershipRepo.flush();
 
         // when

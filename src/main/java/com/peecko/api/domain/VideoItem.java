@@ -11,11 +11,12 @@ public class VideoItem {
 
     private String code;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "previous_video_item_id")
     private VideoItem next;
 
-    @OneToOne(fetch = FetchType.LAZY)
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "next_video_item_id")
     private VideoItem previous;
 
@@ -65,6 +66,14 @@ public class VideoItem {
 
     public void setPlayList(PlayList playList) {
         this.playList = playList;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
 }

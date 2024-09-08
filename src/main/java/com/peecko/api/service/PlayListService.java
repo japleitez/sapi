@@ -66,11 +66,12 @@ public class PlayListService {
                 .findByApsUser(apsUser)
                 .stream()
                 .map(PlayListMapper::toIdName)
+                .sorted(Comparator.comparing(IdName::getName))
                 .collect(Collectors.toList());
     }
 
     public PlayListDTO getPlayListAsDTO(Long playListId, Long apsUserId) {
-        PlayList playList = playListRepo.findById(playListId).orElse(null);
+        PlayList playList = playListRepo.findByIdWithVideoItems(playListId).orElse(null);
         if (playList == null) {
             return null;
         }
@@ -164,7 +165,7 @@ public class PlayListService {
 
     public void addVideoItemToTop(Long playListId, VideoItem newVideoItem) {
 
-        PlayList playlist =  playListRepo.findById(playListId).orElse(null);
+        PlayList playlist =  playListRepo.findByIdWithVideoItems(playListId).orElse(null);
         if (playlist == null) {
             return;
         }

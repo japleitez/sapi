@@ -38,14 +38,13 @@ class AccountServiceTest {
     @Test
     void testActivateUserLicense_Success() {
         //GIVEN
+
         ApsUser apsUser = EntityBuilder.buildApsUser();
         apsUser.license(null);
         apsUserRepo.save(apsUser);
         apsUserRepo.flush();
 
-        ApsMembership aspsMembership = EntityBuilder.buildApsMembership();
-        aspsMembership.setUsername(apsUser.getUsername());
-        aspsMembership.setLicense(EntityDefault.LICENSE);
+        ApsMembership aspsMembership = EntityBuilder.buildApsMembership(apsUser.getUsername(), EntityDefault.CUSTOMER_ID);
         apsMembershipRepo.save(aspsMembership);
         apsMembershipRepo.flush();
 

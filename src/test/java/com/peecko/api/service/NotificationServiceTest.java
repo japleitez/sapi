@@ -40,19 +40,10 @@ class NotificationServiceTest {
     @BeforeEach
     void beforeEach() {
         viewedNotificationRepo.deleteAll();
-        viewedNotificationRepo.flush();
-
         notificationRepo.deleteAll();
-        notificationRepo.flush();
-
         apsMembershipRepo.deleteAll();
-        apsMembershipRepo.flush();
-
         apsUserRepo.deleteAll();
-        apsUserRepo.flush();
-
         customerRepo.deleteAll();
-        customerRepo.flush();
     }
 
     @Test
@@ -71,52 +62,18 @@ class NotificationServiceTest {
     @Test
     void getNotificationsForUserAndPeriod() {
         // GIVEN
-        int period = Common.currentPeriod();
-        String licence = "test";
-
-        // customer
-        Customer customer = new Customer();
-        customer.setCode("test");
-        customer.setName("Test");
-        customer.setCountry("FR");
-        customer.setState(CustomerState.ACTIVE);
-        customer.vatRate(0.2);
-        customer.setLicense(licence);
+        Customer customer = EntityBuilder.buildCustomer();
         customerRepo.save(customer);
-        customerRepo.flush();
-
-        // user
-        ApsUser apsUser = new ApsUser();
-        apsUser.setUsername("test@mail.com");
-        apsUser.setName("Test");
-        apsUser.setLanguage(Lang.FR);
+        ApsUser apsUser = EntityBuilder.buildApsUser();
         apsUserRepo.save(apsUser);
-        apsUserRepo.flush();
-
-        // membership
-        ApsMembership apsMembership = new ApsMembership();
-        apsMembership.setUsername(apsUser.getUsername());
-        apsMembership.setPeriod(period);
-        apsMembership.setCustomerId(customer.getId());
-        apsMembership.setLicense(licence);
-        apsMembership.setCustomerId(customer.getId());
+        ApsMembership apsMembership = EntityBuilder.buildApsMembership(apsUser.getUsername(), customer.getId());
         apsMembershipRepo.save(apsMembership);
-        apsMembershipRepo.flush();
-
-        // notification
-        Notification notification = new Notification();
-        notification.setTitle("Test");
-        notification.setMessage("Test");
-        notification.setLanguage(Lang.FR);
-        notification.setCustomer(customer);
-        notification.setVideoUrl("test");
-        notification.setImageUrl("test");
-        notification.setStarts(LocalDate.now());
-        notification.setExpires(LocalDate.now().plusDays(10));
+        Notification notification = EntityBuilder.buildNotification(customer);
         notificationRepo.save(notification);
         notificationRepo.flush();
 
         // WHEN
+        int period = Common.currentPeriod();
         List<NotificationDTO> notViewed = notificationService.getNotificationsForUserAndPeriod(apsUser, period);
         notificationService.addViewedNotification(apsUser.getId(), notification.getId());
         List<NotificationDTO> viewed = notificationService.getNotificationsForUserAndPeriod(apsUser, period);

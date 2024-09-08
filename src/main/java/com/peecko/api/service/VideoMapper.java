@@ -1,5 +1,6 @@
 package com.peecko.api.service;
 
+import com.peecko.api.domain.Coach;
 import com.peecko.api.domain.Video;
 import com.peecko.api.domain.VideoCategory;
 import com.peecko.api.domain.dto.CategoryDTO;
@@ -35,16 +36,10 @@ public class VideoMapper {
         dto.setCategory(video.getVideoCategory().getCode());
         dto.setTitle(video.getTitle());
         dto.setDuration(String.valueOf(video.getDuration()));
-        dto.setCoach(video.getCoach().getName());
         dto.setImage(video.getThumbnail());
         dto.setUrl(video.getUrl());
         dto.setDescription(video.getDescription());
-        dto.setResume(video.getCoach().getResume());
         dto.setPlayer(video.getPlayer().name());
-        dto.setFavorite(video.isFavorite());
-        dto.setCoachWebsite(video.getCoach().getWebsite());
-        dto.setCoachEmail(video.getCoach().getEmail());
-        dto.setCoachInstagram(video.getCoach().getInstagram());
         dto.setFavorite(video.isFavorite());
         if (StringUtils.hasText(video.getAudience())) {
             dto.setAudience(labelService.getCachedLabel(video.getAudience(), lang));
@@ -54,6 +49,14 @@ public class VideoMapper {
         }
         if (StringUtils.hasText(video.getTags())) {
             dto.setTags(buildVideoTagsAsLabelList(video.getTags(), lang));
+        }
+        if (video.getCoach() != null) {
+            Coach coach = video.getCoach();
+            dto.setCoach(coach.getName());
+            dto.setResume(coach.getResume());
+            dto.setCoachWebsite(coach.getWebsite());
+            dto.setCoachEmail(coach.getEmail());
+            dto.setCoachInstagram(coach.getInstagram());
         }
         return dto;
     }
