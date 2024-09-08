@@ -55,7 +55,7 @@ public abstract class EntityBuilder {
 
     public static VideoCategory buildVideoCategory() {
         VideoCategory category = new VideoCategory();
-        category.setCode("YOGA");
+        category.setCode(EntityDefault.VIDEO_CATEGORY_NAME);
         category.setTitle(EntityDefault.TITLE);
         category.setLabel(EntityDefault.LABEL);
         return category;

@@ -4,6 +4,7 @@ import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.utils.Common;
 
 public abstract class EntityDefault {
+    public static final String VIDEO_CATEGORY_NAME = "default-video-category-name";
 
     public static final String PLAYLIST_NAME = "default-playlist-name";
     public static final String NAME = "Default Name";

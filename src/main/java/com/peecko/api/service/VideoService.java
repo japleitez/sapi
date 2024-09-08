@@ -27,7 +27,6 @@ public class VideoService {
     final TodayVideoRepo todayVideoRepo;
     final VideoCategoryRepo videoCategoryRepo;
     final UserFavoriteVideoRepo userFavoriteVideoRepo;
-
     final static int CATEGORY_VIDEOS_SIZE = 4;
 
     public VideoService(VideoMapper videoMapper, VideoRepo videoRepo, LabelService labelService, CacheManager cacheManager, TodayVideoRepo todayVideoRepo, VideoCategoryRepo videoCategoryRepo, UserFavoriteVideoRepo userFavoriteVideoRepo) {
