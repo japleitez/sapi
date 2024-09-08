@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.parameters.P;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -89,7 +90,7 @@ class PlayListServiceTest {
         ApsUser apsUser = EntityBuilder.buildApsUser();
         apsUserRepo.save(apsUser);
 
-        // Given names in descending order
+        // Given
         String name4 = EntityDefault.PLAYLIST_NAME + "-04";
         String name3 = EntityDefault.PLAYLIST_NAME + "-03";
         String name2 = EntityDefault.PLAYLIST_NAME + "-02";
@@ -126,103 +127,10 @@ class PlayListServiceTest {
     }
 
     @Test
-    void moveVideoItemBelowAnother() {
-    }
-
-    @Test
-    void addAndRemoveVideoItems() {
-        // Given
-        VideoCategory videoCategory = EntityBuilder.buildVideoCategory();
-        videoCategoryRepo.save(videoCategory);
-
-        String code1 = EntityDefault.VIDEO_CODE + "-01";
-        Video video1 = EntityBuilder.buildVideo(code1, videoCategory);
-        videoRepo.save(video1);
-
-        String code2 = EntityDefault.VIDEO_CODE + "-02";
-        Video video2 = EntityBuilder.buildVideo(code2, videoCategory);
-        videoRepo.save(video2);
-
-        String code3 = EntityDefault.VIDEO_CODE + "-03";
-        Video video3 = EntityBuilder.buildVideo(code3, videoCategory);
-        videoRepo.save(video3);
-
-        String code4 = EntityDefault.VIDEO_CODE + "-04";
-        Video video4 = EntityBuilder.buildVideo(code4, videoCategory);
-        videoRepo.save(video4);
-
-        String code5 = EntityDefault.VIDEO_CODE + "-05";
-        Video video5 = EntityBuilder.buildVideo(code5, videoCategory);
-        videoRepo.save(video5);
-
-        String code6 = EntityDefault.VIDEO_CODE + "-06";
-        Video video6 = EntityBuilder.buildVideo(code6, videoCategory);
-        videoRepo.save(video6);
-
-        ApsUser apsUser = EntityBuilder.buildApsUser();
-        apsUserRepo.save(apsUser);
-
-        String list1 = EntityDefault.PLAYLIST_NAME + "-01";
-        String list2 = EntityDefault.PLAYLIST_NAME + "-02";
-        PlayList playList1 = playListService.createPlayList(apsUser.getId(), list1);
-        PlayList playList2 = playListService.createPlayList(apsUser.getId(), list2);
-
-        // When
-        Long L1 = playList1.getId();
-        playListService.addVideoItemToTop(L1, new VideoItem(code1));
-        playListService.addVideoItemToTop(L1, new VideoItem(code2));
-        playListService.addVideoItemToTop(L1, new VideoItem(code3));
-        playListService.addVideoItemToTop(L1, new VideoItem(code4));
-        playListService.addVideoItemToTop(L1, new VideoItem(code5));
-        playListService.addVideoItemToTop(L1, new VideoItem(code6));
-
-        Long L2 = playList2.getId();
-        playListService.addVideoItemToTop(L2, new VideoItem(code1));
-        playListService.addVideoItemToTop(L2, new VideoItem(code2));
-        playListService.addVideoItemToTop(L2, new VideoItem(code3));
-        playListService.addVideoItemToTop(L2, new VideoItem(code4));
-        playListService.addVideoItemToTop(L2, new VideoItem(code5));
-
-        // Then
-        PlayListDTO playListDTO = playListService.getPlayListAsDTO(L1, apsUser.getId());
-
-        assertEquals(6, playListDTO.getVideoItemDTOS().size());
-        assertEquals(code6, playListDTO.getVideoItemDTOS().get(0).getCode());
-        assertEquals(code5, playListDTO.getVideoItemDTOS().get(1).getCode());
-        assertEquals(code4, playListDTO.getVideoItemDTOS().get(2).getCode());
-        assertEquals(code3, playListDTO.getVideoItemDTOS().get(3).getCode());
-        assertEquals(code2, playListDTO.getVideoItemDTOS().get(4).getCode());
-        assertEquals(code1, playListDTO.getVideoItemDTOS().get(5).getCode());
-
-        // When
-        playListService.removeVideoItem(L1, code5);
-        playListService.removeVideoItems(L1, Arrays.asList(code3, code2));
-
-        // Then play list 1 has been modified
-        playListDTO = playListService.getPlayListAsDTO(L1, apsUser.getId());
-        assertEquals(3, playListDTO.getVideoItemDTOS().size());
-        assertEquals(code6, playListDTO.getVideoItemDTOS().get(0).getCode());
-        assertEquals(code4, playListDTO.getVideoItemDTOS().get(1).getCode());
-        assertEquals(code1, playListDTO.getVideoItemDTOS().get(2).getCode());
-
-        // Then play list 2 remains unchanged
-        playListDTO = playListService.getPlayListAsDTO(L2, apsUser.getId());
-        assertEquals(5, playListDTO.getVideoItemDTOS().size());
-        assertEquals(code5, playListDTO.getVideoItemDTOS().get(0).getCode());
-        assertEquals(code4, playListDTO.getVideoItemDTOS().get(1).getCode());
-        assertEquals(code3, playListDTO.getVideoItemDTOS().get(2).getCode());
-        assertEquals(code2, playListDTO.getVideoItemDTOS().get(3).getCode());
-        assertEquals(code1, playListDTO.getVideoItemDTOS().get(4).getCode());
-
-    }
-
-
-    @Test
     void existsById() {
         // Given
         ApsUser apsUser = EntityBuilder.buildApsUser();
         apsUserRepo.save(apsUser);
-
         PlayList playList = playListService.createPlayList(apsUser.getId(), EntityDefault.PLAYLIST_NAME);
 
         // When
@@ -230,6 +138,316 @@ class PlayListServiceTest {
 
         // Then
         assertTrue(result);
+    }
+
+    @Test
+    void addAndRemoveVideoItemsAtTop() {
+        // Given
+        VideoCategory videoCategory = EntityBuilder.buildVideoCategory();
+        videoCategoryRepo.save(videoCategory);
+
+        String videoCode1 = EntityDefault.VIDEO_CODE + "-01";
+        Video video1 = EntityBuilder.buildVideo(videoCode1, videoCategory);
+        videoRepo.save(video1);
+
+        String videoCode2 = EntityDefault.VIDEO_CODE + "-02";
+        Video video2 = EntityBuilder.buildVideo(videoCode2, videoCategory);
+        videoRepo.save(video2);
+
+        String videoCode3 = EntityDefault.VIDEO_CODE + "-03";
+        Video video3 = EntityBuilder.buildVideo(videoCode3, videoCategory);
+        videoRepo.save(video3);
+
+        String videoCode4 = EntityDefault.VIDEO_CODE + "-04";
+        Video video4 = EntityBuilder.buildVideo(videoCode4, videoCategory);
+        videoRepo.save(video4);
+
+        String videoCode5 = EntityDefault.VIDEO_CODE + "-05";
+        Video video5 = EntityBuilder.buildVideo(videoCode5, videoCategory);
+        videoRepo.save(video5);
+
+        String videoCode6 = EntityDefault.VIDEO_CODE + "-06";
+        Video video6 = EntityBuilder.buildVideo(videoCode6, videoCategory);
+        videoRepo.save(video6);
+
+        ApsUser apsUser = EntityBuilder.buildApsUser();
+        apsUserRepo.save(apsUser);
+
+        String listName1 = EntityDefault.PLAYLIST_NAME + "-01";
+        String listName2 = EntityDefault.PLAYLIST_NAME + "-02";
+        PlayList playList1 = playListService.createPlayList(apsUser.getId(), listName1);
+        PlayList playList2 = playListService.createPlayList(apsUser.getId(), listName2);
+
+        // When
+        Long listId1 = playList1.getId();
+        playListService.addVideoItemToTop(listId1, new VideoItem(videoCode1));
+        playListService.addVideoItemToTop(listId1, new VideoItem(videoCode2));
+        playListService.addVideoItemToTop(listId1, new VideoItem(videoCode3));
+        playListService.addVideoItemToTop(listId1, new VideoItem(videoCode4));
+        playListService.addVideoItemToTop(listId1, new VideoItem(videoCode5));
+        playListService.addVideoItemToTop(listId1, new VideoItem(videoCode6));
+
+        Long listId2 = playList2.getId();
+        playListService.addVideoItemToTop(listId2, new VideoItem(videoCode1));
+        playListService.addVideoItemToTop(listId2, new VideoItem(videoCode2));
+        playListService.addVideoItemToTop(listId2, new VideoItem(videoCode3));
+        playListService.addVideoItemToTop(listId2, new VideoItem(videoCode4));
+        playListService.addVideoItemToTop(listId2, new VideoItem(videoCode5));
+
+        // Then
+        PlayListDTO playListDTO = playListService.getPlayListAsDTO(listId1, apsUser.getId());
+
+        assertEquals(6, playListDTO.getVideoItemDTOS().size());
+        assertEquals(videoCode6, playListDTO.getVideoItemDTOS().get(0).getCode());
+        assertEquals(videoCode5, playListDTO.getVideoItemDTOS().get(1).getCode());
+        assertEquals(videoCode4, playListDTO.getVideoItemDTOS().get(2).getCode());
+        assertEquals(videoCode3, playListDTO.getVideoItemDTOS().get(3).getCode());
+        assertEquals(videoCode2, playListDTO.getVideoItemDTOS().get(4).getCode());
+        assertEquals(videoCode1, playListDTO.getVideoItemDTOS().get(5).getCode());
+
+        // When
+        playListService.removeVideoItem(listId1, videoCode5);
+        playListService.removeVideoItems(listId1, Arrays.asList(videoCode3, videoCode2));
+
+        // Then play list 1 has been modified
+        playListDTO = playListService.getPlayListAsDTO(listId1, apsUser.getId());
+        assertEquals(3, playListDTO.getVideoItemDTOS().size());
+        assertEquals(videoCode6, playListDTO.getVideoItemDTOS().get(0).getCode());
+        assertEquals(videoCode4, playListDTO.getVideoItemDTOS().get(1).getCode());
+        assertEquals(videoCode1, playListDTO.getVideoItemDTOS().get(2).getCode());
+
+        // Then play list 2 remains unchanged
+        playListDTO = playListService.getPlayListAsDTO(listId2, apsUser.getId());
+        assertEquals(5, playListDTO.getVideoItemDTOS().size());
+        assertEquals(videoCode5, playListDTO.getVideoItemDTOS().get(0).getCode());
+        assertEquals(videoCode4, playListDTO.getVideoItemDTOS().get(1).getCode());
+        assertEquals(videoCode3, playListDTO.getVideoItemDTOS().get(2).getCode());
+        assertEquals(videoCode2, playListDTO.getVideoItemDTOS().get(3).getCode());
+        assertEquals(videoCode1, playListDTO.getVideoItemDTOS().get(4).getCode());
+
+        // When
+        playListService.deletePlayList(listId1);
+        boolean list1Deleted = !playListService.existsPlayList(apsUser, listName1);
+        boolean list2NotDeleted = playListService.existsPlayList(apsUser, listName2);
+        boolean videoItem1Deleted = !videoItemRepo.existsByPlayListIdAndCode(listId1, videoCode1);
+
+        // Then
+        assertTrue(list1Deleted);
+        assertTrue(list2NotDeleted);
+        assertTrue(videoItem1Deleted);
+    }
+
+    @Test
+    void addAndRemoveVideoItemAtBottom() {
+        // Given
+        VideoCategory videoCategory = EntityBuilder.buildVideoCategory();
+        videoCategoryRepo.save(videoCategory);
+
+        String videoCode1 = EntityDefault.VIDEO_CODE + "-01";
+        Video video1 = EntityBuilder.buildVideo(videoCode1, videoCategory);
+        videoRepo.save(video1);
+
+        String videoCode2 = EntityDefault.VIDEO_CODE + "-02";
+        Video video2 = EntityBuilder.buildVideo(videoCode2, videoCategory);
+        videoRepo.save(video2);
+
+        String videoCode3 = EntityDefault.VIDEO_CODE + "-03";
+        Video video3 = EntityBuilder.buildVideo(videoCode3, videoCategory);
+        videoRepo.save(video3);
+
+        String videoCode4 = EntityDefault.VIDEO_CODE + "-04";
+        Video video4 = EntityBuilder.buildVideo(videoCode4, videoCategory);
+        videoRepo.save(video4);
+
+        String videoCode5 = EntityDefault.VIDEO_CODE + "-05";
+        Video video5 = EntityBuilder.buildVideo(videoCode5, videoCategory);
+        videoRepo.save(video5);
+
+        String videoCode6 = EntityDefault.VIDEO_CODE + "-06";
+        Video video6 = EntityBuilder.buildVideo(videoCode6, videoCategory);
+        videoRepo.save(video6);
+
+        ApsUser apsUser = EntityBuilder.buildApsUser();
+        apsUserRepo.save(apsUser);
+
+        String listName1 = EntityDefault.PLAYLIST_NAME + "-01";
+        String listName2 = EntityDefault.PLAYLIST_NAME + "-02";
+        PlayList playList1 = playListService.createPlayList(apsUser.getId(), listName1);
+        PlayList playList2 = playListService.createPlayList(apsUser.getId(), listName2);
+
+        // When
+        Long listId1 = playList1.getId();
+        playListService.addVideoItemToBottom(listId1, new VideoItem(videoCode1));
+        playListService.addVideoItemToBottom(listId1, new VideoItem(videoCode2));
+        playListService.addVideoItemToBottom(listId1, new VideoItem(videoCode3));
+        playListService.addVideoItemToBottom(listId1, new VideoItem(videoCode4));
+        playListService.addVideoItemToBottom(listId1, new VideoItem(videoCode5));
+        playListService.addVideoItemToBottom(listId1, new VideoItem(videoCode6));
+
+        Long listId2 = playList2.getId();
+        playListService.addVideoItemToBottom(listId2, new VideoItem(videoCode1));
+        playListService.addVideoItemToBottom(listId2, new VideoItem(videoCode2));
+        playListService.addVideoItemToBottom(listId2, new VideoItem(videoCode3));
+        playListService.addVideoItemToBottom(listId2, new VideoItem(videoCode4));
+        playListService.addVideoItemToBottom(listId2, new VideoItem(videoCode5));
+
+        // Then
+        PlayListDTO playListDTO = playListService.getPlayListAsDTO(listId1, apsUser.getId());
+
+        assertEquals(6, playListDTO.getVideoItemDTOS().size());
+        assertEquals(videoCode1, playListDTO.getVideoItemDTOS().get(0).getCode());
+        assertEquals(videoCode2, playListDTO.getVideoItemDTOS().get(1).getCode());
+        assertEquals(videoCode3, playListDTO.getVideoItemDTOS().get(2).getCode());
+        assertEquals(videoCode4, playListDTO.getVideoItemDTOS().get(3).getCode());
+        assertEquals(videoCode5, playListDTO.getVideoItemDTOS().get(4).getCode());
+        assertEquals(videoCode6, playListDTO.getVideoItemDTOS().get(5).getCode());
+
+        // When
+        playListService.removeVideoItem(listId1, videoCode5);
+        playListService.removeVideoItems(listId1, Arrays.asList(videoCode3, videoCode2));
+
+        // Then play list 1 has been modified
+        playListDTO = playListService.getPlayListAsDTO(listId1, apsUser.getId());
+        assertEquals(3, playListDTO.getVideoItemDTOS().size());
+        assertEquals(videoCode1, playListDTO.getVideoItemDTOS().get(0).getCode());
+        assertEquals(videoCode4, playListDTO.getVideoItemDTOS().get(1).getCode());
+        assertEquals(videoCode6, playListDTO.getVideoItemDTOS().get(2).getCode());
+
+        // Then play list 2 remains unchanged
+        playListDTO = playListService.getPlayListAsDTO(listId2, apsUser.getId());
+        assertEquals(5, playListDTO.getVideoItemDTOS().size());
+        assertEquals(videoCode1, playListDTO.getVideoItemDTOS().get(0).getCode());
+        assertEquals(videoCode2, playListDTO.getVideoItemDTOS().get(1).getCode());
+        assertEquals(videoCode3, playListDTO.getVideoItemDTOS().get(2).getCode());
+        assertEquals(videoCode4, playListDTO.getVideoItemDTOS().get(3).getCode());
+        assertEquals(videoCode5, playListDTO.getVideoItemDTOS().get(4).getCode());
+
+        // When
+        playListService.moveVideoItemToTop(listId2, videoCode4);
+
+        // Then
+        playListDTO = playListService.getPlayListAsDTO(listId2, apsUser.getId());
+        assertEquals(5, playListDTO.getVideoItemDTOS().size());
+        assertEquals(videoCode4, playListDTO.getVideoItemDTOS().get(0).getCode());
+        assertEquals(videoCode1, playListDTO.getVideoItemDTOS().get(1).getCode());
+        assertEquals(videoCode2, playListDTO.getVideoItemDTOS().get(2).getCode());
+        assertEquals(videoCode3, playListDTO.getVideoItemDTOS().get(3).getCode());
+        assertEquals(videoCode5, playListDTO.getVideoItemDTOS().get(4).getCode());
+
+        // When
+        playListService.moveVideoItemToTop(listId2, videoCode5);
+
+        // Then
+        playListDTO = playListService.getPlayListAsDTO(listId2, apsUser.getId());
+        assertEquals(5, playListDTO.getVideoItemDTOS().size());
+        assertEquals(videoCode5, playListDTO.getVideoItemDTOS().get(0).getCode());
+        assertEquals(videoCode4, playListDTO.getVideoItemDTOS().get(1).getCode());
+        assertEquals(videoCode1, playListDTO.getVideoItemDTOS().get(2).getCode());
+        assertEquals(videoCode2, playListDTO.getVideoItemDTOS().get(3).getCode());
+        assertEquals(videoCode3, playListDTO.getVideoItemDTOS().get(4).getCode());
+
+
+        // When
+        assertDoesNotThrow(() -> playListService.moveVideoItemToTop(listId2, "wrong"));
+        assertDoesNotThrow(() -> playListService.moveVideoItemToTop(-1L, videoCode1));
+
+    }
+
+    @Test
+    void moveVideoItemBelowAnother() {
+        // Given
+        VideoCategory videoCategory = EntityBuilder.buildVideoCategory();
+        videoCategoryRepo.save(videoCategory);
+
+        String videoCode1 = EntityDefault.VIDEO_CODE + "-01";
+        Video video1 = EntityBuilder.buildVideo(videoCode1, videoCategory);
+        videoRepo.save(video1);
+
+        String videoCode2 = EntityDefault.VIDEO_CODE + "-02";
+        Video video2 = EntityBuilder.buildVideo(videoCode2, videoCategory);
+        videoRepo.save(video2);
+
+        String videoCode3 = EntityDefault.VIDEO_CODE + "-03";
+        Video video3 = EntityBuilder.buildVideo(videoCode3, videoCategory);
+        videoRepo.save(video3);
+
+        String videoCode4 = EntityDefault.VIDEO_CODE + "-04";
+        Video video4 = EntityBuilder.buildVideo(videoCode4, videoCategory);
+        videoRepo.save(video4);
+
+        String videoCode5 = EntityDefault.VIDEO_CODE + "-05";
+        Video video5 = EntityBuilder.buildVideo(videoCode5, videoCategory);
+        videoRepo.save(video5);
+
+        String videoCode6 = EntityDefault.VIDEO_CODE + "-06";
+        Video video6 = EntityBuilder.buildVideo(videoCode6, videoCategory);
+        videoRepo.save(video6);
+
+        ApsUser apsUser = EntityBuilder.buildApsUser();
+        apsUserRepo.save(apsUser);
+
+        String listName1 = EntityDefault.PLAYLIST_NAME + "-01";
+        PlayList playList1 = playListService.createPlayList(apsUser.getId(), listName1);
+
+        // When
+        Long listId1 = playList1.getId();
+        playListService.addVideoItemToBottom(listId1, new VideoItem(videoCode1));
+        playListService.addVideoItemToBottom(listId1, new VideoItem(videoCode2));
+        playListService.addVideoItemToBottom(listId1, new VideoItem(videoCode3));
+        playListService.addVideoItemToBottom(listId1, new VideoItem(videoCode4));
+        playListService.addVideoItemToBottom(listId1, new VideoItem(videoCode5));
+        playListService.addVideoItemToBottom(listId1, new VideoItem(videoCode6));
+
+        // Then
+        PlayListDTO playListDTO = playListService.getPlayListAsDTO(listId1, apsUser.getId());
+
+        assertEquals(6, playListDTO.getVideoItemDTOS().size());
+        assertEquals(videoCode1, playListDTO.getVideoItemDTOS().get(0).getCode());
+        assertEquals(videoCode2, playListDTO.getVideoItemDTOS().get(1).getCode());
+        assertEquals(videoCode3, playListDTO.getVideoItemDTOS().get(2).getCode());
+        assertEquals(videoCode4, playListDTO.getVideoItemDTOS().get(3).getCode());
+        assertEquals(videoCode5, playListDTO.getVideoItemDTOS().get(4).getCode());
+        assertEquals(videoCode6, playListDTO.getVideoItemDTOS().get(5).getCode());
+
+        // When
+        playListService.moveVideoItemBelowAnother(listId1, videoCode2, videoCode4);
+
+        // Then
+        playListDTO = playListService.getPlayListAsDTO(listId1, apsUser.getId());
+        assertEquals(6, playListDTO.getVideoItemDTOS().size());
+        assertEquals(videoCode1, playListDTO.getVideoItemDTOS().get(0).getCode());
+        assertEquals(videoCode3, playListDTO.getVideoItemDTOS().get(1).getCode());
+        assertEquals(videoCode4, playListDTO.getVideoItemDTOS().get(2).getCode());
+        assertEquals(videoCode2, playListDTO.getVideoItemDTOS().get(3).getCode());
+        assertEquals(videoCode5, playListDTO.getVideoItemDTOS().get(4).getCode());
+        assertEquals(videoCode6, playListDTO.getVideoItemDTOS().get(5).getCode());
+
+        // When
+        playListService.moveVideoItemBelowAnother(listId1, videoCode2, videoCode6);
+
+        // Then
+        playListDTO = playListService.getPlayListAsDTO(listId1, apsUser.getId());
+        assertEquals(6, playListDTO.getVideoItemDTOS().size());
+        assertEquals(videoCode1, playListDTO.getVideoItemDTOS().get(0).getCode());
+        assertEquals(videoCode3, playListDTO.getVideoItemDTOS().get(1).getCode());
+        assertEquals(videoCode4, playListDTO.getVideoItemDTOS().get(2).getCode());
+        assertEquals(videoCode5, playListDTO.getVideoItemDTOS().get(3).getCode());
+        assertEquals(videoCode6, playListDTO.getVideoItemDTOS().get(4).getCode());
+        assertEquals(videoCode2, playListDTO.getVideoItemDTOS().get(5).getCode());
+
+        // When
+        playListService.moveVideoItemBelowAnother(listId1, videoCode2, videoCode1);
+
+        // Then
+        playListDTO = playListService.getPlayListAsDTO(listId1, apsUser.getId());
+        assertEquals(6, playListDTO.getVideoItemDTOS().size());
+        assertEquals(videoCode1, playListDTO.getVideoItemDTOS().get(0).getCode());
+        assertEquals(videoCode2, playListDTO.getVideoItemDTOS().get(1).getCode());
+        assertEquals(videoCode3, playListDTO.getVideoItemDTOS().get(2).getCode());
+        assertEquals(videoCode4, playListDTO.getVideoItemDTOS().get(3).getCode());
+        assertEquals(videoCode5, playListDTO.getVideoItemDTOS().get(4).getCode());
+        assertEquals(videoCode6, playListDTO.getVideoItemDTOS().get(5).getCode());
+
     }
 
 }

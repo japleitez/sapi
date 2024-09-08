@@ -118,6 +118,60 @@ public class PlayListService {
         return itemDTO;
     }
 
+    public void moveVideoItemToTop(Long playListId, String movingVideoCode) {
+        PlayList playlist =  playListRepo.findByIdWithVideoItems(playListId).orElse(null);
+        if (playlist == null || playlist.getVideoItems().isEmpty() || playlist.getVideoItems().size() == 1) {
+            return;
+        }
+        VideoItem videoItem = playlist.getVideoItems()
+                .stream()
+                .filter(item -> item.getCode().equals(movingVideoCode))
+                .findFirst()
+                .orElse(null);
+        if (videoItem == null) {
+            return;
+        }
+        VideoItem currentTop = playlist.getVideoItems()
+                .stream()
+                .filter(item -> item.getPrevious() == null)
+                .findFirst()
+                .orElse(null);
+        if (currentTop == null) {
+            return;
+        }
+        if (videoItem.getCode().equals(currentTop.getCode())) {
+            return;
+        }
+
+        // Detach the video item from its current position
+        VideoItem previousVideo = videoItem.getPrevious();
+        VideoItem nextVideo = videoItem.getNext();
+
+        // Update the previous video's next pointer
+        if (previousVideo != null) {
+            previousVideo.setNext(nextVideo);
+        }
+
+        // Update the next video's previous pointer
+        if (nextVideo != null) {
+            nextVideo.setPrevious(previousVideo);
+        }
+
+        // Connect the video item to the top
+        videoItem.setPrevious(null);
+        videoItem.setNext(currentTop);
+        currentTop.setPrevious(videoItem);
+
+        videoItemRepo.save(videoItem);
+        videoItemRepo.save(currentTop);
+        if (previousVideo != null) {
+            videoItemRepo.save(previousVideo);
+        }
+        if (nextVideo != null) {
+            videoItemRepo.save(nextVideo);
+        }
+    }
+
     public void moveVideoItemBelowAnother(Long playListId, String movingVideoCode, String targetVideoCode) {
 
         VideoItem movingVideo = videoItemRepo.findByPlayListIdAndCode(playListId, movingVideoCode).orElse(null);
@@ -196,42 +250,39 @@ public class PlayListService {
 
     }
 
-    public PlayList addVideoItemToBottom(Long playlistId, VideoItem newVideoItem) {
+    public void addVideoItemToBottom(Long playlistId, VideoItem newVideoItem) {
 
-        Optional<PlayList> playlistOptional = playListRepo.findById(playlistId);
-
-        if (playlistOptional.isPresent()) {
-            PlayList playlist = playlistOptional.get();
-
-            VideoItem currentBottom = null;
-
-            if (!playlist.getVideoItems().isEmpty()) {
-                // Get the current bottom VideoItem
-                currentBottom = playlist.getVideoItems().stream()
-                        .filter(videoItem -> videoItem.getNext() == null)
-                        .findFirst()
-                        .orElse(null);
-            }
-
-            // Set the new VideoItem's next to null as it's going to be the new bottom
-            newVideoItem.setNext(null);
-            newVideoItem.setPrevious(currentBottom);
-
-            if (currentBottom != null) {
-                currentBottom.setNext(newVideoItem);
-            }
-
-            playlist.addVideoItem(newVideoItem);
-            videoItemRepo.save(newVideoItem);
-
-            if (currentBottom != null) {
-                videoItemRepo.save(currentBottom);
-            }
-
-            return playListRepo.save(playlist);
+        PlayList playlist = playListRepo.findByIdWithVideoItems(playlistId).orElse(null);
+        if (playlist == null) {
+            return;
         }
 
-        return null;
+        VideoItem currentBottom = null;
+
+        if (!playlist.getVideoItems().isEmpty()) {
+            // Get the current bottom VideoItem
+            currentBottom = playlist.getVideoItems().stream()
+                    .filter(videoItem -> videoItem.getNext() == null)
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        // Set the new VideoItem's next to null as it's going to be the new bottom
+        newVideoItem.setNext(null);
+        newVideoItem.setPrevious(currentBottom);
+
+        if (currentBottom != null) {
+            currentBottom.setNext(newVideoItem);
+        }
+
+        playlist.addVideoItem(newVideoItem);
+        videoItemRepo.save(newVideoItem);
+
+        if (currentBottom != null) {
+            videoItemRepo.save(currentBottom);
+        }
+
+        playListRepo.save(playlist);
     }
 
     public void removeVideoItems(Long playListId, List<String> videoCodes) {
