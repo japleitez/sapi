@@ -27,6 +27,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class VideoServiceTest {
 
     @Autowired
+    ApsUserRepo apsUserRepo;
+
+    @Autowired
     VideoMapper videoMapper;
 
     @Autowired
@@ -188,19 +191,77 @@ class VideoServiceTest {
         createVideos();
 
         // When
-        List<Video> videos = videoService.getCachedVideosByCategoryAndLang(category2, Lang.EN);
-        List<VideoDTO> videoDTOS = videoService.toVideoDTOs(videos, Lang.EN);
+        List<Video> videosEn1 = videoService.getCachedVideosByCategoryAndLang(category2, Lang.EN);
+        List<Video> videosEn2 = videoService.getCachedVideosByCategoryAndLang(category2, Lang.EN);
+        List<Video> videosFr1 = videoService.getCachedVideosByCategoryAndLang(category2, Lang.FR);
+        List<Video> videosFr2 = videoService.getCachedVideosByCategoryAndLang(category2, Lang.FR);
+
+        List<VideoDTO> dtoVideosEn = videoService.toVideoDTOs(videosEn1, Lang.EN);
+        List<VideoDTO> dtoVideosFr = videoService.toVideoDTOs(videosFr1, Lang.FR);
+
 
         // Then
-        assertTrue(videoDTOS.size() > 0);
+        boolean cacheHitEn = videosEn1 == videosEn2;
+        boolean cacheHitFr = videosFr1 == videosFr2;
+        assertTrue(cacheHitEn);
+        assertTrue(cacheHitFr);
+        assertEquals(1, dtoVideosFr.size());
+        assertEquals(1, videosFr1.size());
+        assertEquals(5, dtoVideosEn.size());
+        assertEquals(5, videosEn1.size());
+
     }
 
     @Test
     void resolveFavorites() {
-    }
+        // Given
+        createVideos();
 
-    @Test
-    void testResolveFavorites() {
+        ApsUser apsUser = EntityBuilder.buildApsUser();
+        apsUser.setLanguage(Lang.EN);
+        apsUserRepo.save(apsUser);
+        apsUserRepo.flush();
+
+        videoService.addUserFavoriteVideo(apsUser.getId(), video11En.getCode());
+        videoService.addUserFavoriteVideo(apsUser.getId(), video21En.getCode());
+
+        // When
+        List<Video> videos1 = videoService.getCachedVideosByCategoryAndLang(category1, Lang.EN);
+        List<Video> cached1 = videoService.getCachedVideosByCategoryAndLang(category1, Lang.EN);
+        videoService.resolveFavorites(videos1, apsUser.getId());
+
+        // Then
+        assertSame(videos1, cached1);
+        assertEquals(1, videos1.stream().filter(Video::isFavorite).count());
+        assertEquals(video11En, videos1.stream().filter(Video::isFavorite).findFirst().orElse(null));
+
+        // When
+        List<Video> videos2 = videoService.getCachedVideosByCategoryAndLang(category2, Lang.EN);
+        List<Video> cached2 = videoService.getCachedVideosByCategoryAndLang(category2, Lang.EN);
+        videoService.resolveFavorites(videos2, apsUser.getId());
+
+        // Then
+        assertSame(videos2, cached2);
+        assertEquals(1, videos2.stream().filter(Video::isFavorite).count());
+        assertEquals(video21En, videos2.stream().filter(Video::isFavorite).findFirst().orElse(null));
+
+        // When
+        Map<VideoCategory, List<Video>> result = videoService.getCachedLatestVideo(Lang.EN);
+        Map<VideoCategory, List<Video>> cached = videoService.getCachedLatestVideo(Lang.EN);
+        videoService.resolveFavorites(result, apsUser.getId());
+
+        // Then
+        List<Video> videosCategory1 = result.get(category1);
+        List<Video> videosCategory2 = result.get(category2);
+
+        assertSame(result, cached);
+
+        assertEquals(1, videosCategory1.stream().filter(Video::isFavorite).count());
+        assertEquals(video11En, videosCategory1.stream().filter(Video::isFavorite).findFirst().orElse(null));
+
+        assertEquals(1, videosCategory2.stream().filter(Video::isFavorite).count());
+        assertEquals(video21En, videosCategory2.stream().filter(Video::isFavorite).findFirst().orElse(null));
+
     }
 
     @Test
@@ -209,10 +270,6 @@ class VideoServiceTest {
 
     @Test
     void toCategoryDTO() {
-    }
-
-    @Test
-    void addUserFavoriteVideo() {
     }
 
     @Test
