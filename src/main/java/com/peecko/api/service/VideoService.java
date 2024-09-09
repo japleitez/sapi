@@ -27,7 +27,7 @@ public class VideoService {
     final TodayVideoRepo todayVideoRepo;
     final VideoCategoryRepo videoCategoryRepo;
     final UserFavoriteVideoRepo userFavoriteVideoRepo;
-    final static int CATEGORY_VIDEOS_SIZE = 4;
+    public static final int CATEGORY_VIDEOS_SIZE = 4;
 
     public VideoService(VideoMapper videoMapper, VideoRepo videoRepo, LabelService labelService, CacheManager cacheManager, TodayVideoRepo todayVideoRepo, VideoCategoryRepo videoCategoryRepo, UserFavoriteVideoRepo userFavoriteVideoRepo) {
         this.videoMapper = videoMapper;
@@ -41,7 +41,7 @@ public class VideoService {
 
     @Cacheable(value = "todayVideos", key = "#lang.name()")
     public List<Video> getCachedTodayVideos(Lang lang) {
-        TodayVideo latestTodayVideo = todayVideoRepo.findFirstByLanguageOrderByReleaseDateDesc(lang);
+        TodayVideo latestTodayVideo = todayVideoRepo.findFirstByLanguageOrderByReleaseDateDesc(lang).orElse(null);
         if (latestTodayVideo != null) {
             return videoRepo.findByIdIn(latestTodayVideo.getVideoIds());
         }

@@ -4,8 +4,6 @@ import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.utils.Common;
 
 public abstract class EntityDefault {
-    public static final String VIDEO_CATEGORY_NAME = "default-video-category-name";
-
     public static final String PLAYLIST_NAME = "default-playlist-name";
     public static final String NAME = "Default Name";
     public static final String USERNAME = "defaul.name@mail.com";
@@ -27,6 +25,9 @@ public abstract class EntityDefault {
     public static final String VIDEO_CODE = "default-video-code";
     public static final String VIDEO_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
     public static final String IMAGE_URL = "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png";
-
     public static final Integer VIDEO_DURATION = 60;
+    public static final String VIDEO_CATEGORY_CODE = "VC_CODE";
+    public static final String VIDEO_CATEGORY_TITLE = "VC_TITLE";
+    public static final String VIDEO_CATEGORY_LABEL = "vc.label.";
+
 }

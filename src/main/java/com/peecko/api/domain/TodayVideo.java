@@ -2,10 +2,15 @@ package com.peecko.api.domain;
 
 import com.peecko.api.domain.enumeration.Lang;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Table(name = "today_video")
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class TodayVideo {
 
     @Id
@@ -17,13 +22,14 @@ public class TodayVideo {
     private LocalDate releaseDate;
 
     @ElementCollection
-    @CollectionTable(name = "today_video_video_ids", joinColumns = @JoinColumn(name = "today_video_id"))
+    @CollectionTable(name = "today_video_set", joinColumns = @JoinColumn(name = "today_video_id"))
     @Column(name = "video_id")
-    private Set<Long> videoIds;
+    private Set<Long> videoIds = new HashSet<>();
 
     public TodayVideo() {}
 
-    public TodayVideo(LocalDate releaseDate, Set<Long> videoIds) {
+    public TodayVideo(Lang language, LocalDate releaseDate, Set<Long> videoIds) {
+        this.language = language;
         this.releaseDate = releaseDate;
         this.videoIds = videoIds;
     }

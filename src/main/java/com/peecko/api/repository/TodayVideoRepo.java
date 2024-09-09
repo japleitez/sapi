@@ -5,9 +5,10 @@ import com.peecko.api.domain.enumeration.Lang;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface TodayVideoRepo extends JpaRepository<TodayVideo, Long> {
-
-    TodayVideo findFirstByLanguageOrderByReleaseDateDesc(Lang lang);
-
+    Optional<TodayVideo> findFirstByLanguageOrderByReleaseDateDesc(Lang language);
 }
+

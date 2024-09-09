@@ -30,7 +30,7 @@ class VideoCategoryServiceTest {
         videoCategoryRepo.save(videoCategory);
 
         // When
-        Optional<VideoCategory> actual = videoCategoryService.findByCode(EntityDefault.VIDEO_CATEGORY_NAME);
+        Optional<VideoCategory> actual = videoCategoryService.findByCode(EntityDefault.VIDEO_CATEGORY_CODE);
 
         // Then
         assertTrue(actual.isPresent());

@@ -67,7 +67,7 @@ public class VideoMapper {
         for(String code: array) {
             code = code.trim();
             if (StringUtils.hasText(code)) {
-                list.add(labelService.getCachedLabel("video.tag." + code, lang));
+                list.add(labelService.getCachedLabel(code, lang));
             }
         }
         return list;
