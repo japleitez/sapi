@@ -9,8 +9,11 @@ import com.peecko.api.repository.UserFavoriteVideoRepo;
 import com.peecko.api.repository.VideoCategoryRepo;
 import com.peecko.api.repository.VideoRepo;
 import com.peecko.api.utils.Common;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
@@ -27,7 +30,7 @@ public class VideoService {
     final TodayVideoRepo todayVideoRepo;
     final VideoCategoryRepo videoCategoryRepo;
     final UserFavoriteVideoRepo userFavoriteVideoRepo;
-    public static final int CATEGORY_VIDEOS_SIZE = 4;
+    public static final int CATEGORY_VIDEOS_MAX_SIZE = 4;
 
     public VideoService(VideoMapper videoMapper, VideoRepo videoRepo, LabelService labelService, CacheManager cacheManager, TodayVideoRepo todayVideoRepo, VideoCategoryRepo videoCategoryRepo, UserFavoriteVideoRepo userFavoriteVideoRepo) {
         this.videoMapper = videoMapper;
@@ -37,6 +40,14 @@ public class VideoService {
         this.todayVideoRepo = todayVideoRepo;
         this.videoCategoryRepo = videoCategoryRepo;
         this.userFavoriteVideoRepo = userFavoriteVideoRepo;
+    }
+    public void clearAllCaches() {
+        for (String cacheName : cacheManager.getCacheNames()) {
+            Cache cache = cacheManager.getCache(cacheName);
+            if (cache != null) {
+                cache.clear();
+            }
+        }
     }
 
     @Cacheable(value = "todayVideos", key = "#lang.name()")
@@ -54,7 +65,7 @@ public class VideoService {
         List<VideoCategory> categories = videoCategoryRepo.findReleasedCategories(today);
         Map<VideoCategory, List<Video>> videoCategoryMap = new HashMap<>();
         for (VideoCategory category : categories) {
-            List<Video> latestVideos = videoRepo.findLatestByCategoryAndLang(category, lang, today, PageRequest.of(0, CATEGORY_VIDEOS_SIZE));
+            List<Video> latestVideos = videoRepo.findLatestByCategoryAndLang(category, lang, today, PageRequest.of(0, CATEGORY_VIDEOS_MAX_SIZE));
             videoCategoryMap.put(category, latestVideos);
         }
         return videoCategoryMap;

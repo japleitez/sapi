@@ -1,12 +1,15 @@
 package com.peecko.api.service;
 
 import com.peecko.api.domain.*;
+import com.peecko.api.domain.dto.CategoryDTO;
 import com.peecko.api.domain.dto.VideoDTO;
 import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.domain.enumeration.Player;
 import com.peecko.api.repository.*;
 import com.peecko.api.utils.InstantUtils;
 import com.peecko.api.utils.LabelUtils;
+import com.peecko.api.utils.NameUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,19 +62,19 @@ class VideoServiceTest {
 
     // data references
 
-    VideoCategory category1 = null;
-    VideoCategory category2 = null;
-    VideoCategory category3 = null;
+    VideoCategory yogaCategory = null;
+    VideoCategory pilatesCategory = null;
+    VideoCategory flexibilityCategory = null;
 
-    Video video11En = null;
-    Video video12En = null;
-    Video video21En = null;
-    Video video22En = null;
-    Video video23En = null;
-    Video video24EnAr = null;
-    Video video25Fr = null;
-    Video video26En = null;
-    Video video27En = null;
+    Video yoga1En = null;
+    Video yoga2En = null;
+    Video pilates1En = null;
+    Video pilates2En = null;
+    Video pilates3En = null;
+    Video pilates4En = null;
+    Video pilates5En = null;
+    Video pilatesFrench = null;
+    Video pilatesArchived = null;
 
     Label yoga = null;
     Label pilates = null;
@@ -85,405 +89,329 @@ class VideoServiceTest {
     Instant released = InstantUtils.createInstantFromDays(-10);
     Instant archived = InstantUtils.createInstantFromDays(-5);
 
+    List<Video> videosYoga = null;
+    List<Video> videosPilates = null;
+
+    List<Video> allVideos = null;
+    Set<Long> activeAllEnIds = null;
+    Set<Long> activeAllFrIds = null;
+    Set<Long> activeYogaEnIds = null;
+    Set<Long> activePilatesEnIds = null;
+
+    @BeforeEach
+    void setUp() {
+        videoService.clearAllCaches();
+        createVideos();
+    }
 
     @Test
     void getCachedTodayVideos() {
         // Given
-        createVideos();
+        TodayVideo todayVideoEn = new TodayVideo(Lang.EN, LocalDate.now(), activeAllEnIds);
+        todayVideoRepo.save(todayVideoEn);
 
-        List<Video> videos = List.of(video11En, video12En, video21En, video22En, video23En, video24EnAr, video25Fr, video26En, video27En);
-        Set<Long> englishVideoIds = videos.stream().filter(v -> v.getLanguage() == Lang.EN && v.getArchived() == null).map(Video::getId).collect(Collectors.toSet());
-        TodayVideo todayVideoEN = new TodayVideo(Lang.EN, LocalDate.now(), englishVideoIds);
-        todayVideoRepo.save(todayVideoEN);
+        TodayVideo todayVideoFr = new TodayVideo(Lang.FR, LocalDate.now(), activeAllFrIds);
+        todayVideoRepo.save(todayVideoFr);
 
-        Set<Long> frenchVideoIds = videos.stream().filter(v -> v.getLanguage() == Lang.FR && v.getArchived() == null).map(Video::getId).collect(Collectors.toSet());
-        TodayVideo todayVideoFR = new TodayVideo(Lang.FR, LocalDate.now(), frenchVideoIds);
-        todayVideoRepo.save(todayVideoFR);
-
-        // extra data to test latest today videos is returned
+        // additional today_video to test that videoService.getCachedTodayVideos returns the latest today_video
         LocalDate twoDaysAgo = LocalDate.now().minusDays(2);
-        TodayVideo extra = new TodayVideo(Lang.EN, twoDaysAgo, Set.of(video11En.getId(), video12En.getId()));
+        TodayVideo extra = new TodayVideo(Lang.EN, twoDaysAgo, Set.of(yoga1En.getId(), yoga2En.getId()));
         todayVideoRepo.save(extra);
 
 
         // When
-        List<Video> englishResult = videoService.getCachedTodayVideos(Lang.EN);
-        List<Video> frenchResult = videoService.getCachedTodayVideos(Lang.FR);
+        List<Video> todayVideoEnResult = videoService.getCachedTodayVideos(Lang.EN);
+        List<Video> todayVideoFrResult = videoService.getCachedTodayVideos(Lang.FR);
 
         // Then
-        assertEquals(7, englishResult.size());
-        assertEquals(1, frenchResult.size());
-        assertEquals(englishVideoIds, englishResult.stream().map(Video::getId).collect(Collectors.toSet()));
-        assertEquals(frenchVideoIds, frenchResult.stream().map(Video::getId).collect(Collectors.toSet()));
+        assertEquals(activeAllEnIds.size(), todayVideoEnResult.size());
+        assertEquals(activeAllFrIds.size(), todayVideoFrResult.size());
+        assertEquals(activeAllEnIds, todayVideoEnResult.stream().map(Video::getId).collect(Collectors.toSet()));
+        assertEquals(activeAllFrIds, todayVideoFrResult.stream().map(Video::getId).collect(Collectors.toSet()));
 
         // When
         List<Video> englishResult2 = videoService.getCachedTodayVideos(Lang.EN);
 
         // Then
-        boolean cacheHit = englishResult == englishResult2;
+        boolean cacheHit = todayVideoEnResult == englishResult2;
         assertTrue(cacheHit);
     }
 
     @Test
     void getCachedLatestVideo() {
         // Given
-        createVideos();
+        int expectedYogaCount = Math.min(activeYogaEnIds.size(), VideoService.CATEGORY_VIDEOS_MAX_SIZE);
+        int expectedPilatesCount = Math.min(activePilatesEnIds.size(), VideoService.CATEGORY_VIDEOS_MAX_SIZE);
+
         // When
         Map<VideoCategory, List<Video>> result = videoService.getCachedLatestVideo(Lang.EN);
-
-        // Then
-        assertNull(result.get(category3));
-        assertEquals(2, result.get(category1).size());
-        assertEquals(VideoService.CATEGORY_VIDEOS_SIZE, result.get(category2).size());
-
-        // When
         Map<VideoCategory, List<Video>> result2 = videoService.getCachedLatestVideo(Lang.EN);
 
         // Then
         boolean cacheHit = result == result2;
         assertTrue(cacheHit);
-
+        assertNull(result.get(flexibilityCategory));
+        assertEquals(expectedYogaCount, result.get(yogaCategory).size());
+        assertEquals(expectedPilatesCount, result.get(pilatesCategory).size());
     }
 
     @Test
     void getCachedVideosByCategoryAndLang() {
-        // Given
-        createVideos();
-        List<Video> videos = List.of(video21En, video22En, video23En, video24EnAr, video25Fr, video26En, video27En);
-        int count = (int) videos.stream().filter(v -> v.getLanguage() == Lang.EN && v.getArchived() == null).count();
-
         // When
-        List<Video> result = videoService.getCachedVideosByCategoryAndLang(category2, Lang.EN);
-
-        // Then
-        assertEquals(count, result.size());
-
-        // When
-        List<Video> result2 = videoService.getCachedVideosByCategoryAndLang(category2, Lang.EN);
+        List<Video> result = videoService.getCachedVideosByCategoryAndLang(pilatesCategory, Lang.EN);
+        List<Video> result2 = videoService.getCachedVideosByCategoryAndLang(pilatesCategory, Lang.EN);
 
         // Then
         boolean cacheHit = result == result2;
         assertTrue(cacheHit);
+        assertEquals(activePilatesEnIds.size(), result.size());
+        assertEquals(activePilatesEnIds, result.stream().map(Video::getId).collect(Collectors.toSet()));
     }
 
     @Test
     void getVideoTags() {
-
-        // Given
-        createVideos();
-
         // When
-        List<Video> videos = videoService.getCachedVideosByCategoryAndLang(category2, Lang.EN);
-        List<VideoDTO> videoDTOS = videoService.toVideoDTOs(videos, Lang.EN);
-        List<String> tags = videoService.getVideoTags(videoDTOS, Lang.EN);
+        List<Video> videos = videoService.getCachedVideosByCategoryAndLang(pilatesCategory, Lang.EN);
+        List<VideoDTO> videoDTOs = videoService.toVideoDTOs(videos, Lang.EN);
+        List<String> tags = videoService.getVideoTags(videoDTOs, Lang.EN);
 
         // Then
         assertEquals(3, tags.size());
         assertTrue(tags.contains(all.getText()));
         assertTrue(tags.contains(energy.getText()));
         assertTrue(tags.contains(strength.getText()));
-
     }
 
     @Test
     void toVideoDTOs() {
-        // Given
-        createVideos();
-
         // When
-        List<Video> videosEn1 = videoService.getCachedVideosByCategoryAndLang(category2, Lang.EN);
-        List<Video> videosEn2 = videoService.getCachedVideosByCategoryAndLang(category2, Lang.EN);
-        List<Video> videosFr1 = videoService.getCachedVideosByCategoryAndLang(category2, Lang.FR);
-        List<Video> videosFr2 = videoService.getCachedVideosByCategoryAndLang(category2, Lang.FR);
-
-        List<VideoDTO> dtoVideosEn = videoService.toVideoDTOs(videosEn1, Lang.EN);
-        List<VideoDTO> dtoVideosFr = videoService.toVideoDTOs(videosFr1, Lang.FR);
-
+        List<Video> videosEn = videoService.getCachedVideosByCategoryAndLang(pilatesCategory, Lang.EN);
+        List<VideoDTO> videosEnDTOs = videoService.toVideoDTOs(videosEn, Lang.EN);
 
         // Then
-        boolean cacheHitEn = videosEn1 == videosEn2;
-        boolean cacheHitFr = videosFr1 == videosFr2;
-        assertTrue(cacheHitEn);
-        assertTrue(cacheHitFr);
-        assertEquals(1, dtoVideosFr.size());
-        assertEquals(1, videosFr1.size());
-        assertEquals(5, dtoVideosEn.size());
-        assertEquals(5, videosEn1.size());
-
+        assertEquals(activePilatesEnIds.size(), videosEn.size());
+        assertEquals(videosEn.size(), videosEnDTOs.size());
     }
 
     @Test
     void resolveFavorites() {
         // Given
-        createVideos();
-
         ApsUser apsUser = EntityBuilder.buildApsUser();
         apsUser.setLanguage(Lang.EN);
         apsUserRepo.save(apsUser);
         apsUserRepo.flush();
 
-        videoService.addUserFavoriteVideo(apsUser.getId(), video11En.getCode());
-        videoService.addUserFavoriteVideo(apsUser.getId(), video21En.getCode());
+        // add 1 yoga video and 1 pilates video to user's favorites
+        int yogaFavoriteCount = 1;
+        int pilatesFavoriteCount = 1;
+        videoService.addUserFavoriteVideo(apsUser.getId(), yoga1En.getCode());
+        videoService.addUserFavoriteVideo(apsUser.getId(), pilates1En.getCode());
 
         // When
-        List<Video> videos1 = videoService.getCachedVideosByCategoryAndLang(category1, Lang.EN);
-        List<Video> cached1 = videoService.getCachedVideosByCategoryAndLang(category1, Lang.EN);
-        videoService.resolveFavorites(videos1, apsUser.getId());
+        List<Video> videosYogaEn = videoService.getCachedVideosByCategoryAndLang(yogaCategory, Lang.EN);
+        List<Video> videosPilatesEn = videoService.getCachedVideosByCategoryAndLang(pilatesCategory, Lang.EN);
+        videoService.resolveFavorites(videosYogaEn, apsUser.getId());
+        videoService.resolveFavorites(videosPilatesEn, apsUser.getId());
 
         // Then
-        assertSame(videos1, cached1);
-        assertEquals(1, videos1.stream().filter(Video::isFavorite).count());
-        assertEquals(video11En, videos1.stream().filter(Video::isFavorite).findFirst().orElse(null));
-
-        // When
-        List<Video> videos2 = videoService.getCachedVideosByCategoryAndLang(category2, Lang.EN);
-        List<Video> cached2 = videoService.getCachedVideosByCategoryAndLang(category2, Lang.EN);
-        videoService.resolveFavorites(videos2, apsUser.getId());
-
-        // Then
-        assertSame(videos2, cached2);
-        assertEquals(1, videos2.stream().filter(Video::isFavorite).count());
-        assertEquals(video21En, videos2.stream().filter(Video::isFavorite).findFirst().orElse(null));
+        assertEquals(yogaFavoriteCount, videosYogaEn.stream().filter(Video::isFavorite).count());
+        assertEquals(pilatesFavoriteCount, videosPilatesEn.stream().filter(Video::isFavorite).count());
+        assertEquals(yoga1En, videosYogaEn.stream().filter(Video::isFavorite).findFirst().orElse(null));
+        assertEquals(pilates1En, videosPilatesEn.stream().filter(Video::isFavorite).findFirst().orElse(null));
 
         // When
         Map<VideoCategory, List<Video>> result = videoService.getCachedLatestVideo(Lang.EN);
-        Map<VideoCategory, List<Video>> cached = videoService.getCachedLatestVideo(Lang.EN);
         videoService.resolveFavorites(result, apsUser.getId());
 
         // Then
-        List<Video> videosCategory1 = result.get(category1);
-        List<Video> videosCategory2 = result.get(category2);
+        assertEquals(yogaFavoriteCount, result.get(yogaCategory).stream().filter(Video::isFavorite).count());
+        assertEquals(pilatesFavoriteCount, result.get(pilatesCategory).stream().filter(Video::isFavorite).count());
+        assertEquals(yoga1En, result.get(yogaCategory).stream().filter(Video::isFavorite).findFirst().orElse(null));
+        assertEquals(pilates1En, result.get(pilatesCategory).stream().filter(Video::isFavorite).findFirst().orElse(null));
 
-        assertSame(result, cached);
+        // When
+        videoService.removeUserFavoriteVideo(apsUser.getId(), yoga1En.getCode());
+        videoService.resolveFavorites(result.get(yogaCategory), apsUser.getId());
+        videoService.resolveFavorites(result.get(pilatesCategory), apsUser.getId());
 
-        assertEquals(1, videosCategory1.stream().filter(Video::isFavorite).count());
-        assertEquals(video11En, videosCategory1.stream().filter(Video::isFavorite).findFirst().orElse(null));
-
-        assertEquals(1, videosCategory2.stream().filter(Video::isFavorite).count());
-        assertEquals(video21En, videosCategory2.stream().filter(Video::isFavorite).findFirst().orElse(null));
+        // Then
+        assertEquals(0, result.get(yogaCategory).stream().filter(Video::isFavorite).count());
+        assertEquals(1, result.get(pilatesCategory).stream().filter(Video::isFavorite).count());
 
     }
 
     @Test
     void toCategoryDTOs() {
-    }
+        // Given
+        int expectedYogaEnCount = Math.min(activeYogaEnIds.size(), VideoService.CATEGORY_VIDEOS_MAX_SIZE);
+        int expectedPilatesEnCount = Math.min(activePilatesEnIds.size(), VideoService.CATEGORY_VIDEOS_MAX_SIZE);
 
-    @Test
-    void toCategoryDTO() {
-    }
+        // When
+        Map<VideoCategory, List<Video>> categoryVideos = videoService.getCachedLatestVideo(Lang.EN);
+        List<CategoryDTO> categoryDTOS = videoService.toCategoryDTOs(categoryVideos, Lang.EN);
 
-    @Test
-    void removeUserFavoriteVideo() {
+        // Then
+        CategoryDTO yogaCategoryDTO = getCategoryDTO(categoryDTOS, yogaCategory.getCode());
+        CategoryDTO pilatesCategoryDTO = getCategoryDTO(categoryDTOS, pilatesCategory.getCode());
+        assertEquals(expectedYogaEnCount, yogaCategoryDTO.getVideos().size());
+        assertEquals(expectedPilatesEnCount, pilatesCategoryDTO.getVideos().size());
     }
 
     @Test
     void deleteFavoriteVideosForUser() {
-    }
+        // Given
+        ApsUser apsUser = EntityBuilder.buildApsUser();
+        apsUser.setLanguage(Lang.EN);
+        apsUserRepo.save(apsUser);
+        apsUserRepo.flush();
 
-    @Test
-    void findUserFavoriteVideos() {
+        // add 2 yoga videos to user's favorites
+        int yogaFavoriteCount = 2;
+        videoService.addUserFavoriteVideo(apsUser.getId(), yoga1En.getCode());
+        videoService.addUserFavoriteVideo(apsUser.getId(), yoga2En.getCode());
+
+        // When
+        List<Video> favoriteVideos = videoService.findUserFavoriteVideos(apsUser.getId());
+
+        // Then
+        assertEquals(yogaFavoriteCount, favoriteVideos.size());
+        assertTrue(favoriteVideos.stream().anyMatch(video -> video.getId().equals(yoga1En.getId())));
+        assertTrue(favoriteVideos.stream().anyMatch(video -> video.getId().equals(yoga2En.getId())));
+
+        // When
+        videoService.deleteFavoriteVideosForUser(apsUser.getId());
+
+        // Then
+        List<Video> favoriteVideos2 = videoService.findUserFavoriteVideos(apsUser.getId());
+        assertTrue(favoriteVideos2.isEmpty());
     }
 
     @Test
     void existsByCode() {
+        // When
+        boolean exists = videoService.existsByCode(yoga1En.getCode());
+
+        // Then
+        assertTrue(exists);
+    }
+
+    private CategoryDTO getCategoryDTO(List<CategoryDTO> categoryDTOS, String categoryCode) {
+        return categoryDTOS.stream()
+              .filter(dto -> dto.getCode().equals(categoryCode))
+              .findFirst()
+              .orElse(null);
     }
 
     private void createVideos() {
 
-        // YOGA
-        yoga = labelRepo.save(new Label(Lang.EN, "vc.yoga", "Yoga"));
-        pilates = labelRepo.save(new Label(Lang.EN, "vc.pilates", "Pilates"));
-        flexibility = labelRepo.save(new Label(Lang.EN, "vc.flexibility", "Flexibility"));
+        // reference video list
+        videosYoga = new ArrayList<>();
+        videosPilates = new ArrayList<>();
 
-        all = labelRepo.save(new Label(Lang.EN, "v.all", "All"));
-        relax = labelRepo.save(new Label(Lang.EN, "v.relax", "Relax"));
-        energy = labelRepo.save(new Label(Lang.EN, "v.enery", "Energy"));
-        strength = labelRepo.save(new Label(Lang.EN, "v.strength", "Strength"));
+        // Video Category Labels
+        yoga = labelRepo.save(new Label(Lang.EN, "video.category.yoga", "Yoga"));
+        pilates = labelRepo.save(new Label(Lang.EN, "video.category.pilates", "Pilates"));
+        flexibility = labelRepo.save(new Label(Lang.EN, "video.category.flexibility", "Flexibility"));
 
-        category1 = new VideoCategory();
-        category1.setCode("YOGA");
-        category1.setTitle("Yoga");
-        category1.setLabel(yoga.getCode());
-        category1.setCreated(created);
-        category1.setReleased(released);
-        category1.setArchived(null);
-        videoCategoryRepo.save(category1);
+        // Video Tag Labels
+        all = labelRepo.save(new Label(Lang.EN, "video.tag.all", "All"));
+        relax = labelRepo.save(new Label(Lang.EN, "video.tag.relax", "Relax"));
+        energy = labelRepo.save(new Label(Lang.EN, "video.tag.energy", "Energy"));
+        strength = labelRepo.save(new Label(Lang.EN, "video.tag.strength", "Strength"));
+
+        // Video Categories
+        yogaCategory = createVideoCategory(EntityDefault.YOGA, yoga);
+        videoCategoryRepo.save(yogaCategory);
 
 
-        video11En = new Video();
-        video11En.setVideoCategory(category1);
-        video11En.setCode("YOGA_1010");
-        video11En.setTitle("Yoga #1010");
-        video11En.setDescription("Morning yoga #1010");
-        video11En.setFilename("1010.mov");
-        video11En.setLanguage(Lang.EN);
-        video11En.setPlayer(Player.PEECKO);
-        video11En.setThumbnail("http://peecko/thumbnail/1010.jpg");
-        video11En.setUrl("http://peecko/video/1010");
-        video11En.setCreated(created);
-        video11En.setReleased(released);
-        video11En.setArchived(null);
-        video11En.setDuration(1010);
-        video11En.setTags(LabelUtils.concatCodes(all, relax));
-        videoRepo.save(video11En);
+        pilatesCategory = createVideoCategory(EntityDefault.PILATES, pilates);
+        videoCategoryRepo.save(pilatesCategory);
 
-        video12En = new Video();
-        video12En.setVideoCategory(category1);
-        video12En.setCode("YOGA_1020");
-        video12En.setTitle("Yoga #1020");
-        video12En.setDescription("Morning yoga #1020");
-        video12En.setFilename("1020.mov");
-        video12En.setLanguage(Lang.EN);
-        video12En.setPlayer(Player.PEECKO);
-        video12En.setThumbnail("http://peecko/thumbnail/1020.jpg");
-        video12En.setUrl("http://peecko/video/1020");
-        video12En.setCreated(Instant.now());
-        video12En.setReleased(Instant.now());
-        video12En.setArchived(null);
-        video12En.setDuration(1020);
-        video12En.setTags(LabelUtils.concatCodes(all, relax));
-        videoRepo.save(video12En);
+        flexibilityCategory = createVideoCategory(EntityDefault.FLEXIBILITY, flexibility);
+        flexibilityCategory.setArchived(archived);
+        videoCategoryRepo.save(flexibilityCategory);
 
-        // PILATES
-        category2 = new VideoCategory();
-        category2.setCode("PILATES");
-        category2.setTitle("Pilates");
-        category2.setLabel(pilates.getCode());
-        category2.setCreated(created);
-        category2.setReleased(released);
-        category2.setArchived(null);
-        videoCategoryRepo.save(category2);
+        // YOGA Videos
+        yoga1En = createVideo(yogaCategory, "1010", LabelUtils.concatCodes(all, relax));
+        videoRepo.save(yoga1En);
+        videosYoga.add(yoga1En);
 
-        video21En = new Video();
-        video21En.setVideoCategory(category2);
-        video21En.setCode("PILATES_2010");
-        video21En.setTitle("Pilates #2010");
-        video21En.setDescription("Evening pilates #2010");
-        video21En.setFilename("2010.mov");
-        video21En.setLanguage(Lang.EN);
-        video21En.setPlayer(Player.PEECKO);
-        video21En.setThumbnail("http://peecko/thumbnail/2010.jpg");
-        video21En.setUrl("http://peecko/video/2010");
-        video21En.setCreated(created);
-        video21En.setReleased(released);
-        video21En.setArchived(null);
-        video21En.setDuration(2010);
-        video21En.setTags(LabelUtils.concatCodes(all, energy, strength));
-        videoRepo.save(video21En);
+        yoga2En = createVideo(yogaCategory, "1020", LabelUtils.concatCodes(all, relax));
+        videoRepo.save(yoga2En);
+        videosYoga.add(yoga2En);
 
-        video22En = new Video();
-        video22En.setVideoCategory(category2);
-        video22En.setCode("PILATES_2020");
-        video22En.setTitle("Pilates #2020");
-        video22En.setDescription("Evening pilates #2020");
-        video22En.setFilename("2020.mov");
-        video22En.setLanguage(Lang.EN);
-        video22En.setPlayer(Player.PEECKO);
-        video22En.setThumbnail("http://peecko/thumbnail/2020.jpg");
-        video22En.setUrl("http://peecko/video/2020");
-        video22En.setCreated(created);
-        video22En.setReleased(released);
-        video22En.setArchived(null);
-        video22En.setDuration(2020);
-        video22En.setTags(LabelUtils.concatCodes(all, energy, strength));
-        videoRepo.save(video22En);
+        // Pilates Videos
+        pilates1En = createVideo(pilatesCategory, "2010", LabelUtils.concatCodes(all, energy, strength));
+        videoRepo.save(pilates1En);
+        videosPilates.add(pilates1En);
 
-        video23En = new Video();
-        video23En.setVideoCategory(category2);
-        video23En.setCode("PILATES_2030");
-        video23En.setTitle("Pilates #2030");
-        video23En.setDescription("Evening pilates #2030");
-        video23En.setFilename("2030.mov");
-        video23En.setLanguage(Lang.EN);
-        video23En.setPlayer(Player.PEECKO);
-        video23En.setThumbnail("http://peecko/thumbnail/2030.jpg");
-        video23En.setUrl("http://peecko/video/2030");
-        video23En.setCreated(created);
-        video23En.setReleased(released);
-        video23En.setArchived(null);
-        video23En.setDuration(2030);
-        video23En.setTags(LabelUtils.concatCodes(all, energy, strength));
-        videoRepo.save(video23En);
+        pilates2En = createVideo(pilatesCategory, "2020", LabelUtils.concatCodes(all, energy, strength));
+        videoRepo.save(pilates2En);
+        videosPilates.add(pilates2En);
 
-        video24EnAr = new Video(); // diff -> archived
-        video24EnAr.setVideoCategory(category2);
-        video24EnAr.setCode("PILATES_2040");
-        video24EnAr.setTitle("Pilates #2040");
-        video24EnAr.setDescription("Evening pilates #2040");
-        video24EnAr.setFilename("2040.mov");
-        video24EnAr.setLanguage(Lang.EN);
-        video24EnAr.setPlayer(Player.PEECKO);
-        video24EnAr.setThumbnail("http://peecko/thumbnail/2040.jpg");
-        video24EnAr.setUrl("http://peecko/video/2040");
-        video24EnAr.setCreated(created);
-        video24EnAr.setReleased(released);
-        video24EnAr.setArchived(archived);
-        video24EnAr.setDuration(2040);
-        video24EnAr.setTags(LabelUtils.concatCodes(all, energy, strength));
-        videoRepo.save(video24EnAr);
+        pilates3En = createVideo(pilatesCategory, "2030", LabelUtils.concatCodes(all, energy, strength));
+        videoRepo.save(pilates3En);
+        videosPilates.add(pilates3En);
 
-        video25Fr = new Video(); // diff -> FR
-        video25Fr.setVideoCategory(category2);
-        video25Fr.setCode("PILATES_2050");
-        video25Fr.setTitle("Pilates #2050");
-        video25Fr.setDescription("Evening pilates #2050");
-        video25Fr.setFilename("2050.mov");
-        video25Fr.setLanguage(Lang.FR);
-        video25Fr.setPlayer(Player.PEECKO);
-        video25Fr.setThumbnail("http://peecko/thumbnail/2050.jpg");
-        video25Fr.setUrl("http://peecko/video/2050");
-        video25Fr.setCreated(created);
-        video25Fr.setReleased(released);
-        video25Fr.setArchived(null);
-        video25Fr.setDuration(2050);
-        video25Fr.setTags(LabelUtils.concatCodes(all, energy, strength));
-        videoRepo.save(video25Fr);
+        pilates4En = createVideo(pilatesCategory, "2040", LabelUtils.concatCodes(all, energy, strength));
+        videoRepo.save(pilates4En);
+        videosPilates.add(pilates4En);
 
-        video26En = new Video();
-        video26En.setVideoCategory(category2);
-        video26En.setCode("PILATES_2060");
-        video26En.setTitle("Pilates #260");
-        video26En.setDescription("Evening pilates #2060");
-        video26En.setFilename("2060.mov");
-        video26En.setLanguage(Lang.EN);
-        video26En.setPlayer(Player.PEECKO);
-        video26En.setThumbnail("http://peecko/thumbnail/2060.jpg");
-        video26En.setUrl("http://peecko/video/2060");
-        video26En.setCreated(created);
-        video26En.setReleased(released);
-        video26En.setArchived(null);
-        video26En.setDuration(2060);
-        video26En.setTags(LabelUtils.concatCodes(all, energy, strength));
-        videoRepo.save(video26En);
+        pilates5En = createVideo(pilatesCategory, "2050", LabelUtils.concatCodes(all, energy, strength));
+        videoRepo.save(pilates5En);
+        videosPilates.add(pilates5En);
+        
+        pilatesFrench = createVideo(pilatesCategory, "2060", LabelUtils.concatCodes(all, energy, strength));
+        pilatesFrench.setLanguage(Lang.FR); // FR
+        videoRepo.save(pilatesFrench);
+        videosPilates.add(pilatesFrench);
 
-        video27En = new Video();
-        video27En.setVideoCategory(category2);
-        video27En.setCode("PILATES_2070");
-        video27En.setTitle("Pilates #2060");
-        video27En.setDescription("Evening pilates #2070");
-        video27En.setFilename("2070.mov");
-        video27En.setLanguage(Lang.EN);
-        video27En.setPlayer(Player.PEECKO);
-        video27En.setThumbnail("http://peecko/thumbnail/2070.jpg");
-        video27En.setUrl("http://peecko/video/2070");
-        video27En.setCreated(created);
-        video27En.setReleased(released);
-        video27En.setArchived(null);
-        video27En.setDuration(2070);
-        video27En.setTags(LabelUtils.concatCodes(all, energy, strength));
-        videoRepo.save(video27En);
+        pilatesArchived = createVideo(pilatesCategory, "2070", LabelUtils.concatCodes(all, energy, strength));
+        pilatesArchived.setArchived(archived); // Archived
+        videoRepo.save(pilatesArchived);
+        videosPilates.add(pilatesArchived);
 
-        // FLEXIBILITY
-        category3 = new VideoCategory(); // diff -> archived
-        category3.setCode("FLEXIBILITY");
-        category3.setTitle("Flexibility");
-        category3.setLabel(flexibility.getCode());
-        category3.setCreated(created);
-        category3.setReleased(released);
-        category3.setArchived(archived);
-        videoCategoryRepo.save(category3);
+        // set references about the videos
+        allVideos = videoRepo.findAll();
+        activeAllEnIds = allVideos.stream().filter(v -> v.getLanguage() == Lang.EN && v.getArchived() == null).map(Video::getId).collect(Collectors.toSet());
+        activeAllFrIds = allVideos.stream().filter(v -> v.getLanguage() == Lang.FR && v.getArchived() == null).map(Video::getId).collect(Collectors.toSet());
+        activeYogaEnIds = allVideos.stream()
+                .filter(v -> v.getLanguage() == Lang.EN && v.getArchived() == null && v.getVideoCategory().getCode().equals(yogaCategory.getCode()))
+                .map(Video::getId).collect(Collectors.toSet());
+        activePilatesEnIds = allVideos.stream()
+              .filter(v -> v.getLanguage() == Lang.EN && v.getArchived() == null && v.getVideoCategory().getCode().equals(pilatesCategory.getCode()))
+              .map(Video::getId).collect(Collectors.toSet());
 
     }
 
+    private VideoCategory createVideoCategory(String code, Label label) {
+        VideoCategory category = new VideoCategory();
+        category.setCode(code);
+        category.setTitle(NameUtils.toCamelCase(code));
+        category.setLabel(label.getCode());
+        category.setCreated(created);
+        category.setReleased(released);
+        category.setArchived(null);
+        return category;
+    }
+
+    private Video createVideo(VideoCategory category, String number, String tags) {
+        Video video = new Video();
+        video.setVideoCategory(category);
+        video.setCode("VIDEO_" + number);
+        video.setTitle("Video #" + number);
+        video.setDescription("Morning workout #" + number);
+        video.setFilename(number + ".mov");
+        video.setLanguage(Lang.EN);
+        video.setPlayer(Player.PEECKO);
+        video.setThumbnail("http://peecko/thumbnail/" + number);
+        video.setUrl("http://peecko/video/" + number);
+        video.setCreated(created);
+        video.setReleased(released);
+        video.setArchived(null);
+        video.setDuration(Integer.valueOf(number));
+        video.setTags(tags);
+        return video;
+    }
 
 }
