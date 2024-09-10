@@ -25,8 +25,10 @@ public class VideoMapper {
     public CategoryDTO toCategoryDTO(VideoCategory videoCategory, List<Video> videos, Lang lang) {
         CategoryDTO dto = new CategoryDTO();
         dto.setCode(videoCategory.getCode());
-        dto.setTitle(labelService.getCachedLabel(videoCategory.getLabel(), lang));
-        dto.setVideos(videos.stream().map(video -> toVideoDTO(video, lang)).collect(Collectors.toList()));
+        dto.setTitle(labelService.getCachedLabel("video.category." + videoCategory.getLabel(), lang));
+        if (videos != null && !videos.isEmpty()) {
+            dto.setVideos(videos.stream().map(video -> toVideoDTO(video, lang)).collect(Collectors.toList()));
+        }
         return dto;
     }
 
@@ -42,10 +44,10 @@ public class VideoMapper {
         dto.setPlayer(video.getPlayer().name());
         dto.setFavorite(video.isFavorite());
         if (StringUtils.hasText(video.getAudience())) {
-            dto.setAudience(labelService.getCachedLabel(video.getAudience(), lang));
+            dto.setAudience(labelService.getCachedLabel("video.audience." + video.getAudience().toLowerCase(), lang));
         }
         if (video.getIntensity() != null) {
-            dto.setIntensity(labelService.getCachedLabel(video.getIntensity().name(), lang));
+            dto.setIntensity(labelService.getCachedLabel("video.intensity." + video.getIntensity().name().toLowerCase(), lang));
         }
         if (StringUtils.hasText(video.getTags())) {
             dto.setTags(buildVideoTagsAsLabelList(video.getTags(), lang));
@@ -67,7 +69,7 @@ public class VideoMapper {
         for(String code: array) {
             code = code.trim();
             if (StringUtils.hasText(code)) {
-                list.add(labelService.getCachedLabel(code, lang));
+                list.add(labelService.getCachedLabel("video.tag." + code, lang));
             }
         }
         return list;

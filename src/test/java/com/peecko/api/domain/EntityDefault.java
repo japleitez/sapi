@@ -1,7 +1,10 @@
 package com.peecko.api.domain;
 
+import com.peecko.api.domain.enumeration.Intensity;
 import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.utils.Common;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import org.springframework.security.core.parameters.P;
 
 public abstract class EntityDefault {
     public static final String PLAYLIST_NAME = "default-playlist-name";
@@ -20,17 +23,39 @@ public abstract class EntityDefault {
     public static final String JTI = "jti";
     public static final Double VAT_RATE = 0.16;
     public static final String TITLE = "default-title";
+    public static final String VIDEO_CATEGORY_TITLE = "default-video-category";
+
+    public static final String VIDEO_CATEGORY_LABEL = "video.category.default";
+
     public static final String LABEL = "default.label";
     public static final String MESSAGE = "default-message";
     public static final String VIDEO_CODE = "default-video-code";
+    public static final String VIDEO_TITLE = "default-video-title";
     public static final String VIDEO_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-    public static final String IMAGE_URL = "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png";
-    public static final Integer VIDEO_DURATION = 60;
-    public static final String VIDEO_CATEGORY_CODE = "VC_CODE";
+    public static final String VIDEO_THUMBNAIL = "https://www.google.com/images/272x92dp.png";
+    public static final String VIDEO_DESCRIPTION = "default-video-description";
+    public static final Integer VIDEO_DURATION = 10;
+    public static final String VIDEO_AUDIENCE_ALL = "all";
 
+    public static final String VIDEO_INTENSITY_LOW = "low";
+    public static final String VIDEO_INTENSITY_MODERATE = "moderate";
+    public static final String VIDEO_INTENSITY_HIGH = "high";
+
+    public static final String VIDEO_TAG_ALL = "all";
+    public static final String VIDEO_TAG_RELAX = "relax";
+    public static final String VIDEO_TAG_ENERGY  = "energy";
+    public static final String VIDEO_TAGS = VIDEO_TAG_ALL + "," + VIDEO_TAG_RELAX + "," + VIDEO_TAG_ENERGY;
+
+    public static final String VIDEO_CATEGORY_CODE = "VC_CODE";
     public static final String YOGA = "YOGA";
     public static final String PILATES = "PILATES";
-
     public static final String FLEXIBILITY = "FLEXIBILITY";
+
+    public static final String COACH_NAME = "default-name";
+    public static final String COACH_RESUME = "default-resume";
+    public static final String COACH_WEBSITE = "default-website";
+    public static final String COACH_EMAIL = "default-email";
+    public static final String COACH_INSTAGRAM = "default-instagram";
+
 
 }

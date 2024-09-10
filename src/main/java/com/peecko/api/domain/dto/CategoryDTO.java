@@ -13,5 +13,5 @@ import java.util.List;
 public class CategoryDTO {
     private String code;
     private String title;
-    private List<VideoDTO> videos;
+    private List<VideoDTO> videos = new ArrayList<>();
 }

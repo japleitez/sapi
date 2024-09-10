@@ -332,41 +332,41 @@ class VideoServiceTest {
         videoCategoryRepo.save(flexibilityCategory);
 
         // YOGA Videos
-        yoga1En = createVideo(yogaCategory, "1010", LabelUtils.concatCodes(all, relax));
+        yoga1En = createVideo(yogaCategory, "1010", "all, relax");
         videoRepo.save(yoga1En);
         videosYoga.add(yoga1En);
 
-        yoga2En = createVideo(yogaCategory, "1020", LabelUtils.concatCodes(all, relax));
+        yoga2En = createVideo(yogaCategory, "1020", "all, relax");
         videoRepo.save(yoga2En);
         videosYoga.add(yoga2En);
 
         // Pilates Videos
-        pilates1En = createVideo(pilatesCategory, "2010", LabelUtils.concatCodes(all, energy, strength));
+        pilates1En = createVideo(pilatesCategory, "2010", "all, energy, strength");
         videoRepo.save(pilates1En);
         videosPilates.add(pilates1En);
 
-        pilates2En = createVideo(pilatesCategory, "2020", LabelUtils.concatCodes(all, energy, strength));
+        pilates2En = createVideo(pilatesCategory, "2020", "all, energy, strength");
         videoRepo.save(pilates2En);
         videosPilates.add(pilates2En);
 
-        pilates3En = createVideo(pilatesCategory, "2030", LabelUtils.concatCodes(all, energy, strength));
+        pilates3En = createVideo(pilatesCategory, "2030", "all, energy, strength");
         videoRepo.save(pilates3En);
         videosPilates.add(pilates3En);
 
-        pilates4En = createVideo(pilatesCategory, "2040", LabelUtils.concatCodes(all, energy, strength));
+        pilates4En = createVideo(pilatesCategory, "2040", "all, energy, strength");
         videoRepo.save(pilates4En);
         videosPilates.add(pilates4En);
 
-        pilates5En = createVideo(pilatesCategory, "2050", LabelUtils.concatCodes(all, energy, strength));
+        pilates5En = createVideo(pilatesCategory, "2050", "all, energy, strength");
         videoRepo.save(pilates5En);
         videosPilates.add(pilates5En);
         
-        pilatesFrench = createVideo(pilatesCategory, "2060", LabelUtils.concatCodes(all, energy, strength));
+        pilatesFrench = createVideo(pilatesCategory, "2060", "all, energy, strength");
         pilatesFrench.setLanguage(Lang.FR); // FR
         videoRepo.save(pilatesFrench);
         videosPilates.add(pilatesFrench);
 
-        pilatesArchived = createVideo(pilatesCategory, "2070", LabelUtils.concatCodes(all, energy, strength));
+        pilatesArchived = createVideo(pilatesCategory, "2070", "all, energy, strength");
         pilatesArchived.setArchived(archived); // Archived
         videoRepo.save(pilatesArchived);
         videosPilates.add(pilatesArchived);

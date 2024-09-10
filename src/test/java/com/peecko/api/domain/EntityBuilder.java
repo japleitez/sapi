@@ -2,11 +2,9 @@ package com.peecko.api.domain;
 
 import com.peecko.api.domain.enumeration.CustomerState;
 import com.peecko.api.domain.enumeration.Intensity;
-import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.domain.enumeration.Player;
 import com.peecko.api.web.payload.request.SignInRequest;
 import com.peecko.api.web.payload.request.SignUpRequest;
-import org.checkerframework.checker.units.qual.A;
 
 import java.time.LocalDate;
 
@@ -47,7 +45,7 @@ public abstract class EntityBuilder {
         notification.setMessage(EntityDefault.MESSAGE);
         notification.setLanguage(EntityDefault.LANG);
         notification.setVideoUrl(EntityDefault.VIDEO_URL);
-        notification.setImageUrl(EntityDefault.IMAGE_URL);
+        notification.setImageUrl(EntityDefault.VIDEO_THUMBNAIL);
         notification.setStarts(LocalDate.now());
         notification.setExpires(LocalDate.now().plusDays(10));
         return notification;
@@ -69,7 +67,7 @@ public abstract class EntityBuilder {
         video.setLanguage(EntityDefault.LANG);
         video.setUrl(EntityDefault.VIDEO_URL);
         video.setPlayer(Player.PEECKO);
-        video.setIntensity(Intensity.BEGINNER);
+        video.setIntensity(Intensity.LOW);
         video.setDuration(EntityDefault.VIDEO_DURATION);
         return video;
     }
