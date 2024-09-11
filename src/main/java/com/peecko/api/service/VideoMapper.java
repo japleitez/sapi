@@ -6,6 +6,7 @@ import com.peecko.api.domain.VideoCategory;
 import com.peecko.api.domain.dto.CategoryDTO;
 import com.peecko.api.domain.dto.VideoDTO;
 import com.peecko.api.domain.enumeration.Lang;
+import com.peecko.api.utils.TagUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -18,6 +19,7 @@ public class VideoMapper {
 
     final LabelService labelService;
 
+
     public VideoMapper(LabelService labelService) {
         this.labelService = labelService;
     }
@@ -25,7 +27,7 @@ public class VideoMapper {
     public CategoryDTO toCategoryDTO(VideoCategory videoCategory, List<Video> videos, Lang lang) {
         CategoryDTO dto = new CategoryDTO();
         dto.setCode(videoCategory.getCode());
-        dto.setTitle(labelService.getCachedLabel("video.category." + videoCategory.getLabel(), lang));
+        dto.setTitle(labelService.getCachedLabel(LabelService.PREFIX_VIDEO_CATEGORY + videoCategory.getLabel(), lang));
         if (videos != null && !videos.isEmpty()) {
             dto.setVideos(videos.stream().map(video -> toVideoDTO(video, lang)).collect(Collectors.toList()));
         }
@@ -44,10 +46,10 @@ public class VideoMapper {
         dto.setPlayer(video.getPlayer().name());
         dto.setFavorite(video.isFavorite());
         if (StringUtils.hasText(video.getAudience())) {
-            dto.setAudience(labelService.getCachedLabel("video.audience." + video.getAudience().toLowerCase(), lang));
+            dto.setAudience(labelService.getCachedLabel(LabelService.resolveAudienceLabel(video.getAudience()), lang));
         }
         if (video.getIntensity() != null) {
-            dto.setIntensity(labelService.getCachedLabel("video.intensity." + video.getIntensity().name().toLowerCase(), lang));
+            dto.setIntensity(labelService.getCachedLabel(LabelService.resolveIntensityLabel(video.getIntensity()), lang));
         }
         if (StringUtils.hasText(video.getTags())) {
             dto.setTags(buildVideoTagsAsLabelList(video.getTags(), lang));
@@ -63,16 +65,11 @@ public class VideoMapper {
         return dto;
     }
 
-    private List<String> buildVideoTagsAsLabelList(String codes, Lang lang) {
-        List<String> list = new ArrayList<>();
-        String[] array = codes.split(",");
-        for(String code: array) {
-            code = code.trim();
-            if (StringUtils.hasText(code)) {
-                list.add(labelService.getCachedLabel("video.tag." + code, lang));
-            }
-        }
-        return list;
+    private List<String> buildVideoTagsAsLabelList(String tags, Lang lang) {
+        return TagUtils.convertToList(tags)
+              .stream()
+              .map(tag -> labelService.getCachedLabel(LabelService.resolveVideoTagLabel(tag), lang))
+              .collect(Collectors.toList());
     }
 
 }

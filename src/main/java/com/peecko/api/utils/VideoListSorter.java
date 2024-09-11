@@ -8,6 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 public class VideoListSorter {
+
+    private VideoListSorter() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static List<VideoItemDTO> sortVideoList(List<VideoItemDTO> videoList) {
         // Create a map of code to VideoItemDTO for quick lookup
         Map<String, VideoItemDTO> map = new HashMap<>();

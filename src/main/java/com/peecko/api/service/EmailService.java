@@ -23,16 +23,16 @@ public class EmailService {
     }
 
     @Async
-    public void sendEmail(EmailContext cxt) {
+    public void sendEmail(EmailContext email) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
-            helper.setFrom(cxt.getFrom());
-            helper.setTo(cxt.getTo());
-            helper.setSubject(cxt.getSubject());
-            helper.setText(cxt.getText(), true);
-            if (StringUtils.hasText(cxt.getAttachmentPath())) {
-                FileSystemResource file = new FileSystemResource(new File(cxt.getAttachmentPath()));
+            helper.setFrom(email.getFrom());
+            helper.setTo(email.getTo());
+            helper.setSubject(email.getSubject());
+            helper.setText(email.getText(), true);
+            if (StringUtils.hasText(email.getAttachmentPath())) {
+                FileSystemResource file = new FileSystemResource(new File(email.getAttachmentPath()));
                 helper.addAttachment(Objects.requireNonNull(file.getFilename()), file);
             }
             mailSender.send(message);

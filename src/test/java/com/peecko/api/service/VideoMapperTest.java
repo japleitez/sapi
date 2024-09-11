@@ -7,6 +7,7 @@ import com.peecko.api.domain.enumeration.Intensity;
 import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.domain.enumeration.Player;
 import com.peecko.api.repository.LabelRepo;
+import com.peecko.api.utils.TagUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,9 +108,9 @@ class VideoMapperTest {
       assertEquals(dto.getDescription(), video.getDescription());
       assertEquals(dto.getPlayer(), video.getPlayer().name());
       assertEquals(dto.isFavorite(), video.isFavorite());
-      assertEquals(dto.getAudience(), "video.audience." + video.getAudience()); // no translation
-      assertEquals(dto.getIntensity(), "video.intensity." + video.getIntensity().name().toLowerCase()); // no translation
-      assertEquals(dto.getTags(), convertTagsToList(video.getTags(), "video.tag.")); // no translation
+      assertEquals(dto.getAudience(), LabelService.resolveAudienceLabel(video.getAudience()));
+      assertEquals(dto.getIntensity(), LabelService.resolveIntensityLabel(video.getIntensity()));
+      assertEquals(dto.getTags(), LabelService.resolveVideoTagsAsLabelList(video.getTags()));
       assertEquals(dto.getCoach(), video.getCoach().getName());
       assertEquals(dto.getResume(), video.getCoach().getResume());
       assertEquals(dto.getCoachWebsite(), video.getCoach().getWebsite());
@@ -118,10 +119,11 @@ class VideoMapperTest {
    }
 
    @Test
-   void toVideoDTOWithTranslations() {
+   void toVideoDTO() {
       // Given
       createLabels();
       Video video = createBaseVideo(Lang.EN, createBaseCoach(), createBaseVideoCategory());
+      // set fields that required label translation
       video.setIntensity(Intensity.LOW);
       video.setAudience("all");
       video.setTags("all, relax, energy");
@@ -130,9 +132,24 @@ class VideoMapperTest {
       VideoDTO dto = videoMapper.toVideoDTO(video, Lang.EN);
 
       // Then
+      assertEquals(dto.getCode(), video.getCode());
+      assertEquals(dto.getCategory(), video.getVideoCategory().getCode());
+      assertEquals(dto.getTitle(), video.getTitle());
+      assertEquals(dto.getDuration(), String.valueOf(video.getDuration()));
+      assertEquals(dto.getImage(), video.getThumbnail());
+      assertEquals(dto.getUrl(), video.getUrl());
+      assertEquals(dto.getDescription(), video.getDescription());
+      assertEquals(dto.getPlayer(), video.getPlayer().name());
+      assertEquals(dto.isFavorite(), video.isFavorite());
+      assertEquals(dto.getCoach(), video.getCoach().getName());
+      assertEquals(dto.getResume(), video.getCoach().getResume());
+      assertEquals(dto.getCoachWebsite(), video.getCoach().getWebsite());
+      assertEquals(dto.getCoachEmail(), video.getCoach().getEmail());
+      assertEquals(dto.getCoachInstagram(), video.getCoach().getInstagram());
+      // fields with label translation
       assertEquals(dto.getIntensity(), intensityLow.getText());
       assertEquals(dto.getAudience(), audienceAll.getText());
-      assertEquals(dto.getTags(), convertTagsToList(all.getText() + ", " + relax.getText() + ", " + energy.getText(), null));
+      assertEquals(dto.getTags(), TagUtils.convertToList(all.getText() + ", " + relax.getText() + ", " + energy.getText()));
 
    }
 
@@ -230,23 +247,6 @@ class VideoMapperTest {
       coach.setEmail(EntityDefault.COACH_EMAIL);
       coach.setInstagram(EntityDefault.COACH_INSTAGRAM);
       return coach;
-   }
-
-   private List<String> convertTagsToList(String codes, String prefix) {
-      if (!StringUtils.hasText(codes)) {
-         return null;
-      }
-      List<String> list = new ArrayList<>();
-      String[] array = codes.split(",");
-      for(String code: array) {
-         code = code.trim();
-         if (prefix == null) {
-            list.add(code);
-         } else {
-            list.add(prefix + code);
-         }
-      }
-      return list;
    }
 
    private void createLabels() {

@@ -4,6 +4,10 @@ import java.util.Random;
 
 public class PinUtils {
 
+    private PinUtils() {
+       throw new IllegalStateException("Utility class");
+    }
+
     public static String randomDigitsAsString(int length) {
         Random random = new Random();
         StringBuilder stringBuilder = new StringBuilder(length);

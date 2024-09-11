@@ -5,6 +5,10 @@ import java.time.temporal.ChronoUnit;
 
 public class InstantUtils {
 
+   private InstantUtils() {
+      throw new IllegalStateException("InstantUtils class");
+   }
+
    public static Instant createInstantFromDays(int daysFromToday) {
       // Get the current Instant
       Instant now = Instant.now();

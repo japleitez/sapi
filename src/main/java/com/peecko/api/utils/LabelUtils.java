@@ -7,6 +7,10 @@ import java.util.stream.Collectors;
 
 public class LabelUtils {
 
+    private LabelUtils() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static String concatCodes(Label... labels) {
         return Arrays.stream(labels)
                 .map(Label::getCode)

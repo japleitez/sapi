@@ -7,8 +7,12 @@ public abstract class Common {
 
     public static final String OK = "OK";
     public static final String ERROR = "ERROR";
-    public static final int MAX_DEVICES_ALLOWED = 3;
     public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final int MAX_DEVICES_ALLOWED = 3;
+
+    private Common() {
+       throw new IllegalStateException("Utility class");
+    }
 
     public static String instantAsString(Instant time) {
         ZoneId zoneId = ZoneId.systemDefault();
