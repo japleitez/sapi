@@ -5,6 +5,7 @@ import com.peecko.api.domain.enumeration.Intensity;
 import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.domain.enumeration.Player;
 import jakarta.persistence.*;
+
 import java.time.Instant;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -58,14 +59,14 @@ public class Video implements Serializable {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "created")
-    private Instant created;
-
     @Column(name = "released")
-    private Instant released;
+    private LocalDate released;
 
     @Column(name = "archived")
-    private Instant archived;
+    private LocalDate archived;
+
+    @Column(name = "created")
+    private Instant created;
 
     LocalDate publicationDate;
 
@@ -194,19 +195,17 @@ public class Video implements Serializable {
         this.created = created;
     }
 
-    public Instant getReleased() {
-        return released;
-    }
+    public LocalDate getReleased() { return this.released; }
 
-    public void setReleased(Instant released) {
+    public void setReleased(LocalDate released) {
         this.released = released;
     }
 
-    public Instant getArchived() {
+    public LocalDate getArchived() {
         return archived;
     }
 
-    public void setArchived(Instant archived) {
+    public void setArchived(LocalDate archived) {
         this.archived = archived;
     }
 

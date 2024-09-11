@@ -2,7 +2,7 @@ package com.peecko.api.web.rest;
 
 import com.peecko.api.security.Login;
 import com.peecko.api.service.AccountService;
-import com.peecko.api.utils.Common;
+import com.peecko.api.utils.PeriodUtils;
 import com.peecko.api.web.payload.request.ActivationRequest;
 import com.peecko.api.web.payload.response.Message;
 import jakarta.validation.Valid;
@@ -38,7 +38,7 @@ public class MembershipResource extends BaseResource {
         if (!StringUtils.hasLength(license) && license.length() != 20) {
             return ResponseEntity.ok(new Message(ERROR, message("membership.valid.nok")));
         }
-        boolean activated = accountService.activateUserLicense(getUsername(), Common.currentPeriod(), license);
+        boolean activated = accountService.activateUserLicense(getUsername(), PeriodUtils.current(), license);
         if (activated) {
             return ResponseEntity.ok(new Message(OK, message("membership.activate.ok")));
         } else {

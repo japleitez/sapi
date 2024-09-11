@@ -8,6 +8,8 @@ public abstract class Common {
     public static final String OK = "OK";
     public static final String ERROR = "ERROR";
     public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final String USER_DATE_FORMAT = "dd-MM-yyyy";
+
     public static final int MAX_DEVICES_ALLOWED = 3;
 
     private Common() {
@@ -21,27 +23,20 @@ public abstract class Common {
         return localDateTime.format(formatter);
     }
 
-    public static String localDateAsString(LocalDate localDate) {
-        LocalDateTime localDateTime = localDate.atTime(LocalTime.MIDNIGHT);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
-        return localDateTime.format(formatter);
-    }
-
     public static Instant endOfDay() {
         return LocalDate.now().atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant();
     }
 
-    public static int currentPeriod() {
-        LocalDate today = LocalDate.now();
-        int year = today.getYear();
-        int month = today.getMonthValue();
-        return year * 100 + month;
+    public static String localDateAsString(LocalDate localDate) {
+        LocalDateTime localDateTime = localDate.atTime(LocalTime.MIDNIGHT);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(USER_DATE_FORMAT);
+        return localDateTime.format(formatter);
     }
 
-    public static int previousPeriod() {
-        LocalDate today = LocalDate.now();
-        LocalDate previousMonth = today.minusMonths(1);
-        return previousMonth.getYear() * 100 + previousMonth.getMonthValue();
+    public static String lastDayOfMonthAsString() {
+        LocalDate lastDayOfMonth = lastDayOfMonth();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(USER_DATE_FORMAT);
+        return lastDayOfMonth.format(formatter);
     }
 
     public static LocalDate lastDayOfMonth() {
@@ -50,10 +45,6 @@ public abstract class Common {
         return yearMonth.atEndOfMonth();
     }
 
-    public static String lastDayOfMonthAsString() {
-        LocalDate lastDayOfMonth = lastDayOfMonth();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        return lastDayOfMonth.format(formatter);
-    }
+
 
 }

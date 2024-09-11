@@ -11,6 +11,7 @@ import com.peecko.api.repository.ApsDeviceRepo;
 import com.peecko.api.repository.ApsMembershipRepo;
 import com.peecko.api.repository.ApsUserRepo;
 import com.peecko.api.repository.CustomerRepo;
+import com.peecko.api.utils.PeriodUtils;
 import com.peecko.api.web.payload.response.UserProfileResponse;
 import com.peecko.api.utils.Common;
 import com.peecko.api.utils.NameUtils;
@@ -111,7 +112,7 @@ public class ApsUserService {
     }
 
     private UserProfileResponse buildProfileResponse(ApsUser apsUser) {
-        int currentPeriod = Common.currentPeriod();
+        int currentPeriod = PeriodUtils.current();
         int deviceCount = apsUser.getApsDevices().size();
         UserProfileResponse response = new UserProfileResponse();
         response.setToken(apsUser.getJwt());

@@ -86,8 +86,8 @@ class VideoServiceTest {
     Label strength = null;
 
     Instant created = InstantUtils.createInstantFromDays(-20);
-    Instant released = InstantUtils.createInstantFromDays(-10);
-    Instant archived = InstantUtils.createInstantFromDays(-5);
+    LocalDate released = LocalDate.now().minusDays(10);
+    LocalDate archived = LocalDate.now().minusDays(5);
 
     List<Video> videosYoga = null;
     List<Video> videosPilates = null;

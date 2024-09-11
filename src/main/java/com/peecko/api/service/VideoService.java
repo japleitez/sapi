@@ -17,6 +17,7 @@ import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -61,7 +62,7 @@ public class VideoService {
 
     @Cacheable(value = "videoLibrary", key = "#lang.name()")
     public Map<VideoCategory, List<Video>> getCachedLatestVideo(Lang lang) {
-        Instant today = Common.endOfDay();
+        LocalDate today = LocalDate.now();
         List<VideoCategory> categories = videoCategoryRepo.findReleasedCategories(today);
         Map<VideoCategory, List<Video>> videoCategoryMap = new HashMap<>();
         for (VideoCategory category : categories) {
@@ -73,8 +74,7 @@ public class VideoService {
 
     @Cacheable(value = "videosByCategory", key = "#videoCategory.code + '-' + #lang.name()")
     public List<Video> getCachedVideosByCategoryAndLang(VideoCategory videoCategory, Lang lang) {
-        Instant today = Common.endOfDay();
-        return videoRepo.findByCategoryAndLang(videoCategory, lang, today);
+        return videoRepo.findByCategoryAndLang(videoCategory, lang, LocalDate.now());
     }
 
     public List<String> getVideoTags(List<VideoDTO> videos, Lang lang) {

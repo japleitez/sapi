@@ -3,6 +3,7 @@ package com.peecko.api.domain;
 import com.peecko.api.domain.enumeration.Intensity;
 import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.utils.Common;
+import com.peecko.api.utils.PeriodUtils;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.security.core.parameters.P;
 
@@ -15,7 +16,7 @@ public abstract class EntityDefault {
     public static final String COUNTRY = "UK";
     public static final String LANGUAGE = LANG.name();
     public static final String LICENSE = "default-license";
-    public static final Integer PERIOD = Common.currentPeriod();
+    public static final Integer PERIOD = PeriodUtils.current();
     public static final Long CUSTOMER_ID = 1L;
     public static final String PHONE_MODEL = "default-model";
     public static final String OS_VERSION = "default-version";

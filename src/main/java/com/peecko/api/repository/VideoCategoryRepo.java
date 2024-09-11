@@ -4,7 +4,7 @@ import com.peecko.api.domain.VideoCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +13,6 @@ public interface VideoCategoryRepo extends JpaRepository<VideoCategory, Long> {
 
     Optional<VideoCategory> findByCode(String code);
     @Query("SELECT vc FROM VideoCategory vc WHERE vc.released <= :today AND (vc.archived IS NULL OR vc.archived > :today)")
-    List<VideoCategory> findReleasedCategories(Instant today);
+    List<VideoCategory> findReleasedCategories(LocalDate today);
 
 }

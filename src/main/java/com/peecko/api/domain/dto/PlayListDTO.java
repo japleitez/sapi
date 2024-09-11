@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Setter
-@Getter
-@Accessors(chain = true)
 @AllArgsConstructor
 @NoArgsConstructor
 public class PlayListDTO {

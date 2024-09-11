@@ -3,7 +3,6 @@ package com.peecko.api.domain;
 import jakarta.persistence.*;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "invalid_jwt")

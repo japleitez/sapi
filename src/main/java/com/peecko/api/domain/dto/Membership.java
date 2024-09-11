@@ -4,7 +4,8 @@ import lombok.*;
 import lombok.experimental.Accessors;
 
 @Data
-@Setter @Getter @Accessors(chain = true)
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Membership {
     @EqualsAndHashCode.Include

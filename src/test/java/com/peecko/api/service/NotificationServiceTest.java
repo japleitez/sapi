@@ -2,18 +2,13 @@ package com.peecko.api.service;
 
 import com.peecko.api.domain.*;
 import com.peecko.api.domain.dto.NotificationDTO;
-import com.peecko.api.domain.enumeration.CustomerState;
-import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.repository.*;
-import com.peecko.api.utils.Common;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import com.peecko.api.utils.PeriodUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -67,7 +62,7 @@ class NotificationServiceTest {
         notificationRepo.flush();
 
         // WHEN
-        int period = Common.currentPeriod();
+        int period = PeriodUtils.current();
         List<NotificationDTO> notViewed = notificationService.getNotificationsForUserAndPeriod(apsUser, period);
         notificationService.addViewedNotification(apsUser.getId(), notification.getId());
         List<NotificationDTO> viewed = notificationService.getNotificationsForUserAndPeriod(apsUser, period);

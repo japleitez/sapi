@@ -20,11 +20,11 @@ public class ApsDeviceMapper {
 
     public static ApsDevice toApsDevice(SignInRequest request) {
         ApsDevice apsDevice = new ApsDevice();
-        apsDevice.username(request.username());
-        apsDevice.deviceId(request.deviceId());
-        apsDevice.osVersion(request.osVersion());
-        apsDevice.phoneModel(request.phoneModel());
-        apsDevice.installedOn(Instant.now());
+        apsDevice.setUsername(request.username());
+        apsDevice.setDeviceId(request.deviceId());
+        apsDevice.setOsVersion(request.osVersion());
+        apsDevice.setPhoneModel(request.phoneModel());
+        apsDevice.setInstalledOn(Instant.now());
         return apsDevice;
     }
 

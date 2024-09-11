@@ -3,7 +3,7 @@ package com.peecko.api.service;
 import com.peecko.api.domain.ApsUser;
 import com.peecko.api.repository.ApsMembershipRepo;
 import com.peecko.api.repository.ApsUserRepo;
-import com.peecko.api.utils.Common;
+import com.peecko.api.utils.PeriodUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -33,14 +33,14 @@ public class LicenseService {
         }
         // if the user has a valid license in the current period, we return true
         if (apsMembershipRepo
-                .findByUsernameAndPeriodAndLicense(username, Common.currentPeriod(), apsUser.getLicense())
+                .findByUsernameAndPeriodAndLicense(username, PeriodUtils.current(), apsUser.getLicense())
                 .isPresent()) {
             return true;
         }
         // otherwise, grant grace period if the user had any license in the previous period
         return GRACE_PERIOD_IN_DAYS > LocalDate.now().getDayOfMonth() &&
                 apsMembershipRepo
-                        .findByUsernameAndPeriod(username, Common.previousPeriod())
+                        .findByUsernameAndPeriod(username, PeriodUtils.previous())
                         .isPresent();
     }
 

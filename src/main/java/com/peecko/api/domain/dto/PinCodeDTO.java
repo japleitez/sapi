@@ -1,17 +1,13 @@
 package com.peecko.api.domain.dto;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
 @Data
-@Setter
-@Getter
-@Accessors(chain = true)
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class PinCodeDTO {
     @EqualsAndHashCode.Include

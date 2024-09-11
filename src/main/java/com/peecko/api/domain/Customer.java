@@ -1,12 +1,11 @@
 package com.peecko.api.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.peecko.api.domain.enumeration.CustomerState;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.HashSet;
+import java.time.LocalDate;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -77,16 +76,16 @@ public class Customer implements Serializable {
     private Instant updated;
 
     @Column(name = "trialed")
-    private Instant trialed;
+    private LocalDate trialed;
 
     @Column(name = "declined")
-    private Instant declined;
+    private LocalDate declined;
 
     @Column(name = "activated")
-    private Instant activated;
+    private LocalDate activated;
 
     @Column(name = "closed")
-    private Instant closed;
+    private LocalDate closed;
 
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
@@ -312,55 +311,55 @@ public class Customer implements Serializable {
         this.updated = updated;
     }
 
-    public Instant getTrialed() {
+    public LocalDate getTrialed() {
         return this.trialed;
     }
 
-    public Customer trialed(Instant trialed) {
+    public Customer trialed(LocalDate trialed) {
         this.setTrialed(trialed);
         return this;
     }
 
-    public void setTrialed(Instant trialed) {
+    public void setTrialed(LocalDate trialed) {
         this.trialed = trialed;
     }
 
-    public Instant getDeclined() {
+    public LocalDate getDeclined() {
         return this.declined;
     }
 
-    public Customer declined(Instant declined) {
+    public Customer declined(LocalDate declined) {
         this.setDeclined(declined);
         return this;
     }
 
-    public void setDeclined(Instant declined) {
+    public void setDeclined(LocalDate declined) {
         this.declined = declined;
     }
 
-    public Instant getActivated() {
+    public LocalDate getActivated() {
         return this.activated;
     }
 
-    public Customer activated(Instant activated) {
+    public Customer activated(LocalDate activated) {
         this.setActivated(activated);
         return this;
     }
 
-    public void setActivated(Instant activated) {
+    public void setActivated(LocalDate activated) {
         this.activated = activated;
     }
 
-    public Instant getClosed() {
+    public LocalDate getClosed() {
         return this.closed;
     }
 
-    public Customer closed(Instant closed) {
+    public Customer closed(LocalDate closed) {
         this.setClosed(closed);
         return this;
     }
 
-    public void setClosed(Instant closed) {
+    public void setClosed(LocalDate closed) {
         this.closed = closed;
     }
 

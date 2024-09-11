@@ -6,7 +6,7 @@ import com.peecko.api.domain.dto.NotificationDTO;
 import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.security.Login;
 import com.peecko.api.service.*;
-import com.peecko.api.utils.Common;
+import com.peecko.api.utils.PeriodUtils;
 import com.peecko.api.web.payload.response.LanguageResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -54,7 +54,7 @@ public class AccountResource extends BaseResource {
      */
     @GetMapping("/notifications")
     public ResponseEntity<List<NotificationDTO>> getNotifications() {
-        List<NotificationDTO> list = notificationService.getNotificationsForUserAndPeriod(Login.getUser(), Common.currentPeriod());
+        List<NotificationDTO> list = notificationService.getNotificationsForUserAndPeriod(Login.getUser(), PeriodUtils.current());
         return ResponseEntity.ok(list);
     }
 
