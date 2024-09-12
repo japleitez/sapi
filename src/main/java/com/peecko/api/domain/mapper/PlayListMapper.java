@@ -6,6 +6,10 @@ import com.peecko.api.domain.dto.PlayListDTO;
 
 public class PlayListMapper {
 
+   private PlayListMapper() {
+      throw new IllegalStateException("Utility class");
+   }
+
     public static IdName toIdName(PlayList playList) {
         return new IdName(playList.getId(), playList.getName(), playList.getCounter());
     }

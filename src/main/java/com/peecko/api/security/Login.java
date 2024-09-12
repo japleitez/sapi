@@ -10,8 +10,12 @@ import java.util.Locale;
 
 public class Login {
 
-    public final static String CURRENT_USER = "currentUser";
-    private final static ApsUser UNDEFINED_APS_USER = new ApsUser(0L, Lang.EN);
+    public static final String CURRENT_USER = "currentUser";
+    private static final ApsUser UNDEFINED_APS_USER = new ApsUser(0L, Lang.EN);
+
+    private Login() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static ApsUser getUser() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();

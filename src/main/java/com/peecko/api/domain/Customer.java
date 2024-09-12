@@ -376,4 +376,9 @@ public class Customer implements Serializable {
         return getId() != null && getId().equals(((Customer) o).getId());
     }
 
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
+
 }

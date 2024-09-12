@@ -9,6 +9,10 @@ import java.time.Instant;
 
 public class ApsDeviceMapper {
 
+    private ApsDeviceMapper() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static DeviceDTO deviceDTO(ApsDevice apsDevice) {
         DeviceDTO dto = new DeviceDTO();
         dto.setDeviceId(apsDevice.getDeviceId());

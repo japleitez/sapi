@@ -9,6 +9,10 @@ import java.util.ArrayList;
 
 public class ApsUserMapper {
 
+    private ApsUserMapper() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static UserDTO toUserDTO(ApsUser apsUser) {
         if (apsUser == null) {
             return null;

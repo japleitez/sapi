@@ -87,4 +87,9 @@ public class ApsMembership implements Serializable {
         return getId() != null && getId().equals(((ApsMembership) o).getId());
     }
 
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
+
 }

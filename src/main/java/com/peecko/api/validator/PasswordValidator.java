@@ -8,6 +8,11 @@ public abstract class PasswordValidator {
 
     private static final int MIN_PASSWORD_LENGTH = 6;
 
+
+    private PasswordValidator() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static boolean isNotValid(String password) {
         return !isValid(password);
     }

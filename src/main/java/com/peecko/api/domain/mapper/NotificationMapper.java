@@ -7,6 +7,10 @@ import java.util.Set;
 
 public class NotificationMapper {
 
+    private NotificationMapper() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static NotificationDTO notificationDTO(Notification notification, Set<Long> viewedIds) {
         NotificationDTO dto = new NotificationDTO();
         dto.setId(notification.getId());

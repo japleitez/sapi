@@ -180,4 +180,9 @@ public class Notification implements Serializable {
         return getId() != null && getId().equals(((Notification) o).getId());
     }
 
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
+
 }

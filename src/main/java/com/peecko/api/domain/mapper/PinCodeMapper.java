@@ -4,6 +4,11 @@ import com.peecko.api.domain.PinCode;
 import com.peecko.api.domain.dto.PinCodeDTO;
 
 public class PinCodeMapper {
+
+    private PinCodeMapper() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static PinCodeDTO pinCodeDTO(PinCode pinCode) {
         PinCodeDTO dto = new PinCodeDTO();
         dto.setEmail(pinCode.getEmail());

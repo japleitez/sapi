@@ -5,6 +5,9 @@ import com.peecko.api.domain.dto.Help;
 
 public class HelpItemMapper {
 
+   private HelpItemMapper() {
+       throw new IllegalStateException("Utility class");
+   }
     public static Help help(HelpItem item) {
         return new Help(item.getQuestion(), item.getAnswer());
     }

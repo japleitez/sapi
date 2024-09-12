@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Objects;
 
 @Entity
 @Table(name = "aps_device")
@@ -135,4 +136,10 @@ public class ApsDevice implements Serializable {
         ApsDevice device = (ApsDevice) o;
         return username.equals(device.username) && deviceId.equals(device.deviceId);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, deviceId);
+    }
+
 }

@@ -4,6 +4,10 @@ import java.util.UUID;
 
 public class UuidValidator {
 
+    private UuidValidator() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static boolean isNotValid(String input) {
         return !isValid(input);
     }

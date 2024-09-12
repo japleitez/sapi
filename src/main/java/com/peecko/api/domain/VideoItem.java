@@ -2,8 +2,12 @@ package com.peecko.api.domain;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
+
 @Entity
-public class VideoItem {
+public class VideoItem implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

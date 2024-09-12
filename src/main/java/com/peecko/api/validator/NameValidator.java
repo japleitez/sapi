@@ -9,6 +9,11 @@ public class NameValidator {
     private static final String NAME_REGEX = "^[A-ZÀ-ÖØ-öø-ÿ][a-zA-ZÀ-ÖØ-öø-ÿ'\\- .,’]{1,99}$";
     private static final Pattern NAME_PATTERN = Pattern.compile(NAME_REGEX);
 
+
+    private NameValidator() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static boolean isNotValid(String name) {
         return !isValid(name);
     }
