@@ -1,5 +1,6 @@
 package com.peecko.api.web.rest;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.peecko.api.domain.ApsUser;
 import com.peecko.api.domain.enumeration.Lang;
@@ -82,9 +83,12 @@ class AuthResourceTest {
               .andExpect(jsonPath("$.membership-sponsor-logo", blankString()))
               .andReturn();
 
-      String responseContent = result.getResponse().getContentAsString();
+      String jsonResponse = result.getResponse().getContentAsString();
+      assertNotNull(jsonResponse);
 
-      assertNotNull(responseContent );
+      JsonNode jsonNode = objectMapper.readTree(jsonResponse);
+      String token = jsonNode.get("token").asText();
+      assertNotNull(token);
 
    }
 

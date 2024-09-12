@@ -1,10 +1,11 @@
 package com.peecko.api.security;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.jsonwebtoken.security.Keys;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.UUID;
+import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -14,14 +15,21 @@ import io.jsonwebtoken.*;
 @Component
 public class JwtUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
-
-    @Value("${app.api.jwtSecret}")
-    private String jwtSecret;
-
     /** 10 hours expiration = 36000000 = 1000 * 60 * 60 * 10 */
     @Value("${app.api.jwtExpirationMs:36000000}")
     private int jwtExpirationMs;
+
+    private static final String JWT_SECRET = "Calcium.Copper.Iodine.Iron.Magnesium.Phosphorus.Potassium.Selenium.Sodium.Zinc";
+
+    private static SecretKey secretKey = null;
+
+    private static SecretKey getSecretKey() {
+        if (secretKey == null) {
+            byte[] secretBytes = JWT_SECRET.getBytes(StandardCharsets.UTF_8);
+            secretKey = Keys.hmacShaKeyFor(secretBytes);
+        }
+        return secretKey;
+    }
 
     public String generateJwtToken(Authentication authentication) {
 
@@ -29,16 +37,15 @@ public class JwtUtils {
 
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 
+
         return Jwts.builder()
             .setSubject((userPrincipal.getUsername()))
-            .setIssuedAt(new Date()).setId(jti)
+            .setIssuer("peecko.com")
+            .setIssuedAt(new Date())
+            .setId(jti)
             .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
-            .signWith(SignatureAlgorithm.HS512, jwtSecret)
+            .signWith(getSecretKey(), SignatureAlgorithm.HS512) // Sign with HMAC SHA-512 and secret key
             .compact();
-    }
-
-    public String getUserNameFromJwtToken(String authToken) {
-        return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken).getBody().getSubject();
     }
 
     public String getJtiFromAuthHeader(String authHeader) {
@@ -51,28 +58,14 @@ public class JwtUtils {
 
     public String getJtiFromAuthToken(String authToken) {
         try {
-            return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken).getBody().getId();
+            return Jwts.parserBuilder().setSigningKey(getSecretKey()).build().parseClaimsJws(authToken).getBody().getId();
         } catch (Exception e) {
             return null;
         }
     }
 
-    public boolean validateAuthToken(String authToken) {
-        try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
-            return true;
-        } catch (SignatureException e) {
-            logger.error("Invalid JWT signature: {}", e.getMessage());
-        } catch (MalformedJwtException e) {
-            logger.error("Invalid JWT token: {}", e.getMessage());
-        } catch (ExpiredJwtException e) {
-            logger.error("JWT token is expired: {}", e.getMessage());
-        } catch (UnsupportedJwtException e) {
-            logger.error("JWT token is unsupported: {}", e.getMessage());
-        } catch (IllegalArgumentException e) {
-            logger.error("JWT claims string is empty: {}", e.getMessage());
-        }
-        return false;
+    public Claims validateAuthToken(String authToken) {
+        return Jwts.parserBuilder().setSigningKey(getSecretKey()).build().parseClaimsJws(authToken).getBody();
     }
 
 }
