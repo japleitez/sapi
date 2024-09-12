@@ -21,6 +21,9 @@ import jakarta.validation.Valid;
 import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -81,11 +84,12 @@ public class AuthResource extends BaseResource {
      */
     @PostMapping("/signin")
     public ResponseEntity<UserProfileResponse> signIn(@Valid @RequestBody SignInRequest request) {
-        if (apsUserService.authenticated(request.username(), request.password())) {
-            return ResponseEntity.ok(apsUserService.signIn(request));
-        } else {
-            return ResponseEntity.ok(new UserProfileResponse());
-        }
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.username(), request.password()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
+        UserProfileResponse userProfileResponse = apsUserService.signIn(request);
+        userProfileResponse.setToken(jwt);
+        return ResponseEntity.ok(userProfileResponse);
     }
 
     /**
