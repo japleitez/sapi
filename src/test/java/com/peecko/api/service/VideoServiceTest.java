@@ -7,7 +7,6 @@ import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.domain.enumeration.Player;
 import com.peecko.api.repository.*;
 import com.peecko.api.utils.InstantUtils;
-import com.peecko.api.utils.LabelUtils;
 import com.peecko.api.utils.NameUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -320,14 +319,14 @@ class VideoServiceTest {
         strength = labelRepo.save(new Label(Lang.EN, "video.tag.strength", "Strength"));
 
         // Video Categories
-        yogaCategory = createVideoCategory(EntityDefault.YOGA, yoga);
+        yogaCategory = createVideoCategory(EntityDefault.YOGA, "yoga");
         videoCategoryRepo.save(yogaCategory);
 
 
-        pilatesCategory = createVideoCategory(EntityDefault.PILATES, pilates);
+        pilatesCategory = createVideoCategory(EntityDefault.PILATES, "pilates");
         videoCategoryRepo.save(pilatesCategory);
 
-        flexibilityCategory = createVideoCategory(EntityDefault.FLEXIBILITY, flexibility);
+        flexibilityCategory = createVideoCategory(EntityDefault.FLEXIBILITY, "flexibility");
         flexibilityCategory.setArchived(archived);
         videoCategoryRepo.save(flexibilityCategory);
 
@@ -384,11 +383,11 @@ class VideoServiceTest {
 
     }
 
-    private VideoCategory createVideoCategory(String code, Label label) {
+    private VideoCategory createVideoCategory(String code, String label) {
         VideoCategory category = new VideoCategory();
         category.setCode(code);
         category.setTitle(NameUtils.toCamelCase(code));
-        category.setLabel(label.getCode());
+        category.setLabel(label);
         category.setCreated(created);
         category.setReleased(released);
         category.setArchived(null);

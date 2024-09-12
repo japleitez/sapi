@@ -206,6 +206,20 @@ class AuthResourceTest {
             .andExpect(jsonPath("$.tags.length()", not(empty())))
             .andExpect(jsonPath("$.videos.length()", is(activeAllEnIds.size())));
 
+      int expectedYogaCount = Math.min(activeYogaEnIds.size(), VideoService.CATEGORY_VIDEOS_MAX_SIZE);
+      int expectedPilatesCount = Math.min(activePilatesEnIds.size(), VideoService.CATEGORY_VIDEOS_MAX_SIZE);
+
+      mockMvc.perform(get("/api/videos/categories")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.categories.length()", is(2)))
+            .andExpect(jsonPath("$.categories[0].code").value(EntityDefault.PILATES))
+            .andExpect(jsonPath("$.categories[0].title").value(pilates.getText()))
+            .andExpect(jsonPath("$.categories[0].videos.length()", is(expectedPilatesCount)))
+            .andExpect(jsonPath("$.categories[1].code").value(EntityDefault.YOGA))
+            .andExpect(jsonPath("$.categories[1].title").value(yoga.getText()))
+            .andExpect(jsonPath("$.categories[1].videos.length()", is(expectedYogaCount)));
    }
 
 
@@ -227,14 +241,14 @@ class AuthResourceTest {
       strength = labelRepo.save(new Label(Lang.EN, "video.tag.strength", "Strength"));
 
       // Video Categories
-      yogaCategory = createVideoCategory(EntityDefault.YOGA, yoga);
+      yogaCategory = createVideoCategory(EntityDefault.YOGA, "yoga");
       videoCategoryRepo.save(yogaCategory);
 
 
-      pilatesCategory = createVideoCategory(EntityDefault.PILATES, pilates);
+      pilatesCategory = createVideoCategory(EntityDefault.PILATES, "pilates");
       videoCategoryRepo.save(pilatesCategory);
 
-      flexibilityCategory = createVideoCategory(EntityDefault.FLEXIBILITY, flexibility);
+      flexibilityCategory = createVideoCategory(EntityDefault.FLEXIBILITY, "flexibility");
       flexibilityCategory.setArchived(archived);
       videoCategoryRepo.save(flexibilityCategory);
 
@@ -294,11 +308,11 @@ class AuthResourceTest {
 
    }
 
-   private VideoCategory createVideoCategory(String code, Label label) {
+   private VideoCategory createVideoCategory(String code, String label) {
       VideoCategory category = new VideoCategory();
       category.setCode(code);
       category.setTitle(NameUtils.toCamelCase(code));
-      category.setLabel(label.getCode());
+      category.setLabel(label);
       category.setCreated(created);
       category.setReleased(released);
       category.setArchived(null);

@@ -8,18 +8,13 @@ import com.peecko.api.repository.TodayVideoRepo;
 import com.peecko.api.repository.UserFavoriteVideoRepo;
 import com.peecko.api.repository.VideoCategoryRepo;
 import com.peecko.api.repository.VideoRepo;
-import com.peecko.api.utils.Common;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class VideoService {
@@ -83,12 +78,11 @@ public class VideoService {
                 .flatMap(Collection::stream)
                 .distinct()
                 .map(tag -> labelService.getCachedLabel(tag, lang))
-                .sorted()
-                .collect(Collectors.toList());
+                .sorted().toList();
     }
 
     public List<VideoDTO> toVideoDTOs(List<Video> videos, Lang lang) {
-        return videos.stream().map(v -> videoMapper.toVideoDTO(v, lang)).collect(Collectors.toList());
+        return videos.stream().map(v -> videoMapper.toVideoDTO(v, lang)).toList();
     }
 
     public void resolveFavorites(List<Video> videos, Long userId) {
@@ -111,9 +105,7 @@ public class VideoService {
 
     public List<CategoryDTO> toCategoryDTOs(Map<VideoCategory, List<Video>> categoryVideos, Lang lang) {
         return categoryVideos.entrySet().stream()
-                .map(entry -> videoMapper.toCategoryDTO(entry.getKey(), entry.getValue(), lang))
-                .collect(Collectors.toList());
-
+                .map(entry -> videoMapper.toCategoryDTO(entry.getKey(), entry.getValue(), lang)).sorted(Comparator.comparing(CategoryDTO::getCode)).toList();
     }
 
     public CategoryDTO toCategoryDTO(VideoCategory category, List<Video> videos, Lang lang) {
@@ -144,8 +136,7 @@ public class VideoService {
                 .findByApsUserIdOrderByIdDesc(apsUserId)
                 .stream()
                 .map(UserFavoriteVideo::getVideo)
-                .map(this::videoFavorite)
-                .collect(Collectors.toList());
+                .map(this::videoFavorite).toList();
     }
 
     private Video videoFavorite(Video video) {
