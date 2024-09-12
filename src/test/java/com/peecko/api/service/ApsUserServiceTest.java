@@ -12,8 +12,6 @@ import com.peecko.api.utils.NameUtils;
 import com.peecko.api.web.payload.request.SignInRequest;
 import com.peecko.api.web.payload.request.SignUpRequest;
 import com.peecko.api.web.payload.response.UserProfileResponse;
-import org.checkerframework.checker.units.qual.A;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -80,7 +78,7 @@ class ApsUserServiceTest {
         assertFalse(response.isMembershipActivated());
 
         assertEquals(1, response.getDevicesCount());
-        assertEquals(EntityDefault.USERNAME, response.getUsername());
+        assertEquals(EntityDefault.USER_EMAIL, response.getUsername());
 
     }
 

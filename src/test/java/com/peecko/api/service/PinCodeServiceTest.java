@@ -8,7 +8,6 @@ import com.peecko.api.domain.enumeration.Verification;
 import com.peecko.api.repository.ApsUserRepo;
 import com.peecko.api.repository.PinCodeRepo;
 import com.peecko.api.utils.PinUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -70,7 +69,7 @@ class PinCodeServiceTest {
         // GIVEN
         PinCode pinCode = new PinCode();
         pinCode.setLanguage(Lang.FR.name());
-        pinCode.setEmail(EntityDefault.USERNAME);
+        pinCode.setEmail(EntityDefault.USER_EMAIL);
         pinCode.setCode(PinUtils.randomDigitsAsString(4));
         pinCode.setExpireAt(LocalDateTime.now().plusMinutes(10));
         pinCode.setVerification(Verification.RESET_PASSWORD);
@@ -92,7 +91,7 @@ class PinCodeServiceTest {
         String code = PinUtils.randomDigitsAsString(4);
         PinCode pinCode = new PinCode();
         pinCode.setLanguage(Lang.FR.name());
-        pinCode.setEmail(EntityDefault.USERNAME);
+        pinCode.setEmail(EntityDefault.USER_EMAIL);
         pinCode.setCode(code);
         pinCode.setLanguage(Lang.FR.name());
         pinCode.setExpireAt(LocalDateTime.now().plusMinutes(10));

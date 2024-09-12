@@ -1,6 +1,5 @@
 package com.peecko.api.domain;
 
-import com.peecko.api.domain.enumeration.CustomerState;
 import com.peecko.api.domain.enumeration.Intensity;
 import com.peecko.api.domain.enumeration.Player;
 import com.peecko.api.web.payload.request.SignInRequest;
@@ -12,19 +11,19 @@ public abstract class EntityBuilder {
 
     public static ApsUser buildApsUser() {
         ApsUser apsUser = new ApsUser();
-        apsUser.name(EntityDefault.NAME);
-        apsUser.username(EntityDefault.USERNAME);
-        apsUser.setLanguage(EntityDefault.LANG);
+        apsUser.name(EntityDefault.USER_NAME);
+        apsUser.username(EntityDefault.USER_EMAIL);
+        apsUser.setLanguage(EntityDefault.USER_LANG);
         return apsUser;
     }
 
     public static Customer buildCustomer() {
         Customer customer = new Customer();
-        customer.setCode(EntityDefault.USERNAME);
-        customer.setName(EntityDefault.NAME);
-        customer.setCountry(EntityDefault.COUNTRY);
-        customer.setState(CustomerState.ACTIVE);
-        customer.vatRate(EntityDefault.VAT_RATE);
+        customer.setCode(EntityDefault.CUSTOMER_CODE);
+        customer.setName(EntityDefault.CUSTOMER_NAME);
+        customer.setCountry(EntityDefault.CUSTOMER_COUNTRY);
+        customer.setState(EntityDefault.CUSTOMER_STATE);
+        customer.vatRate(EntityDefault.CUSTOMER_VAT_RATE);
         customer.setLicense(EntityDefault.LICENSE);
         return customer;
     }
@@ -43,7 +42,7 @@ public abstract class EntityBuilder {
         notification.setCustomer(customer);
         notification.setTitle(EntityDefault.TITLE);
         notification.setMessage(EntityDefault.MESSAGE);
-        notification.setLanguage(EntityDefault.LANG);
+        notification.setLanguage(EntityDefault.USER_LANG);
         notification.setVideoUrl(EntityDefault.VIDEO_URL);
         notification.setImageUrl(EntityDefault.VIDEO_THUMBNAIL);
         notification.setStarts(LocalDate.now());
@@ -64,7 +63,7 @@ public abstract class EntityBuilder {
         video.setVideoCategory(videoCategory);
         video.setCode(videoCode);
         video.setTitle(EntityDefault.TITLE);
-        video.setLanguage(EntityDefault.LANG);
+        video.setLanguage(EntityDefault.USER_LANG);
         video.setUrl(EntityDefault.VIDEO_URL);
         video.setPlayer(Player.PEECKO);
         video.setIntensity(Intensity.LOW);
@@ -74,16 +73,16 @@ public abstract class EntityBuilder {
 
     public static SignUpRequest buildSignUpRequest() {
         return new SignUpRequest(
-                EntityDefault.NAME,
-                EntityDefault.USERNAME,
-                EntityDefault.PASSWORD,
+                EntityDefault.USER_NAME,
+                EntityDefault.USER_EMAIL,
+                EntityDefault.USER_PASSWORD,
                 EntityDefault.LANGUAGE);
     }
 
     public static SignInRequest buildSignInRequest() {
         return new SignInRequest(
-                EntityDefault.USERNAME,
-                EntityDefault.PASSWORD,
+                EntityDefault.USER_EMAIL,
+                EntityDefault.USER_PASSWORD,
                 EntityDefault.PHONE_MODEL,
                 EntityDefault.OS_VERSION,
                 EntityDefault.DEVICE_ID

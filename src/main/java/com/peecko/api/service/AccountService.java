@@ -5,6 +5,8 @@ import com.peecko.api.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+
 @Service
 public class AccountService {
 
@@ -22,6 +24,7 @@ public class AccountService {
         if (activated) {
             ApsUser apsUser = apsUserRepo.findByUsername(username).orElseThrow();
             apsUser.license(license);
+            apsUser.updated(Instant.now());
             apsUserRepo.save(apsUser);
         }
         return activated;
