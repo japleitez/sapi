@@ -8,6 +8,6 @@ import java.util.List;
 @Repository
 public interface LanguageRepo extends JpaRepository<Language, String> {
 
-    List<Language> findByActiveTrue();
+    List<Language> findByActiveTrueOrderByName();
 
 }

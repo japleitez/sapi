@@ -84,6 +84,9 @@ class AuthResourceTest {
    VideoService videoService;
 
    @Autowired
+   LanguageRepo languageRepo;
+
+   @Autowired
    HelpItemRepo helpItemRepo;
 
    @Autowired
@@ -134,8 +137,12 @@ class AuthResourceTest {
    Notification notification2 = null;
 
    int helpSizeIs2;
+   int activeLanguagesSizeIs2;
    int activeNotificationsSizeIs2;
    static final String EN = Lang.EN.name();
+
+   Language languageEn = null;
+   Language languageFr = null;
 
    @BeforeEach
    void setUp() {
@@ -143,6 +150,7 @@ class AuthResourceTest {
       createCustomer();
       createHelp();
       createNotifications();
+      createLanguages();
       createVideos();
    }
 
@@ -365,6 +373,19 @@ class AuthResourceTest {
             .andExpect(jsonPath("$.length()", is(activeNotificationsSizeIs2)))
             .andExpect(jsonPath("$[?(@.id == " + notification1.getId() + " && @.viewed == false)]", hasSize(1)))
             .andExpect(jsonPath("$[?(@.id == " + notification2.getId() + " && @.viewed == true)]", hasSize(1)));
+
+
+      // get active languages ordered by name
+      mockMvc.perform(get("/api/account/languages")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.selected", is("EN")))
+            .andExpect(jsonPath("$.languages.length()", is(activeLanguagesSizeIs2)))
+            .andExpect(jsonPath("$.languages[0].code", is(languageEn.getCode())))
+            .andExpect(jsonPath("$.languages[0].name", is(languageEn.getName())))
+            .andExpect(jsonPath("$.languages[1].code", is(languageFr.getCode())))
+            .andExpect(jsonPath("$.languages[1].name", is(languageFr.getName())));
    }
 
 
@@ -497,6 +518,26 @@ class AuthResourceTest {
 
       Notification notification4 = createNotification(customer1, Lang.EN, startsTomorrow, expiresInAMonth);
       notificationRepo.save(notification4);
+   }
+
+   void createLanguages() {
+      // create 2 active languages
+      activeLanguagesSizeIs2 = 2;
+      languageEn = createLanguage("EN", "English", true);
+      languageRepo.save(languageEn);
+      languageFr = createLanguage("FR", "French", true);
+      languageRepo.save(languageFr);
+      // create 2 inactive languages
+      languageRepo.save(createLanguage("ES", "Spanish", false));
+      languageRepo.save(createLanguage("DE", "German", false));
+   }
+
+   private Language createLanguage(String code, String name, boolean active) {
+      Language language = new Language();
+      language.setCode(code);
+      language.setName(name);
+      language.setActive(active);
+      return language;
    }
 
    private VideoCategory createVideoCategory(String code, String label) {

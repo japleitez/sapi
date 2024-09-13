@@ -16,7 +16,7 @@ public class LanguageService {
     }
 
     public List<LanguageDTO> findActiveLanguages() {
-        return languageRepo.findByActiveTrue().stream().map(LanguageMapper::languageDTO).toList();
+        return languageRepo.findByActiveTrueOrderByName().stream().map(LanguageMapper::languageDTO).toList();
     }
 
 }
