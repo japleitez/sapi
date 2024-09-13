@@ -13,15 +13,13 @@ import com.peecko.api.utils.NameUtils;
 import com.peecko.api.web.payload.request.ActivationRequest;
 import com.peecko.api.web.payload.request.SignInRequest;
 import com.peecko.api.web.payload.request.SignUpRequest;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.http.MediaType;
 
@@ -44,8 +42,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureMockMvc // Automatically configures MockMvc
-@Transactional // Rollback the changes after each test
 class AuthResourceTest {
 
    @Autowired
@@ -145,24 +144,35 @@ class AuthResourceTest {
    Language languageEn = null;
    Language languageFr = null;
 
-   @BeforeEach
-   void setUp() {
+   ApsUser apsUser = null;
+   String token = null;
+
+   int activeYogaTopCap = 0;
+   int activePilatesTopCap = 0;
+
+   @BeforeAll
+   public void executeOnceBeforeAllTests() {
       videoService.clearAllCaches();
       createCustomer();
       createHelp();
       createNotifications();
       createLanguages();
       createVideos();
+      activeYogaTopCap = Math.min(activeYogaEnIds.size(), VideoService.CATEGORY_VIDEOS_MAX_SIZE);
+      activePilatesTopCap = Math.min(activePilatesEnIds.size(), VideoService.CATEGORY_VIDEOS_MAX_SIZE);
    }
 
    @Test
-   void signUp() throws Exception {
+   @Order(1)
+   void singUp() throws Exception {
+      // Given
+      SignUpRequest signUp = new SignUpRequest(
+            EntityDefault.USER_NAME,
+            EntityDefault.USER_EMAIL,
+            EntityDefault.USER_PASSWORD, EN);
 
-      String jsonRequest;
-
-      // sign up user
-      SignUpRequest signUp = new SignUpRequest(EntityDefault.USER_NAME, EntityDefault.USER_EMAIL, EntityDefault.USER_PASSWORD, EN);
-      jsonRequest = objectMapper.writeValueAsString(signUp);
+      // When
+      String jsonRequest = objectMapper.writeValueAsString(signUp);
       mockMvc.perform(post("/api/auth/signup")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(jsonRequest))
@@ -170,100 +180,123 @@ class AuthResourceTest {
             .andExpect(jsonPath("$.code").value("OK"))
             .andExpect(jsonPath("$.message").value("Successful sign up"));
 
-      // validate the user was created in database
-      ApsUser apsUser = apsUserRepo.findByUsername(signUp.username()).orElse(null);
+      // Then
+      apsUser = apsUserRepo.findByUsername(signUp.username()).orElse(null);
       assertNotNull(apsUser);
+   }
 
-      // sign in user
-      SignInRequest signInRequest = new SignInRequest(EntityDefault.USER_EMAIL, EntityDefault.USER_PASSWORD, EntityDefault.PHONE_MODEL, EntityDefault.OS_VERSION, EntityDefault.DEVICE_ID);
+   @Test
+   @Order(2)
+   void signIn() throws Exception {
+      // Given
+      SignInRequest signInRequest = new SignInRequest(
+            EntityDefault.USER_EMAIL,
+            EntityDefault.USER_PASSWORD,
+            EntityDefault.PHONE_MODEL,
+            EntityDefault.OS_VERSION,
+            EntityDefault.DEVICE_ID);
 
-      jsonRequest = objectMapper.writeValueAsString(signInRequest);
+      // When
+      String jsonRequest = objectMapper.writeValueAsString(signInRequest);
       MvcResult result =  mockMvc.perform(post("/api/auth/signin")
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(jsonRequest))
-              .andExpect(status().isOk())
-              .andExpect(jsonPath("$.name").value(EntityDefault.USER_NAME))
-              .andExpect(jsonPath("$.username").value(EntityDefault.USER_EMAIL))
-              .andExpect(jsonPath("$.email-verified").value(true))
-              .andExpect(jsonPath("$.devices-exceeded").value(false))
-              .andExpect(jsonPath("$.devices-count").value(1))
-              .andExpect(jsonPath("$.devices-max").value(3))
-              .andExpect(jsonPath("$.membership", is(nullValue())))
-              .andExpect(jsonPath("$.membership-activated").value(false))
-              .andExpect(jsonPath("$.membership-expiration", blankString()))
-              .andExpect(jsonPath("$.membership-sponsor", blankString()))
-              .andExpect(jsonPath("$.membership-sponsor-logo", blankString()))
-              .andReturn();
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value(EntityDefault.USER_NAME))
+            .andExpect(jsonPath("$.username").value(EntityDefault.USER_EMAIL))
+            .andExpect(jsonPath("$.email-verified").value(true))
+            .andExpect(jsonPath("$.devices-exceeded").value(false))
+            .andExpect(jsonPath("$.devices-count").value(1))
+            .andExpect(jsonPath("$.devices-max").value(3))
+            .andExpect(jsonPath("$.membership", is(nullValue())))
+            .andExpect(jsonPath("$.membership-activated").value(false))
+            .andExpect(jsonPath("$.membership-expiration", blankString()))
+            .andExpect(jsonPath("$.membership-sponsor", blankString()))
+            .andExpect(jsonPath("$.membership-sponsor-logo", blankString()))
+            .andReturn();
 
-      // validate and extract token from sign in response
+      // Then
       String jsonResponse = result.getResponse().getContentAsString();
-      assertNotNull(jsonResponse);
       JsonNode jsonNode = objectMapper.readTree(jsonResponse);
-      String token = jsonNode.get("token").asText();
+      token = jsonNode.get("token").asText();
       assertNotNull(token);
+   }
 
-      // create the client and user membership as if it had been done by the backoffice application
-      ApsMembership apsMembership = EntityBuilder.buildApsMembership(signUp.username(), customer1.getId());
+
+   @Test
+   @Order(3)
+   void activateMembership() throws Exception {
+      // Given
+      ApsMembership apsMembership = EntityBuilder.buildApsMembership(apsUser.getUsername(), customer1.getId());
       apsMembershipRepo.saveAndFlush(apsMembership);
 
-      // activate membership
+      // When
       ActivationRequest activationRequest = new ActivationRequest(apsMembership.getLicense(), EntityDefault.DEVICE_ID);
-
-      jsonRequest = objectMapper.writeValueAsString(activationRequest);
+      String jsonRequest = objectMapper.writeValueAsString(activationRequest);
       mockMvc.perform(put("/api/membership/activate")
                   .contentType(MediaType.APPLICATION_JSON)
                   .header("Authorization", "Bearer " + token)
-            .content(jsonRequest))
+                  .content(jsonRequest))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.code").value("OK"))
             .andExpect(jsonPath("$.message").value("Membership number activated successfully"));
+   }
 
-      // get today's videos
+   @Test
+   @Order(4)
+   void getTodayVideos() throws Exception {
       mockMvc.perform(get("/api/videos/today")
-            .contentType(MediaType.APPLICATION_JSON)
-            .header("Authorization", "Bearer " + token))
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.greeting", notNullValue()))
             .andExpect(jsonPath("$.tags.length()", not(empty())))
             .andExpect(jsonPath("$.videos.length()", is(activeAllEnIds.size())));
+   }
 
-      // get categories with their top videos (library
-      int expectedYogaCount = Math.min(activeYogaEnIds.size(), VideoService.CATEGORY_VIDEOS_MAX_SIZE);
-      int expectedPilatesCount = Math.min(activePilatesEnIds.size(), VideoService.CATEGORY_VIDEOS_MAX_SIZE);
-
+   @Test
+   @Order(5)
+   void getCategories() throws Exception {
       mockMvc.perform(get("/api/videos/categories")
-            .contentType(MediaType.APPLICATION_JSON)
-            .header("Authorization", "Bearer " + token))
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.categories.length()", is(2)))
             .andExpect(jsonPath("$.categories[0].code").value(EntityDefault.PILATES))
             .andExpect(jsonPath("$.categories[0].title").value(pilates.getText()))
-            .andExpect(jsonPath("$.categories[0].videos.length()", is(expectedPilatesCount)))
+            .andExpect(jsonPath("$.categories[0].videos.length()", is(activePilatesTopCap)))
             .andExpect(jsonPath("$.categories[1].code").value(EntityDefault.YOGA))
             .andExpect(jsonPath("$.categories[1].title").value(yoga.getText()))
-            .andExpect(jsonPath("$.categories[1].videos.length()", is(expectedYogaCount)));
+            .andExpect(jsonPath("$.categories[1].videos.length()", is(activeYogaTopCap)));
+   }
 
-      // get category with its videos
+   @Test
+   @Order(6)
+   void getCategory() throws Exception {
       mockMvc.perform(get("/api/videos/categories/{code}", EntityDefault.YOGA)
-            .contentType(MediaType.APPLICATION_JSON)
-            .header("Authorization", "Bearer " + token))
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.code").value(EntityDefault.YOGA))
             .andExpect(jsonPath("$.title").value(yoga.getText()))
-            .andExpect(jsonPath("$.videos.length()", is(expectedYogaCount)));
+            .andExpect(jsonPath("$.videos.length()", is(activeYogaTopCap)));
+   }
 
+   @Test
+   @Order(7)
+   void getFavoriteVideos() throws Exception {
       // validate there are no favorite videos
       mockMvc.perform(get("/api/videos/favorites")
-            .contentType(MediaType.APPLICATION_JSON)
-            .header("Authorization", "Bearer " + token))
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.tags.length()", is(0)))
             .andExpect(jsonPath("$.videos.length()", is(0)));
 
       // add 1 yoga and 1 pilates video to the user's favorites
       mockMvc.perform(put("/api/videos/favorites/{videoId}", yoga1En.getCode())
-            .contentType(MediaType.APPLICATION_JSON)
-            .header("Authorization", "Bearer " + token))
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
             .andExpect(status().isOk());
 
       mockMvc.perform(put("/api/videos/favorites/{videoId}", pilates1En.getCode())
@@ -330,7 +363,11 @@ class AuthResourceTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.videos.length()", is(0)));
 
-      // get help
+   }
+
+   @Test
+   @Order(8)
+   void getHelp() throws Exception {
       mockMvc.perform(get("/api/account/help")
                   .contentType(MediaType.APPLICATION_JSON)
                   .header("Authorization", "Bearer " + token))
@@ -340,7 +377,11 @@ class AuthResourceTest {
             .andExpect(jsonPath("$[0].answer", is(notNullValue())))
             .andExpect(jsonPath("$[1].question", is(notNullValue())))
             .andExpect(jsonPath("$[1].answer", is(notNullValue())));
+   }
 
+   @Test
+   @Order(9)
+   void getNotifications() throws Exception {
       // get notifications
       mockMvc.perform(get("/api/account/notifications")
                   .contentType(MediaType.APPLICATION_JSON)
@@ -374,8 +415,11 @@ class AuthResourceTest {
             .andExpect(jsonPath("$.length()", is(activeNotificationsSizeIs2)))
             .andExpect(jsonPath("$[?(@.id == " + notification1.getId() + " && @.viewed == false)]", hasSize(1)))
             .andExpect(jsonPath("$[?(@.id == " + notification2.getId() + " && @.viewed == true)]", hasSize(1)));
+   }
 
-
+   @Test
+   @Order(10)
+   void getLanguages() throws Exception {
       // get active languages ordered by name
       mockMvc.perform(get("/api/account/languages")
                   .contentType(MediaType.APPLICATION_JSON)
@@ -400,6 +444,10 @@ class AuthResourceTest {
       assertEquals(languageFr.getCode(), apsUser.getLanguage().name());
    }
 
+
+   /**
+    * Utilities to create data before the execution of the tests
+    */
 
    private void createVideos() {
 
