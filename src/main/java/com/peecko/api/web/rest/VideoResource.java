@@ -119,7 +119,7 @@ public class VideoResource extends BaseResource {
      * Create a new playlist with the given name.
      */
     @Licensed
-    @PostMapping("/playlists/")
+    @PostMapping("/playlists")
     public ResponseEntity<?> createPlaylist(@Valid @RequestBody CreatePlaylistRequest request) {
         if (!StringUtils.hasText(request.name())) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.name.required")));
@@ -129,6 +129,7 @@ public class VideoResource extends BaseResource {
         }
         PlayList created = playListService.createPlayList(Login.getUserId(), request.name());
         PlayListDTO playlistDTO = playListService.toPlayListDTO(created);
+        playlistDTO.setUsername(Login.getUser().getUsername());
         return ResponseEntity.ok(playlistDTO);
     }
 

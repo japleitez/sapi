@@ -11,6 +11,7 @@ import com.peecko.api.service.VideoService;
 import com.peecko.api.utils.InstantUtils;
 import com.peecko.api.utils.NameUtils;
 import com.peecko.api.web.payload.request.ActivationRequest;
+import com.peecko.api.web.payload.request.CreatePlaylistRequest;
 import com.peecko.api.web.payload.request.SignInRequest;
 import com.peecko.api.web.payload.request.SignUpRequest;
 import org.junit.jupiter.api.*;
@@ -221,7 +222,6 @@ class AuthResourceTest {
       token = jsonNode.get("token").asText();
       assertNotNull(token);
    }
-
 
    @Test
    @Order(3)
@@ -446,7 +446,7 @@ class AuthResourceTest {
 
    @Test
    @Order(11)
-   void getProfile() throws Exception {
+   void getDevices() throws Exception {
       // get user profile
       mockMvc.perform(get("/api/auth/installations")
               .contentType(MediaType.APPLICATION_JSON)
@@ -458,7 +458,22 @@ class AuthResourceTest {
               .andExpect(jsonPath("$.installations[0].phone-model").value(EntityDefault.PHONE_MODEL))
               .andExpect(jsonPath("$.installations[0].os-version").value(EntityDefault.OS_VERSION))
               .andExpect(jsonPath("$.installations[0].installed-on", is(notNullValue())));
+   }
 
+   @Test
+   @Order(12)
+   void createPlaylist() throws Exception {
+      CreatePlaylistRequest request = new CreatePlaylistRequest(EntityDefault.PLAYLIST_NAME);
+      String jsonRequest = objectMapper.writeValueAsString(request);
+      mockMvc.perform(post("/api/videos/playlists")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(jsonRequest)
+              .header("Authorization", "Bearer " + token))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.id", is(notNullValue())))
+              .andExpect(jsonPath("$.username", is(EntityDefault.USER_EMAIL)))
+              .andExpect(jsonPath("$.name", is(EntityDefault.PLAYLIST_NAME)))
+              .andExpect(jsonPath("$.videoItems.length()", is(0)));
    }
 
    /**
