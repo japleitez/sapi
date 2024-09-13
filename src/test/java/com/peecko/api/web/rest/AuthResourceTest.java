@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -82,7 +83,16 @@ class AuthResourceTest {
    @Autowired
    VideoService videoService;
 
+   @Autowired
+   HelpItemRepo helpItemRepo;
+
+   @Autowired
+   NotificationRepo notificationRepo;
+
    // data references
+
+   Customer customer1 = null;
+   Customer customer2 = null;
 
    VideoCategory yogaCategory = null;
    VideoCategory pilatesCategory = null;
@@ -127,6 +137,9 @@ class AuthResourceTest {
    @BeforeEach
    void setUp() {
       videoService.clearAllCaches();
+      createCustomer();
+      createHelp();
+      createNotifications();
       createVideos();
    }
 
@@ -178,9 +191,7 @@ class AuthResourceTest {
       assertNotNull(token);
 
       // create the client and user membership as if it had been done by the backoffice application
-      Customer customer = EntityBuilder.buildCustomer();
-      customerRepo.saveAndFlush(customer);
-      ApsMembership apsMembership = EntityBuilder.buildApsMembership(signUp.username(), customer.getId());
+      ApsMembership apsMembership = EntityBuilder.buildApsMembership(signUp.username(), customer1.getId());
       apsMembershipRepo.saveAndFlush(apsMembership);
 
       // activate membership
@@ -277,6 +288,36 @@ class AuthResourceTest {
             .andExpect(jsonPath("$.title").value(pilates.getText()))
             .andExpect(jsonPath("$.videos.length()", is(activePilatesEnIds.size())))
             .andExpect(jsonPath("$.videos[?(@.favorite == true)]", hasSize(1)));
+
+      // remove a video from the user's favorite list
+      mockMvc.perform(delete("/api/videos/favorites/{videoId}", yoga1En.getCode())
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk());
+
+      // validate the video was removed
+      mockMvc.perform(get("/api/videos/favorites")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.tags.length()", not(empty())))
+            .andExpect(jsonPath("$.videos.length()", is(1)))
+            .andExpect(jsonPath("$.videos[?(@.code == '" + yoga1En.getCode() + "')]", hasSize(0)))
+            .andExpect(jsonPath("$.videos[?(@.code == '" + pilates1En.getCode() + "')]", hasSize(1)));
+
+      // remove all favorites
+      mockMvc.perform(delete("/api/videos/favorites")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk());
+
+      // validate there are no favorite videos
+      mockMvc.perform(get("/api/videos/favorites")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.videos.length()", is(0)));
+
    }
 
 
@@ -365,6 +406,47 @@ class AuthResourceTest {
 
    }
 
+   void createHelp() {
+      HelpItem helpItem1En = createHelpItem("What is peecko", "Your best wellness app companion", Lang.EN);
+      helpItemRepo.save(helpItem1En);
+
+      HelpItem helpItem2En = createHelpItem("How can I renew my membership?", "Your employer will directly provide the business license to you", Lang.EN);
+      helpItemRepo.save(helpItem2En);
+
+      HelpItem helpItem1Fr = createHelpItem("What is peecko", "Votre meilleur application de bien-être", Lang.FR);
+      helpItemRepo.save(helpItem1Fr);
+
+      HelpItem helpItem2Fr = createHelpItem("How can I renew my membership?", "Votre employeur le contactera directement pour vous", Lang.FR);
+      helpItemRepo.save(helpItem2Fr);
+   }
+
+   void createCustomer() {
+      customer1 = EntityBuilder.buildCustomer();
+      customerRepo.saveAndFlush(customer1);
+   }
+
+   void createNotifications() {
+      LocalDate startsToday = LocalDate.now();
+      LocalDate startsTomorrow = LocalDate.now().plusDays(1);
+      LocalDate expiresInAMonth = startsToday.plusMonths(1);
+      LocalDate expiredYesterday = LocalDate.now().minusDays(1);
+
+
+      // active notifications
+      Notification notification1 = createNotification(customer1, Lang.EN, startsToday, expiresInAMonth);
+      notificationRepo.save(notification1);
+
+      Notification notification2 = createNotification(customer1, Lang.FR, startsToday, expiresInAMonth);
+      notificationRepo.save(notification2);
+
+      // expired notifications or not yet active
+      Notification notification3 = createNotification(customer1, Lang.EN, startsToday, expiredYesterday);
+      notificationRepo.save(notification3);
+
+      Notification notification4 = createNotification(customer1, Lang.EN, startsTomorrow, expiresInAMonth);
+      notificationRepo.save(notification4);
+   }
+
    private VideoCategory createVideoCategory(String code, String label) {
       VideoCategory category = new VideoCategory();
       category.setCode(code);
@@ -393,6 +475,27 @@ class AuthResourceTest {
       video.setDuration(Integer.valueOf(number));
       video.setTags(tags);
       return video;
+   }
+
+   private HelpItem createHelpItem(String question, String answer, Lang lang) {
+      HelpItem helpItem = new HelpItem();
+      helpItem.setQuestion(question);
+      helpItem.setAnswer(answer);
+      helpItem.setLang(lang);
+      return helpItem;
+   }
+
+   private Notification createNotification(Customer customer, Lang lang, LocalDate starts, LocalDate expires) {
+      Notification n = new Notification();
+      n.setTitle("Test");
+      n.setLanguage(lang);
+      n.setCustomer(customer);
+      n.setStarts(starts);
+      n.setExpires(expires);
+      n.setMessage("Test");
+      n.setVideoUrl("http://peecko/video/1");
+      n.setImageUrl("http://peecko/thumbnail/1");
+      return n;
    }
 
 }
