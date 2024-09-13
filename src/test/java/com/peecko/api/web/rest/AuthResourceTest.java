@@ -130,8 +130,11 @@ class AuthResourceTest {
    Set<Long> activeYogaEnIds = null;
    Set<Long> activePilatesEnIds = null;
 
-   int helpSize;
-   int activeNotificationsSize;
+   Notification notification1 = null;
+   Notification notification2 = null;
+
+   int helpSizeIs2;
+   int activeNotificationsSizeIs2;
    static final String EN = Lang.EN.name();
 
    @BeforeEach
@@ -323,14 +326,45 @@ class AuthResourceTest {
                   .contentType(MediaType.APPLICATION_JSON)
                   .header("Authorization", "Bearer " + token))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()", is(helpSize)));
+            .andExpect(jsonPath("$.length()", is(helpSizeIs2)))
+            .andExpect(jsonPath("$[0].question", is(notNullValue())))
+            .andExpect(jsonPath("$[0].answer", is(notNullValue())))
+            .andExpect(jsonPath("$[1].question", is(notNullValue())))
+            .andExpect(jsonPath("$[1].answer", is(notNullValue())));
 
       // get notifications
       mockMvc.perform(get("/api/account/notifications")
                   .contentType(MediaType.APPLICATION_JSON)
                   .header("Authorization", "Bearer " + token))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()", is(activeNotificationsSize)));
+            .andExpect(jsonPath("$.length()", is(activeNotificationsSizeIs2)))
+            .andExpect(jsonPath("$[0].title", is(notNullValue())))
+            .andExpect(jsonPath("$[0].message", is(notNullValue())))
+            .andExpect(jsonPath("$[0].image", is(notNullValue())))
+            .andExpect(jsonPath("$[0].video", is(notNullValue())))
+            .andExpect(jsonPath("$[0].date", is(notNullValue())))
+            .andExpect(jsonPath("$[0].viewed", is(false)))
+            .andExpect(jsonPath("$[1].title", is(notNullValue())))
+            .andExpect(jsonPath("$[1].message", is(notNullValue())))
+            .andExpect(jsonPath("$[1].image", is(notNullValue())))
+            .andExpect(jsonPath("$[1].video", is(notNullValue())))
+            .andExpect(jsonPath("$[1].date", is(notNullValue())))
+            .andExpect(jsonPath("$[1].viewed", is(false)));
+
+      // set notification 2 as viewed
+      mockMvc.perform(put("/api/account/notifications/{id}", notification2.getId())
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk());
+
+      // validate only notification 2 has been viewed
+      mockMvc.perform(get("/api/account/notifications")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()", is(activeNotificationsSizeIs2)))
+            .andExpect(jsonPath("$[?(@.id == " + notification1.getId() + " && @.viewed == false)]", hasSize(1)))
+            .andExpect(jsonPath("$[?(@.id == " + notification2.getId() + " && @.viewed == true)]", hasSize(1)));
    }
 
 
@@ -421,14 +455,15 @@ class AuthResourceTest {
 
    void createHelp() {
 
-      // create 2 help items for each language
-      helpSize = 2;
+      // create 2 help items for english (default)
+      helpSizeIs2 = 2;
       HelpItem helpItem1En = createHelpItem("What is peecko", "Your best wellness app companion", Lang.EN);
       helpItemRepo.save(helpItem1En);
 
       HelpItem helpItem2En = createHelpItem("How can I renew my membership?", "Your employer will directly provide the business license to you", Lang.EN);
       helpItemRepo.save(helpItem2En);
 
+      // create 2 help items for french
       HelpItem helpItem1Fr = createHelpItem("What is peecko", "Votre meilleur application de bien-être", Lang.FR);
       helpItemRepo.save(helpItem1Fr);
 
@@ -449,11 +484,11 @@ class AuthResourceTest {
 
 
       // create 2 active notifications
-      activeNotificationsSize = 2;
-      Notification notification1 = createNotification(customer1, Lang.EN, startsToday, expiresInAMonth);
+      activeNotificationsSizeIs2 = 2;
+      notification1 = createNotification(customer1, Lang.EN, startsToday, expiresInAMonth);
       notificationRepo.save(notification1);
 
-      Notification notification2 = createNotification(customer1, Lang.FR, startsToday, expiresInAMonth);
+      notification2 = createNotification(customer1, Lang.FR, startsToday, expiresInAMonth);
       notificationRepo.save(notification2);
 
       // create 2 inactive notifications

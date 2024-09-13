@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface NotificationRepo extends JpaRepository<Notification, Long> {
 
-    @Query("SELECT n FROM Notification n JOIN n.customer c WHERE c.id = :customerId AND n.starts <= :today AND n.expires > :today")
+    @Query("SELECT n FROM Notification n JOIN n.customer c WHERE c.id = :customerId AND n.starts <= :today AND n.expires > :today ORDER BY n.starts ASC")
     List<Notification> findByCustomerIdAndForToday(@Param("customerId") Long customerId, LocalDate today);
 
 }
