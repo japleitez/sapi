@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -170,8 +171,8 @@ class AuthResourceTest {
             .andExpect(jsonPath("$.message").value("Successful sign up"));
 
       // validate the user was created in database
-      ApsUser user = apsUserRepo.findByUsername(signUp.username()).orElse(null);
-      assertNotNull(user);
+      ApsUser apsUser = apsUserRepo.findByUsername(signUp.username()).orElse(null);
+      assertNotNull(apsUser);
 
       // sign in user
       SignInRequest signInRequest = new SignInRequest(EntityDefault.USER_EMAIL, EntityDefault.USER_PASSWORD, EntityDefault.PHONE_MODEL, EntityDefault.OS_VERSION, EntityDefault.DEVICE_ID);
@@ -380,12 +381,23 @@ class AuthResourceTest {
                   .contentType(MediaType.APPLICATION_JSON)
                   .header("Authorization", "Bearer " + token))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.selected", is("EN")))
+            .andExpect(jsonPath("$.selected", is(apsUser.getLanguage().name())))
             .andExpect(jsonPath("$.languages.length()", is(activeLanguagesSizeIs2)))
             .andExpect(jsonPath("$.languages[0].code", is(languageEn.getCode())))
             .andExpect(jsonPath("$.languages[0].name", is(languageEn.getName())))
             .andExpect(jsonPath("$.languages[1].code", is(languageFr.getCode())))
             .andExpect(jsonPath("$.languages[1].name", is(languageFr.getName())));
+
+      // change user language to FR
+      mockMvc.perform(put("/api/account/languages/{lang}", languageFr.getCode())
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk());
+
+      // verify user language had been changed to FR
+      apsUser = apsUserRepo.findById(apsUser.getId()).orElse(null);
+      assertNotNull(apsUser);
+      assertEquals(languageFr.getCode(), apsUser.getLanguage().name());
    }
 
 
