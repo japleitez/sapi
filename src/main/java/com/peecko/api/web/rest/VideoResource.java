@@ -148,10 +148,10 @@ public class VideoResource extends BaseResource {
      */
     @PutMapping("/playlists/{playListId}/{videoCode}")
     public ResponseEntity<?> addVideoToPlayList(@PathVariable Long playListId, @PathVariable String videoCode) {
-        if (playListService.existsById(playListId)) {
+        if (!playListService.existsById(playListId)) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.invalid")));
         }
-        if (videoService.existsByCode(videoCode)) {
+        if (!videoService.existsByCode(videoCode)) {
             return ResponseEntity.ok(new Message(ERROR, message("video.invalid")));
         }
         if (videoItemService.existsByPlayListIdAndCode(playListId, videoCode)) {

@@ -93,6 +93,8 @@ class AuthResourceTest {
    @Autowired
    NotificationRepo notificationRepo;
 
+   @Autowired
+   PlayListRepo playListRepo;
    ObjectMapper objectMapper = new ObjectMapper();
 
    // data references
@@ -150,6 +152,8 @@ class AuthResourceTest {
 
    int activeYogaTopCap = 0;
    int activePilatesTopCap = 0;
+
+   PlayList playList = null;
 
    @BeforeAll
    public void executeOnceBeforeAllTests() {
@@ -474,7 +478,44 @@ class AuthResourceTest {
               .andExpect(jsonPath("$.username", is(EntityDefault.USER_EMAIL)))
               .andExpect(jsonPath("$.name", is(EntityDefault.PLAYLIST_NAME)))
               .andExpect(jsonPath("$.videoItems.length()", is(0)));
+
+      playList = playListRepo.findByApsUserAndName(apsUser, EntityDefault.PLAYLIST_NAME).orElse(null);
+      assertNotNull(playList);
    }
+
+   @Test
+   @Order(13)
+   void addVideoToPlaylist() throws Exception {
+
+      mockMvc.perform(put("/api/videos/playlists/{playListId}/{videoCode}", playList.getId(), pilates1En.getCode())
+              .header("Authorization", "Bearer " + token))
+              .andExpect(status().isOk());
+
+      mockMvc.perform(put("/api/videos/playlists/{playListId}/{videoCode}", playList.getId(), pilates2En.getCode())
+                      .header("Authorization", "Bearer " + token))
+              .andExpect(status().isOk());
+
+      mockMvc.perform(put("/api/videos/playlists/{playListId}/{videoCode}", playList.getId(), pilates3En.getCode())
+                      .header("Authorization", "Bearer " + token))
+              .andExpect(status().isOk());
+
+      mockMvc.perform(put("/api/videos/playlists/{playListId}/{videoCode}", playList.getId(), pilates4En.getCode())
+                      .header("Authorization", "Bearer " + token))
+              .andExpect(status().isOk());
+
+      mockMvc.perform(get("/api/videos/playlists/{id}", playList.getId())
+              .header("Authorization", "Bearer " + token))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.videoItems.length()", is(4)))
+              .andExpect(jsonPath("$.videoItems[0].code", is(pilates4En.getCode())))
+              .andExpect(jsonPath("$.videoItems[1].code", is(pilates3En.getCode())))
+              .andExpect(jsonPath("$.videoItems[2].code", is(pilates2En.getCode())))
+              .andExpect(jsonPath("$.videoItems[3].code", is(pilates1En.getCode())));
+
+      //TODO order is not correct, need to be fixed
+
+   }
+
 
    /**
     * Utilities to create data before the execution of the tests
