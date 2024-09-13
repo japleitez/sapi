@@ -444,6 +444,22 @@ class AuthResourceTest {
       assertEquals(languageFr.getCode(), apsUser.getLanguage().name());
    }
 
+   @Test
+   @Order(11)
+   void getProfile() throws Exception {
+      // get user profile
+      mockMvc.perform(get("/api/auth/installations")
+              .contentType(MediaType.APPLICATION_JSON)
+              .header("Authorization", "Bearer " + token))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.max-allowed").value(3))
+              .andExpect(jsonPath("$.installations.length()").value(1))
+              .andExpect(jsonPath("$.installations[0].device-id").value(EntityDefault.DEVICE_ID))
+              .andExpect(jsonPath("$.installations[0].phone-model").value(EntityDefault.PHONE_MODEL))
+              .andExpect(jsonPath("$.installations[0].os-version").value(EntityDefault.OS_VERSION))
+              .andExpect(jsonPath("$.installations[0].installed-on", is(notNullValue())));
+
+   }
 
    /**
     * Utilities to create data before the execution of the tests
