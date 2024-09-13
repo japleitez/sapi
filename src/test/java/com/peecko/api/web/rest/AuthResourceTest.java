@@ -89,6 +89,8 @@ class AuthResourceTest {
    @Autowired
    NotificationRepo notificationRepo;
 
+   ObjectMapper objectMapper = new ObjectMapper();
+
    // data references
 
    Customer customer1 = null;
@@ -121,15 +123,15 @@ class AuthResourceTest {
 
    List<Video> videosYoga = null;
    List<Video> videosPilates = null;
-
    List<Video> allVideos = null;
+
    Set<Long> activeAllEnIds = null;
    Set<Long> activeAllFrIds = null;
    Set<Long> activeYogaEnIds = null;
    Set<Long> activePilatesEnIds = null;
 
-   ObjectMapper objectMapper = new ObjectMapper();
-
+   int helpSize;
+   int activeNotificationsSize;
    static final String EN = Lang.EN.name();
 
    @BeforeEach
@@ -316,6 +318,19 @@ class AuthResourceTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.videos.length()", is(0)));
 
+      // get help
+      mockMvc.perform(get("/api/account/help")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()", is(helpSize)));
+
+      // get notifications
+      mockMvc.perform(get("/api/account/notifications")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()", is(activeNotificationsSize)));
    }
 
 
@@ -405,6 +420,9 @@ class AuthResourceTest {
    }
 
    void createHelp() {
+
+      // create 2 help items for each language
+      helpSize = 2;
       HelpItem helpItem1En = createHelpItem("What is peecko", "Your best wellness app companion", Lang.EN);
       helpItemRepo.save(helpItem1En);
 
@@ -430,14 +448,15 @@ class AuthResourceTest {
       LocalDate expiredYesterday = LocalDate.now().minusDays(1);
 
 
-      // active notifications
+      // create 2 active notifications
+      activeNotificationsSize = 2;
       Notification notification1 = createNotification(customer1, Lang.EN, startsToday, expiresInAMonth);
       notificationRepo.save(notification1);
 
       Notification notification2 = createNotification(customer1, Lang.FR, startsToday, expiresInAMonth);
       notificationRepo.save(notification2);
 
-      // expired notifications or not yet active
+      // create 2 inactive notifications
       Notification notification3 = createNotification(customer1, Lang.EN, startsToday, expiredYesterday);
       notificationRepo.save(notification3);
 
