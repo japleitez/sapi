@@ -135,9 +135,9 @@ class AuthResourceTest {
 
       String jsonRequest;
 
+      // sign up user
       SignUpRequest signUp = new SignUpRequest(EntityDefault.USER_NAME, EntityDefault.USER_EMAIL, EntityDefault.USER_PASSWORD, EN);
       jsonRequest = objectMapper.writeValueAsString(signUp);
-
       mockMvc.perform(post("/api/auth/signup")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(jsonRequest))
@@ -145,15 +145,12 @@ class AuthResourceTest {
             .andExpect(jsonPath("$.code").value("OK"))
             .andExpect(jsonPath("$.message").value("Successful sign up"));
 
+      // validate the user was created in database
       ApsUser user = apsUserRepo.findByUsername(signUp.username()).orElse(null);
       assertNotNull(user);
 
-      SignInRequest signInRequest = new SignInRequest(
-            EntityDefault.USER_EMAIL,
-            EntityDefault.USER_PASSWORD,
-            EntityDefault.PHONE_MODEL,
-            EntityDefault.OS_VERSION,
-            EntityDefault.DEVICE_ID);
+      // sign in user
+      SignInRequest signInRequest = new SignInRequest(EntityDefault.USER_EMAIL, EntityDefault.USER_PASSWORD, EntityDefault.PHONE_MODEL, EntityDefault.OS_VERSION, EntityDefault.DEVICE_ID);
 
       jsonRequest = objectMapper.writeValueAsString(signInRequest);
       MvcResult result =  mockMvc.perform(post("/api/auth/signin")
@@ -173,23 +170,23 @@ class AuthResourceTest {
               .andExpect(jsonPath("$.membership-sponsor-logo", blankString()))
               .andReturn();
 
+      // validate and extract token from sign in response
       String jsonResponse = result.getResponse().getContentAsString();
       assertNotNull(jsonResponse);
-
       JsonNode jsonNode = objectMapper.readTree(jsonResponse);
       String token = jsonNode.get("token").asText();
       assertNotNull(token);
 
-
+      // create the client and user membership as if it had been done by the backoffice application
       Customer customer = EntityBuilder.buildCustomer();
       customerRepo.saveAndFlush(customer);
-
       ApsMembership apsMembership = EntityBuilder.buildApsMembership(signUp.username(), customer.getId());
       apsMembershipRepo.saveAndFlush(apsMembership);
 
+      // activate membership
       ActivationRequest activationRequest = new ActivationRequest(apsMembership.getLicense(), EntityDefault.DEVICE_ID);
-      jsonRequest = objectMapper.writeValueAsString(activationRequest);
 
+      jsonRequest = objectMapper.writeValueAsString(activationRequest);
       mockMvc.perform(put("/api/membership/activate")
                   .contentType(MediaType.APPLICATION_JSON)
                   .header("Authorization", "Bearer " + token)
@@ -198,6 +195,7 @@ class AuthResourceTest {
             .andExpect(jsonPath("$.code").value("OK"))
             .andExpect(jsonPath("$.message").value("Membership number activated successfully"));
 
+      // get today's videos
       mockMvc.perform(get("/api/videos/today")
             .contentType(MediaType.APPLICATION_JSON)
             .header("Authorization", "Bearer " + token))
@@ -206,6 +204,7 @@ class AuthResourceTest {
             .andExpect(jsonPath("$.tags.length()", not(empty())))
             .andExpect(jsonPath("$.videos.length()", is(activeAllEnIds.size())));
 
+      // get categories with their top videos (library
       int expectedYogaCount = Math.min(activeYogaEnIds.size(), VideoService.CATEGORY_VIDEOS_MAX_SIZE);
       int expectedPilatesCount = Math.min(activePilatesEnIds.size(), VideoService.CATEGORY_VIDEOS_MAX_SIZE);
 
@@ -220,6 +219,64 @@ class AuthResourceTest {
             .andExpect(jsonPath("$.categories[1].code").value(EntityDefault.YOGA))
             .andExpect(jsonPath("$.categories[1].title").value(yoga.getText()))
             .andExpect(jsonPath("$.categories[1].videos.length()", is(expectedYogaCount)));
+
+      // get category with its videos
+      mockMvc.perform(get("/api/videos/categories/{code}", EntityDefault.YOGA)
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(EntityDefault.YOGA))
+            .andExpect(jsonPath("$.title").value(yoga.getText()))
+            .andExpect(jsonPath("$.videos.length()", is(expectedYogaCount)));
+
+      // validate there are no favorite videos
+      mockMvc.perform(get("/api/videos/favorites")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.tags.length()", is(0)))
+            .andExpect(jsonPath("$.videos.length()", is(0)));
+
+      // add 1 yoga and 1 pilates video to the user's favorites
+      mockMvc.perform(put("/api/videos/favorites/{videoId}", yoga1En.getCode())
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk());
+
+      mockMvc.perform(put("/api/videos/favorites/{videoId}", pilates1En.getCode())
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk());
+
+      // validate there are 2 favorite videos
+      mockMvc.perform(get("/api/videos/favorites")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.tags.length()", not(empty())))
+            .andExpect(jsonPath("$.videos.length()", is(2)))
+            .andExpect(jsonPath("$.videos[?(@.code == '" + yoga1En.getCode() + "')]", hasSize(1)))
+            .andExpect(jsonPath("$.videos[?(@.code == '" + pilates1En.getCode() + "')]", hasSize(1)));
+
+      // validate there 1 favorite vide in the yoga category
+      mockMvc.perform(get("/api/videos/categories/{code}", EntityDefault.YOGA)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(EntityDefault.YOGA))
+            .andExpect(jsonPath("$.title").value(yoga.getText()))
+            .andExpect(jsonPath("$.videos.length()", is(activeYogaEnIds.size())))
+            .andExpect(jsonPath("$.videos[?(@.favorite == true)]", hasSize(1)));
+
+      // validate there 1 favorite video in the pilates category
+      mockMvc.perform(get("/api/videos/categories/{code}", EntityDefault.PILATES)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(EntityDefault.PILATES))
+            .andExpect(jsonPath("$.title").value(pilates.getText()))
+            .andExpect(jsonPath("$.videos.length()", is(activePilatesEnIds.size())))
+            .andExpect(jsonPath("$.videos[?(@.favorite == true)]", hasSize(1)));
    }
 
 
