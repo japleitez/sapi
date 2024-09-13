@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,13 +38,14 @@ public class NotificationService {
 
     @Transactional
     public void addViewedNotification(@NotNull Long apsUserId, @NotNull Long notificationId) {
-        viewedNotificationRepo.findByApsUserIdAndNotificationId(apsUserId, notificationId).orElseGet(() -> {
+        Optional<ViewedNotification> entry = viewedNotificationRepo.findByApsUserIdAndNotificationId(apsUserId, notificationId);
+        if (entry.isEmpty()) {
             ViewedNotification viewedNotification = new ViewedNotification();
             viewedNotification.setApsUserId(apsUserId);
             viewedNotification.setNotificationId(notificationId);
             viewedNotification.setViewedAt(Instant.now());
-            return viewedNotificationRepo.save(viewedNotification);
-        });
+            viewedNotificationRepo.save(viewedNotification);
+        }
     }
 
     public List<NotificationDTO> getNotificationsForUserAndPeriod(ApsUser apsUser, int period) {

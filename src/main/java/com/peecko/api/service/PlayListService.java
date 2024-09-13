@@ -66,8 +66,7 @@ public class PlayListService {
                 .findByApsUser(apsUser)
                 .stream()
                 .map(PlayListMapper::toIdName)
-                .sorted(Comparator.comparing(IdName::getName))
-                .collect(Collectors.toList());
+                .sorted(Comparator.comparing(IdName::getName)).toList();
     }
 
     public PlayListDTO getPlayListAsDTO(Long playListId, Long apsUserId) {
@@ -85,15 +84,13 @@ public class PlayListService {
         if (!playList.getVideoItems().isEmpty()) {
             List<String> videoCodes = playList.getVideoItems()
                     .stream()
-                    .map(VideoItem::getCode)
-                    .collect(Collectors.toList());
+                    .map(VideoItem::getCode).toList();
             Set<Video> videos = videoRepo.findByCodes(videoCodes);
             Set<Long> favIds = userFavoriteVideoRepo.findVideoIdsByApsUserId(apsUserId);
             List<VideoItemDTO> videoItemDTOs = playList.getVideoItems()
                     .stream()
                     .map(videoItem -> buildVideoItemDTO(videoItem, videos, favIds))
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                    .filter(Objects::nonNull).toList();
             playListDTO.getVideoItemDTOS().addAll(VideoListSorter.sortVideoList(videoItemDTOs));
         }
         return playListDTO;

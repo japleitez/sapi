@@ -14,7 +14,7 @@ import java.time.LocalDate;
 public class LicenseService {
     final ApsUserRepo apsUserRepo;
     final ApsMembershipRepo apsMembershipRepo;
-    final int GRACE_PERIOD_IN_DAYS = 10;
+    public static final int GRACE_PERIOD_IN_DAYS = 10;
 
     public LicenseService(ApsUserRepo apsUserRepo, ApsMembershipRepo apsMembershipRepo) {
         this.apsUserRepo = apsUserRepo;

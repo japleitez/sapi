@@ -29,7 +29,7 @@ public class VideoMapper {
         dto.setCode(videoCategory.getCode());
         dto.setTitle(labelService.getCachedLabel(LabelService.PREFIX_VIDEO_CATEGORY + videoCategory.getLabel(), lang));
         if (videos != null && !videos.isEmpty()) {
-            dto.setVideos(videos.stream().map(video -> toVideoDTO(video, lang)).collect(Collectors.toList()));
+            dto.setVideos(videos.stream().map(video -> toVideoDTO(video, lang)).toList());
         }
         return dto;
     }
@@ -68,8 +68,7 @@ public class VideoMapper {
     private List<String> buildVideoTagsAsLabelList(String tags, Lang lang) {
         return TagUtils.convertToList(tags)
               .stream()
-              .map(tag -> labelService.getCachedLabel(LabelService.resolveVideoTagLabel(tag), lang))
-              .collect(Collectors.toList());
+              .map(tag -> labelService.getCachedLabel(LabelService.resolveVideoTagLabel(tag), lang)).toList();
     }
 
 }
