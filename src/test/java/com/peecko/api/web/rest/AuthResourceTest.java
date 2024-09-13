@@ -92,8 +92,6 @@ class AuthResourceTest {
    // data references
 
    Customer customer1 = null;
-   Customer customer2 = null;
-
    VideoCategory yogaCategory = null;
    VideoCategory pilatesCategory = null;
    VideoCategory flexibilityCategory = null;
