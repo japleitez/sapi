@@ -158,7 +158,7 @@ public class VideoResource extends BaseResource {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.video.added.already")));
         }
         VideoItem newVideoItem = new VideoItem(videoCode);
-        playListService.addVideoItemToTop(playListId, newVideoItem);
+        playListService.addVideoItemToBottom(playListId, newVideoItem);
         PlayListDTO playlistDTO = playListService.getPlayListAsDTO(playListId, Login.getUserId());
         return ResponseEntity.ok(playlistDTO);
     }

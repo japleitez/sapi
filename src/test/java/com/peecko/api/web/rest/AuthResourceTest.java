@@ -507,12 +507,10 @@ class AuthResourceTest {
               .header("Authorization", "Bearer " + token))
               .andExpect(status().isOk())
               .andExpect(jsonPath("$.videoItems.length()", is(4)))
-              .andExpect(jsonPath("$.videoItems[0].code", is(pilates4En.getCode())))
-              .andExpect(jsonPath("$.videoItems[1].code", is(pilates3En.getCode())))
-              .andExpect(jsonPath("$.videoItems[2].code", is(pilates2En.getCode())))
-              .andExpect(jsonPath("$.videoItems[3].code", is(pilates1En.getCode())));
-
-      //TODO order is not correct, need to be fixed
+              .andExpect(jsonPath("$.videoItems[0].code", is(pilates1En.getCode())))
+              .andExpect(jsonPath("$.videoItems[1].code", is(pilates2En.getCode())))
+              .andExpect(jsonPath("$.videoItems[2].code", is(pilates3En.getCode())))
+              .andExpect(jsonPath("$.videoItems[3].code", is(pilates4En.getCode())));
 
    }
 
