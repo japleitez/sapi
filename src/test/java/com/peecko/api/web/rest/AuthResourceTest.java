@@ -224,7 +224,7 @@ class AuthResourceTest {
 
       // When
       String jsonRequest = objectMapper.writeValueAsString(signInRequest);
-      MvcResult result =  mockMvc.perform(post("/api/auth/signin")
+      MvcResult result = mockMvc.perform(post("/api/auth/signin")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(jsonRequest))
             .andExpect(status().isOk())
