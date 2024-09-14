@@ -169,16 +169,20 @@ public class VideoResource extends BaseResource {
      */
     @PutMapping("/playlists/{playListId}/{videoCode}/drag-beneath/{targetVideoCode}")
     public  ResponseEntity<?> moveVideoItemBelowAnother(@PathVariable Long playListId, @PathVariable String videoCode, @PathVariable String targetVideoCode) {
-        if (playListService.existsById(playListId)) {
+        if (!playListService.existsById(playListId)) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.invalid")));
         }
         if (!videoItemService.existsByPlayListIdAndCode(playListId, videoCode)) {
             return ResponseEntity.ok(new Message(ERROR, message("video.item.invalid")));
         }
-        if (!videoItemService.existsByPlayListIdAndCode(playListId, targetVideoCode)) {
+        if (!"top".equals(targetVideoCode) && !videoItemService.existsByPlayListIdAndCode(playListId, targetVideoCode)) {
             return ResponseEntity.ok(new Message(ERROR, message("video.item.new.previous.invalid")));
         }
-        playListService.moveVideoItemBelowAnother(playListId, videoCode, targetVideoCode);
+        if ("top".equals(targetVideoCode)) {
+            playListService.moveVideoItemToTop(playListId, videoCode);
+        } else  {
+            playListService.moveVideoItemBelowAnother(playListId, videoCode, targetVideoCode);
+        }
         PlayListDTO playlistDTO = playListService.getPlayListAsDTO(playListId, Login.getUserId());
         return ResponseEntity.ok(playlistDTO);
     }

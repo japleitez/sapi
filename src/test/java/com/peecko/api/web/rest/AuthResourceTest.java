@@ -514,6 +514,58 @@ class AuthResourceTest {
 
    }
 
+   @Test
+   @Order(14)
+   void moveVideo() throws Exception {
+      String url = "/api/videos/playlists/{playListId}/{videoCode}/drag-beneath/{targetVideoCode}";
+
+      // move pilates 1 under pilates 4 in 3 moves
+      mockMvc.perform(put(url, playList.getId(), pilates1En.getCode(), pilates2En.getCode())
+              .header("Authorization", "Bearer " + token));
+      mockMvc.perform(put(url, playList.getId(), pilates1En.getCode(), pilates3En.getCode())
+              .header("Authorization", "Bearer " + token));
+      mockMvc.perform(put(url, playList.getId(), pilates1En.getCode(), pilates4En.getCode())
+              .header("Authorization", "Bearer " + token));
+
+      mockMvc.perform(get("/api/videos/playlists/{id}", playList.getId())
+              .header("Authorization", "Bearer " + token))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.videoItems.length()", is(4)))
+              .andExpect(jsonPath("$.videoItems[0].code", is(pilates2En.getCode())))
+              .andExpect(jsonPath("$.videoItems[1].code", is(pilates3En.getCode())))
+              .andExpect(jsonPath("$.videoItems[2].code", is(pilates4En.getCode())))
+              .andExpect(jsonPath("$.videoItems[3].code", is(pilates1En.getCode())));
+
+      // move pilates 1 back to the top
+      mockMvc.perform(put(url, playList.getId(), pilates1En.getCode(), "top")
+              .header("Authorization", "Bearer " + token));
+
+      mockMvc.perform(get("/api/videos/playlists/{id}", playList.getId())
+              .header("Authorization", "Bearer " + token))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.videoItems.length()", is(4)))
+              .andExpect(jsonPath("$.videoItems[0].code", is(pilates1En.getCode())))
+              .andExpect(jsonPath("$.videoItems[1].code", is(pilates2En.getCode())))
+              .andExpect(jsonPath("$.videoItems[2].code", is(pilates3En.getCode())))
+              .andExpect(jsonPath("$.videoItems[3].code", is(pilates4En.getCode())));
+
+      // move pilates 3 below pilates 4 by repeating the same request 3 times
+      mockMvc.perform(put(url, playList.getId(), pilates3En.getCode(), pilates4En.getCode())
+              .header("Authorization", "Bearer " + token));
+      mockMvc.perform(put(url, playList.getId(), pilates3En.getCode(), pilates4En.getCode())
+              .header("Authorization", "Bearer " + token));
+      mockMvc.perform(put(url, playList.getId(), pilates3En.getCode(), pilates4En.getCode())
+              .header("Authorization", "Bearer " + token));
+
+      mockMvc.perform(get("/api/videos/playlists/{id}", playList.getId())
+                      .header("Authorization", "Bearer " + token))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.videoItems.length()", is(4)))
+              .andExpect(jsonPath("$.videoItems[0].code", is(pilates1En.getCode())))
+              .andExpect(jsonPath("$.videoItems[1].code", is(pilates2En.getCode())))
+              .andExpect(jsonPath("$.videoItems[2].code", is(pilates4En.getCode())))
+              .andExpect(jsonPath("$.videoItems[3].code", is(pilates3En.getCode())));
+   }
 
    /**
     * Utilities to create data before the execution of the tests
