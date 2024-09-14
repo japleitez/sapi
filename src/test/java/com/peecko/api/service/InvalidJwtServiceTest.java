@@ -3,7 +3,6 @@ package com.peecko.api.service;
 import com.peecko.api.domain.EntityDefault;
 import com.peecko.api.domain.InvalidJwt;
 import com.peecko.api.repository.InvalidJwtRepo;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

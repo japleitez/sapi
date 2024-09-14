@@ -4,12 +4,9 @@ import com.peecko.api.domain.*;
 import com.peecko.api.domain.dto.IdName;
 import com.peecko.api.domain.dto.PlayListDTO;
 import com.peecko.api.repository.*;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.parameters.P;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
