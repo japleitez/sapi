@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.peecko.api.domain.ApsUser;
 import com.peecko.api.domain.EntityBuilder;
-import com.peecko.api.domain.EntityDefault;
 import com.peecko.api.domain.PinCode;
 import com.peecko.api.repository.ApsUserRepo;
 import com.peecko.api.repository.PinCodeRepo;
