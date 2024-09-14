@@ -33,8 +33,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -169,7 +168,7 @@ class AuthResourceTest {
 
    @Test
    @Order(1)
-   void singUp() throws Exception {
+   public void test01SignUp() throws Exception {
       // Given
       SignUpRequest signUp = new SignUpRequest(
             EntityDefault.USER_NAME,
@@ -192,7 +191,29 @@ class AuthResourceTest {
 
    @Test
    @Order(2)
-   void signIn() throws Exception {
+   public void test02ActivateUser() throws Exception {
+
+      // verify email is not active
+      apsUser = apsUserRepo.findByUsername(EntityDefault.USER_EMAIL).orElse(null);
+      assertNotNull(apsUser);
+      assertFalse(apsUser.getActive());
+
+      // activate user email
+      mockMvc.perform(get("/api/auth/active/{username}", EntityDefault.USER_EMAIL))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value("OK"))
+            .andExpect(jsonPath("$.message").value("Email is verified"));
+
+      // verify email is active
+      apsUser = apsUserRepo.findByUsername(EntityDefault.USER_EMAIL).orElse(null);
+      assertNotNull(apsUser);
+      assertTrue(apsUser.getActive());
+
+   }
+
+   @Test
+   @Order(3)
+   public void test03SignIn() throws Exception {
       // Given
       SignInRequest signInRequest = new SignInRequest(
             EntityDefault.USER_EMAIL,
@@ -228,8 +249,8 @@ class AuthResourceTest {
    }
 
    @Test
-   @Order(3)
-   void activateMembership() throws Exception {
+   @Order(4)
+   public void test04ActivateMembership() throws Exception {
       // Given
       ApsMembership apsMembership = EntityBuilder.buildApsMembership(apsUser.getUsername(), customer1.getId());
       apsMembershipRepo.saveAndFlush(apsMembership);
@@ -247,8 +268,8 @@ class AuthResourceTest {
    }
 
    @Test
-   @Order(4)
-   void getTodayVideos() throws Exception {
+   @Order(5)
+   public void test05GetTodayVideos() throws Exception {
       mockMvc.perform(get("/api/videos/today")
                   .contentType(MediaType.APPLICATION_JSON)
                   .header("Authorization", "Bearer " + token))
@@ -259,8 +280,8 @@ class AuthResourceTest {
    }
 
    @Test
-   @Order(5)
-   void getCategories() throws Exception {
+   @Order(6)
+   public void test06GetCategories() throws Exception {
       mockMvc.perform(get("/api/videos/categories")
                   .contentType(MediaType.APPLICATION_JSON)
                   .header("Authorization", "Bearer " + token))
@@ -275,8 +296,8 @@ class AuthResourceTest {
    }
 
    @Test
-   @Order(6)
-   void getCategory() throws Exception {
+   @Order(7)
+   public void test07GetCategory() throws Exception {
       mockMvc.perform(get("/api/videos/categories/{code}", EntityDefault.YOGA)
                   .contentType(MediaType.APPLICATION_JSON)
                   .header("Authorization", "Bearer " + token))
@@ -287,8 +308,8 @@ class AuthResourceTest {
    }
 
    @Test
-   @Order(7)
-   void getFavoriteVideos() throws Exception {
+   @Order(8)
+   public void test08GetFavoriteVideos() throws Exception {
       // validate there are no favorite videos
       mockMvc.perform(get("/api/videos/favorites")
                   .contentType(MediaType.APPLICATION_JSON)
@@ -370,8 +391,8 @@ class AuthResourceTest {
    }
 
    @Test
-   @Order(8)
-   void getHelp() throws Exception {
+   @Order(9)
+   public void test09GetHelp() throws Exception {
       mockMvc.perform(get("/api/account/help")
                   .contentType(MediaType.APPLICATION_JSON)
                   .header("Authorization", "Bearer " + token))
@@ -384,8 +405,8 @@ class AuthResourceTest {
    }
 
    @Test
-   @Order(9)
-   void getNotifications() throws Exception {
+   @Order(10)
+   public void test10GetNotifications() throws Exception {
       // get notifications
       mockMvc.perform(get("/api/account/notifications")
                   .contentType(MediaType.APPLICATION_JSON)
@@ -422,8 +443,8 @@ class AuthResourceTest {
    }
 
    @Test
-   @Order(10)
-   void getLanguages() throws Exception {
+   @Order(11)
+   public void test11GetLanguages() throws Exception {
       // get active languages ordered by name
       mockMvc.perform(get("/api/account/languages")
                   .contentType(MediaType.APPLICATION_JSON)
@@ -449,8 +470,8 @@ class AuthResourceTest {
    }
 
    @Test
-   @Order(11)
-   void getDevices() throws Exception {
+   @Order(12)
+   public void test12GetInstallations() throws Exception {
       // get user profile
       mockMvc.perform(get("/api/auth/installations")
               .contentType(MediaType.APPLICATION_JSON)
@@ -465,8 +486,8 @@ class AuthResourceTest {
    }
 
    @Test
-   @Order(12)
-   void createPlaylist() throws Exception {
+   @Order(13)
+   public void test13CreatePlaylist() throws Exception {
       CreatePlaylistRequest request = new CreatePlaylistRequest(EntityDefault.PLAYLIST_NAME);
       String jsonRequest = objectMapper.writeValueAsString(request);
       mockMvc.perform(post("/api/videos/playlists")
@@ -484,8 +505,8 @@ class AuthResourceTest {
    }
 
    @Test
-   @Order(13)
-   void addVideoToPlaylist() throws Exception {
+   @Order(14)
+   public void test14AddVideoToPlaylist() throws Exception {
 
       mockMvc.perform(put("/api/videos/playlists/{playListId}/{videoCode}", playList.getId(), pilates1En.getCode())
               .header("Authorization", "Bearer " + token))
@@ -515,8 +536,8 @@ class AuthResourceTest {
    }
 
    @Test
-   @Order(14)
-   void moveVideo() throws Exception {
+   @Order(15)
+   public void test15MoveVideoInPlaylist() throws Exception {
       String url = "/api/videos/playlists/{playListId}/{videoCode}/drag-beneath/{targetVideoCode}";
 
       // move pilates 1 under pilates 4 in 3 moves
@@ -656,7 +677,7 @@ class AuthResourceTest {
 
    }
 
-   void createHelp() {
+   private void createHelp() {
 
       // create 2 help items for english (default)
       helpSizeIs2 = 2;
@@ -674,12 +695,12 @@ class AuthResourceTest {
       helpItemRepo.save(helpItem2Fr);
    }
 
-   void createCustomer() {
+   private void createCustomer() {
       customer1 = EntityBuilder.buildCustomer();
       customerRepo.saveAndFlush(customer1);
    }
 
-   void createNotifications() {
+   private void createNotifications() {
       LocalDate startsToday = LocalDate.now();
       LocalDate startsTomorrow = LocalDate.now().plusDays(1);
       LocalDate expiresInAMonth = startsToday.plusMonths(1);
@@ -702,7 +723,7 @@ class AuthResourceTest {
       notificationRepo.save(notification4);
    }
 
-   void createLanguages() {
+   private void createLanguages() {
       // create 2 active languages
       activeLanguagesSizeIs2 = 2;
       languageEn = createLanguage("EN", "English", true);
