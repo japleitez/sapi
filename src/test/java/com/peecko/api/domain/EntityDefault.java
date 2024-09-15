@@ -69,6 +69,8 @@ public abstract class EntityDefault {
     public static final String USER_PASSWORD = "secret";
     public static final Lang USER_LANG = Lang.EN;
     public static final String LANGUAGE = USER_LANG.name();
+    public static final String USER_NEW_PASSWORD = "new" + USER_PASSWORD;
+    public static final String USER_RESET_PASSWORD = "reset" + USER_PASSWORD;
 
     /**
      * DEVICE defaults
