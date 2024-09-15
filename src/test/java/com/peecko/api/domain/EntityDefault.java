@@ -16,7 +16,6 @@ public abstract class EntityDefault {
      *
      */
     public static final String PLAYLIST_NAME = "best morning workouts";
-    public static final String COUNTRY = "UK";
     public static final Long CUSTOMER_ID = 1L;
     public static final String TITLE = "default-title";
     public static final String VIDEO_CATEGORY_TITLE = "default-video-category";
@@ -32,11 +31,6 @@ public abstract class EntityDefault {
     public static final String VIDEO_DESCRIPTION = "default-video-description";
     public static final Integer VIDEO_DURATION = 10;
     public static final String VIDEO_AUDIENCE_ALL = "all";
-
-    public static final String VIDEO_INTENSITY_LOW = "low";
-    public static final String VIDEO_INTENSITY_MODERATE = "moderate";
-    public static final String VIDEO_INTENSITY_HIGH = "high";
-
     public static final String VIDEO_TAG_ALL = "all";
     public static final String VIDEO_TAG_RELAX = "relax";
     public static final String VIDEO_TAG_ENERGY  = "energy";

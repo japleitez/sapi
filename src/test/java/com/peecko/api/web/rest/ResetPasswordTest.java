@@ -3,7 +3,6 @@ package com.peecko.api.web.rest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.peecko.api.domain.ApsUser;
-import com.peecko.api.domain.EntityBuilder;
 import com.peecko.api.domain.EntityDefault;
 import com.peecko.api.domain.PinCode;
 import com.peecko.api.repository.ApsUserRepo;
@@ -19,14 +18,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-import java.util.Optional;
 import java.util.UUID;
 
 
