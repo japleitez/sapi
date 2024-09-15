@@ -7,14 +7,15 @@ import com.peecko.api.domain.EntityDefault;
 import com.peecko.api.domain.PinCode;
 import com.peecko.api.repository.ApsUserRepo;
 import com.peecko.api.repository.PinCodeRepo;
+import com.peecko.api.repository.VideoRepo;
+import com.peecko.api.service.VideoService;
 import com.peecko.api.web.payload.request.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -45,9 +46,23 @@ public class ResetPasswordTest {
     PinCodeRepo pinCodeRepo;
 
     @Autowired
+    VideoService videoService;
+
+    @Autowired
     PasswordEncoder passwordEncoder;
 
     ObjectMapper objectMapper = new ObjectMapper();
+
+    @BeforeAll
+    public void setUp() {
+        videoService.clearAllCaches();
+        cleanUpData();
+    }
+
+    @BeforeEach
+    public void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     public void resetAndChangePassword() throws Exception {
@@ -146,6 +161,11 @@ public class ResetPasswordTest {
 
         apsUser = apsUserRepo.findByUsername(EntityDefault.USER_EMAIL).orElseThrow();
         assertTrue(passwordEncoder.matches(EntityDefault.USER_NEW_PASSWORD, apsUser.getPassword()));
+    }
+
+    private void cleanUpData() {
+        apsUserRepo.deleteAll();
+        pinCodeRepo.deleteAll();
     }
 
 }

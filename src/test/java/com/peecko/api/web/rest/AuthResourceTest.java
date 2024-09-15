@@ -16,11 +16,10 @@ import com.peecko.api.web.payload.request.SignInRequest;
 import com.peecko.api.web.payload.request.SignUpRequest;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -40,6 +39,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -93,6 +93,9 @@ class AuthResourceTest {
 
    @Autowired
    NotificationRepo notificationRepo;
+
+   @Autowired
+   ViewedNotificationRepo viewedNotificationRepo;
 
    @Autowired
    PlayListRepo playListRepo;
@@ -159,6 +162,7 @@ class AuthResourceTest {
    @BeforeAll
    public void executeOnceBeforeAllTests() {
       videoService.clearAllCaches();
+      cleanUpData();
       createCustomer();
       createHelp();
       createNotifications();
@@ -167,6 +171,12 @@ class AuthResourceTest {
       activeYogaTopCap = Math.min(activeYogaEnIds.size(), VideoService.CATEGORY_VIDEOS_MAX_SIZE);
       activePilatesTopCap = Math.min(activePilatesEnIds.size(), VideoService.CATEGORY_VIDEOS_MAX_SIZE);
    }
+
+   @BeforeEach
+   public void clearSecurityContext() {
+      SecurityContextHolder.clearContext();
+   }
+
 
    @Test
    @Order(1)
@@ -182,6 +192,7 @@ class AuthResourceTest {
       mockMvc.perform(post("/api/auth/signup")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(jsonRequest))
+              .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.code").value("OK"))
             .andExpect(jsonPath("$.message").value("Successful sign up"));
@@ -605,6 +616,19 @@ class AuthResourceTest {
    /**
     * Utilities to create data before the execution of the tests
     */
+
+   private void cleanUpData() {
+      helpItemRepo.deleteAll();
+      viewedNotificationRepo.deleteAll();
+      notificationRepo.deleteAll();
+      userFavoriteVideoRepo.deleteAll();
+      playListRepo.deleteAll();
+      videoRepo.deleteAll();
+      videoCategoryRepo.deleteAll();
+      labelRepo.deleteAll();
+      apsUserRepo.deleteAll();
+      customerRepo.deleteAll();
+   }
 
    private void createVideos() {
 
