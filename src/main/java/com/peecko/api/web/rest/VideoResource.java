@@ -137,7 +137,7 @@ public class VideoResource extends BaseResource {
      * Delete a playlist by its id.
      */
     @DeleteMapping("/playlists/{id}")
-    public ResponseEntity<?> deletePlaylist(@PathVariable Long id) {
+    public ResponseEntity<List<IdName>> deletePlaylist(@PathVariable Long id) {
         playListService.deletePlayList(id);
         List<IdName> listIdNames = playListService.getPlayListsAsIdNames(Login.getUser());
         return ResponseEntity.ok(listIdNames);

@@ -588,6 +588,22 @@ class AuthResourceTest {
               .andExpect(jsonPath("$.videoItems[3].code", is(pilates3En.getCode())));
    }
 
+   @Test
+   @Order(16)
+   public void test16DeletePlaylist() throws Exception {
+      // there is 1 playlist in the database
+      mockMvc.perform(get("/api/videos/playlists")
+                      .header("Authorization", "Bearer " + token))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.length()", is(1)));
+
+      // delete the playlist
+      mockMvc.perform(delete("/api/videos/playlists/{id}", playList.getId())
+              .header("Authorization", "Bearer " + token))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.length()", is(0)));
+   }
+
    /**
     * Utilities to create data before the execution of the tests
     */
