@@ -16,6 +16,8 @@ import com.peecko.api.web.payload.request.SignInRequest;
 import com.peecko.api.web.payload.request.SignUpRequest;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
@@ -586,11 +588,7 @@ class AuthResourceTest {
               .andExpect(jsonPath("$.videoItems[1].code", is(pilates2En.getCode())))
               .andExpect(jsonPath("$.videoItems[2].code", is(pilates4En.getCode())))
               .andExpect(jsonPath("$.videoItems[3].code", is(pilates3En.getCode())));
-   }
 
-   @Test
-   @Order(16)
-   public void test16DeletePlaylist() throws Exception {
       // there is 1 playlist in the database
       mockMvc.perform(get("/api/videos/playlists")
                       .header("Authorization", "Bearer " + token))
