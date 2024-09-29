@@ -52,7 +52,6 @@ public abstract class EntityDefault {
     public static final String  CUSTOMER_CODE = "LU-AMAZON";
     public static final String  CUSTOMER_NAME = "AMAZON Luxembourg";
     public static final String  CUSTOMER_COUNTRY = "LU";
-    public static final Double  CUSTOMER_VAT_RATE = 0.16;
     public static final CustomerState  CUSTOMER_STATE = CustomerState.ACTIVE;
 
     /**

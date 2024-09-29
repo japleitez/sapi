@@ -25,7 +25,6 @@ public abstract class EntityBuilder {
         customer.setName(EntityDefault.CUSTOMER_NAME);
         customer.setCountry(EntityDefault.CUSTOMER_COUNTRY);
         customer.setState(EntityDefault.CUSTOMER_STATE);
-        customer.vatRate(EntityDefault.CUSTOMER_VAT_RATE);
         customer.setLicense(EntityDefault.LICENSE);
         return customer;
     }
