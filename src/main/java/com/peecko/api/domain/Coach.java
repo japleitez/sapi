@@ -2,6 +2,8 @@ package com.peecko.api.domain;
 
 import com.peecko.api.domain.enumeration.CoachType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+
 import java.io.Serializable;
 
 @Entity
@@ -15,10 +17,12 @@ public class Coach implements Serializable {
     @Column(name = "id")
     private Long id;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private CoachType type;
 
+    @NotNull
     @Column(name = "name", nullable = false)
     private String name;
 
