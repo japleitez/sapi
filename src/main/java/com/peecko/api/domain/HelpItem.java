@@ -3,9 +3,14 @@ package com.peecko.api.domain;
 import com.peecko.api.domain.enumeration.Lang;
 import jakarta.persistence.*;
 
+import java.io.Serializable;
+
 @Entity
 @Table(name = "help_item")
-public class HelpItem {
+public class HelpItem implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")

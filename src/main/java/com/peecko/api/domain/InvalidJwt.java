@@ -2,11 +2,13 @@ package com.peecko.api.domain;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.time.Instant;
 
 @Entity
 @Table(name = "invalid_jwt")
-public class InvalidJwt {
+public class InvalidJwt implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
