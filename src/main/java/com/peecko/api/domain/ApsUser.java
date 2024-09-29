@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.peecko.api.domain.enumeration.Lang;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -14,6 +15,7 @@ import java.util.Set;
 @Entity
 @Table(name = "aps_user")
 public class ApsUser implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -23,31 +25,27 @@ public class ApsUser implements Serializable {
     private Long id;
 
     @NotNull
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
     @NotNull
-    @Column(name = "username")
+    @Column(name = "username", nullable = false)
     private String username;
 
-    @Column(name = "username_verified")
+    @NotNull
+    @Column(name = "username_verified", nullable = false)
     private Boolean usernameVerified;
-
-    @Column(name = "private_email")
-    private String privateEmail;
-
-    @Column(name = "private_verified")
-    private Boolean privateVerified;
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(name = "language")
+    @Column(name = "language", nullable = false)
     private Lang lang;
 
     @Column(name = "license")
     private String license;
 
-    @Column(name = "active")
+    @NotNull
+    @Column(name = "active", nullable = false)
     private Boolean active;
 
     @Column(name = "password")
@@ -58,9 +56,6 @@ public class ApsUser implements Serializable {
 
     @Column(name = "updated")
     private Instant updated;
-
-    @Column(name = "jwt")
-    private String jwt;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "aps_user_id")
@@ -139,32 +134,6 @@ public class ApsUser implements Serializable {
         this.usernameVerified = usernameVerified;
     }
 
-    public String getPrivateEmail() {
-        return this.privateEmail;
-    }
-
-    public ApsUser privateEmail(String privateEmail) {
-        this.setPrivateEmail(privateEmail);
-        return this;
-    }
-
-    public void setPrivateEmail(String privateEmail) {
-        this.privateEmail = privateEmail;
-    }
-
-    public Boolean getPrivateVerified() {
-        return this.privateVerified;
-    }
-
-    public ApsUser privateVerified(Boolean privateVerified) {
-        this.setPrivateVerified(privateVerified);
-        return this;
-    }
-
-    public void setPrivateVerified(Boolean privateVerified) {
-        this.privateVerified = privateVerified;
-    }
-
     public Lang getLanguage() {
         return this.lang;
     }
@@ -241,20 +210,6 @@ public class ApsUser implements Serializable {
 
     public void setUpdated(Instant updated) {
         this.updated = updated;
-    }
-
-
-    public String getJwt() {
-        return jwt;
-    }
-
-    public void setJwt(String jwt) {
-        this.jwt = jwt;
-    }
-
-    public ApsUser jwt(String jwt) {
-        this.setJwt(jwt);
-        return this;
     }
 
     public Set<ApsDevice> getApsDevices() {

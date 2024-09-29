@@ -2,6 +2,7 @@ package com.peecko.api.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -18,9 +19,11 @@ public class ApsDevice implements Serializable {
     @Column(name = "id")
     private Long id;
 
+    @NotNull
     @Column(name = "username", nullable = false)
     private String username;
 
+    @NotNull
     @Column(name = "device_id", nullable = false)
     private String deviceId;
 
@@ -35,7 +38,7 @@ public class ApsDevice implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "aps_user_id")
-    @JsonIgnoreProperties(value = { "apsDevices", "playlists" }, allowSetters = true)
+    @JsonIgnoreProperties(value = { "apsDevices", "playLists" }, allowSetters = true)
     private ApsUser apsUser;
 
     public Long getId() {

@@ -1,6 +1,7 @@
 package com.peecko.api.service;
 
 import com.peecko.api.domain.ApsUser;
+import com.peecko.api.domain.EntityBuilder;
 import com.peecko.api.domain.EntityDefault;
 import com.peecko.api.domain.PinCode;
 import com.peecko.api.domain.enumeration.Lang;
@@ -50,7 +51,7 @@ class PinCodeServiceTest {
         // GIVEN
 
         // user
-        ApsUser apsUser = new ApsUser();
+        ApsUser apsUser = EntityBuilder.buildApsUser();
         apsUser.setUsername("test@mail.com");
         apsUser.setName("Test");
         apsUser.setLanguage(Lang.FR);

@@ -14,6 +14,8 @@ public abstract class EntityBuilder {
         apsUser.name(EntityDefault.USER_NAME);
         apsUser.username(EntityDefault.USER_EMAIL);
         apsUser.setLanguage(EntityDefault.USER_LANG);
+        apsUser.setActive(false);
+        apsUser.setUsernameVerified(false);
         return apsUser;
     }
 

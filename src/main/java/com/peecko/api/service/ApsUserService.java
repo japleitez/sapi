@@ -115,7 +115,6 @@ public class ApsUserService {
         int currentPeriod = PeriodUtils.current();
         int deviceCount = apsUser.getApsDevices().size();
         UserProfileResponse response = new UserProfileResponse();
-        response.setToken(apsUser.getJwt());
         response.setName(apsUser.getName());
         response.setUsername(apsUser.getUsername());
         response.setEmailVerified(response.isEmailVerified());

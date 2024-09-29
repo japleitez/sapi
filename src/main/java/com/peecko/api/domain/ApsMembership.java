@@ -21,13 +21,6 @@ public class ApsMembership implements Serializable {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "customer_id")
-    private Long customerId;
-
-    @NotNull
-    @Column(name = "username", nullable = false)
-    private String username;
-
     @NotNull
     @Column(name = "period", nullable = false)
     private Integer period;
@@ -35,6 +28,13 @@ public class ApsMembership implements Serializable {
     @NotNull
     @Column(name = "license", nullable = false)
     private String license;
+
+    @NotNull
+    @Column(name = "username", nullable = false)
+    private String username;
+
+    @Column(name = "customer_id")
+    private Long customerId;
 
     public Long getId() {
         return id;
