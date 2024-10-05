@@ -2,6 +2,8 @@ package com.peecko.api.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -18,25 +20,31 @@ public class PlayList implements Serializable {
     @Column(name = "id")
     private Long id;
 
+    @NotNull
     @Column(name = "name", nullable = false)
     private String name;
 
+    @NotNull
     @Column(name = "counter", nullable = false)
     private Integer counter;
 
+    @NotNull
     @Column(name = "created", nullable = false)
     private Instant created;
 
+    @NotNull
     @Column(name = "updated", nullable = false)
     private Instant updated;
+
+    @OneToMany(mappedBy = "playList", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonIgnoreProperties(value = { "playList" }, allowSetters = true)
+    private List<VideoItem> videoItems = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnoreProperties(value = { "apsDevices", "playLists" }, allowSetters = true)
     private ApsUser apsUser;
 
 
-    @OneToMany(mappedBy = "playList", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<VideoItem> videoItems = new ArrayList<>();
 
     public PlayList() {
     }

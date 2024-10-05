@@ -3,17 +3,21 @@ package com.peecko.api.domain;
 import com.peecko.api.domain.enumeration.Verification;
 import org.hibernate.annotations.GenericGenerator;
 import jakarta.persistence.*;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "pin_code")
-public class PinCode {
+public class PinCode implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "reference_id", updatable = false, nullable = false)
+    @Column(name = "request_id", updatable = false, nullable = false)
     private UUID requestId;
 
     @Column(name = "code", nullable = false)
