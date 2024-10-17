@@ -1,5 +1,6 @@
 package com.peecko.api.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -11,8 +12,10 @@ public class VideoItem implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
+    @Column(name = "code")
     private String code;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -25,7 +28,8 @@ public class VideoItem implements Serializable {
     private VideoItem previous;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "playlist_id", nullable = false)
+    @JoinColumn(name = "play_list_id", nullable = false)
+    @JsonIgnoreProperties(value = { "videoItems", "apsUser" }, allowSetters = true)
     private PlayList playList;
 
     public VideoItem() {

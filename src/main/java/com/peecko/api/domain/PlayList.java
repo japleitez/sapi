@@ -36,14 +36,13 @@ public class PlayList implements Serializable {
     @Column(name = "updated", nullable = false)
     private Instant updated;
 
-    @OneToMany(mappedBy = "playList", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @JsonIgnoreProperties(value = { "playList" }, allowSetters = true)
-    private List<VideoItem> videoItems = new ArrayList<>();
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnoreProperties(value = { "apsDevices", "playLists" }, allowSetters = true)
     private ApsUser apsUser;
 
+    @OneToMany(mappedBy = "playList", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonIgnoreProperties(value = { "playList" }, allowSetters = true)
+    private List<VideoItem> videoItems = new ArrayList<>();
 
 
     public PlayList() {
