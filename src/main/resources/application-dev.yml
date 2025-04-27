@@ -16,6 +16,14 @@ spring:
   jackson:
     serialization:
       indent-output: true
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:postgresql://localhost:5432/admin
+    username: admin
+    password:
+    hikari:
+      poolName: Hikari
+      auto-commit: false
   mail:
     host: smtp.office365.com
     port: 587
