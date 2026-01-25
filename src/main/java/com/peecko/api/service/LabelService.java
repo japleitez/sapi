@@ -16,7 +16,6 @@ public class LabelService {
 
     final LabelRepo labelRepo;
     public static final String PREFIX_VIDEO_TAG = "video.tag.";
-    public static final String PREFIX_VIDEO_CATEGORY = "video.category.";
     public static final String PREFIX_VIDEO_AUDIENCE = "video.audience.";
     public static final String PREFIX_VIDEO_INTENSITY = "video.intensity.";
 

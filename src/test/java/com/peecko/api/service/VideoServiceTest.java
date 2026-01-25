@@ -48,9 +48,6 @@ class VideoServiceTest {
     CacheManager cacheManager;
 
     @Autowired
-    TodayVideoRepo todayVideoRepo;
-
-    @Autowired
     VideoCategoryRepo videoCategoryRepo;
 
     @Autowired
@@ -101,39 +98,6 @@ class VideoServiceTest {
     void setUp() {
         videoService.clearAllCaches();
         createVideos();
-    }
-
-    @Test
-    void getCachedTodayVideos() {
-        // Given
-        TodayVideo todayVideoEn = new TodayVideo(Lang.EN, LocalDate.now(), activeAllEnIds);
-        todayVideoRepo.save(todayVideoEn);
-
-        TodayVideo todayVideoFr = new TodayVideo(Lang.FR, LocalDate.now(), activeAllFrIds);
-        todayVideoRepo.save(todayVideoFr);
-
-        // additional today_video to test that videoService.getCachedTodayVideos returns the latest today_video
-        LocalDate twoDaysAgo = LocalDate.now().minusDays(2);
-        TodayVideo extra = new TodayVideo(Lang.EN, twoDaysAgo, Set.of(yoga1En.getId(), yoga2En.getId()));
-        todayVideoRepo.save(extra);
-
-
-        // When
-        List<Video> todayVideoEnResult = videoService.getCachedTodayVideos(Lang.EN);
-        List<Video> todayVideoFrResult = videoService.getCachedTodayVideos(Lang.FR);
-
-        // Then
-        assertEquals(activeAllEnIds.size(), todayVideoEnResult.size());
-        assertEquals(activeAllFrIds.size(), todayVideoFrResult.size());
-        assertEquals(activeAllEnIds, todayVideoEnResult.stream().map(Video::getId).collect(Collectors.toSet()));
-        assertEquals(activeAllFrIds, todayVideoFrResult.stream().map(Video::getId).collect(Collectors.toSet()));
-
-        // When
-        List<Video> englishResult2 = videoService.getCachedTodayVideos(Lang.EN);
-
-        // Then
-        boolean cacheHit = todayVideoEnResult == englishResult2;
-        assertTrue(cacheHit);
     }
 
     @Test
@@ -387,7 +351,6 @@ class VideoServiceTest {
         VideoCategory category = new VideoCategory();
         category.setCode(code);
         category.setTitle(NameUtils.toCamelCase(code));
-        category.setLabel(label);
         category.setCreated(created);
         category.setReleased(released);
         category.setArchived(null);

@@ -140,7 +140,7 @@ class PlayListServiceTest {
     @Test
     void addAndRemoveVideoItemsAtTop() {
         // Given
-        VideoCategory videoCategory = EntityBuilder.buildVideoCategory();
+        VideoCategory videoCategory = EntityBuilder.buildVideoCategory("fc.yoga", "Yoga");
         videoCategoryRepo.save(videoCategory);
 
         String videoCode1 = EntityDefault.VIDEO_CODE + "-01";
@@ -237,7 +237,7 @@ class PlayListServiceTest {
     @Test
     void addAndRemoveVideoItemAtBottom() {
         // Given
-        VideoCategory videoCategory = EntityBuilder.buildVideoCategory();
+        VideoCategory videoCategory = EntityBuilder.buildVideoCategory("fc.yoga", "Yoga");
         videoCategoryRepo.save(videoCategory);
 
         String videoCode1 = EntityDefault.VIDEO_CODE + "-01";
@@ -353,7 +353,7 @@ class PlayListServiceTest {
     @Test
     void moveVideoItemBelowAnother() {
         // Given
-        VideoCategory videoCategory = EntityBuilder.buildVideoCategory();
+        VideoCategory videoCategory = EntityBuilder.buildVideoCategory("fc.yoga", "Yoga");
         videoCategoryRepo.save(videoCategory);
 
         String videoCode1 = EntityDefault.VIDEO_CODE + "-01";

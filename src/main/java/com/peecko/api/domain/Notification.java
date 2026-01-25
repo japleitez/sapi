@@ -49,6 +49,7 @@ public class Notification implements Serializable {
     private LocalDate expires;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "customer_id")
     @JsonIgnoreProperties(value = { "contacts", "apsPlans", "agency" }, allowSetters = true)
     private Customer customer;
 

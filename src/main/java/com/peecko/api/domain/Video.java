@@ -73,10 +73,12 @@ public class Video implements Serializable {
     public int selectionCount;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "video_category_id")
     @JsonIgnoreProperties(value = { "videos" }, allowSetters = true)
     private VideoCategory videoCategory;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "coach_id")
     @JsonIgnoreProperties(value = { "videos", "articles" }, allowSetters = true)
     private Coach coach;
 

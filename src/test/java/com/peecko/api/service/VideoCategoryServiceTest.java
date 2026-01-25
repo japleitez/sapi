@@ -26,11 +26,11 @@ class VideoCategoryServiceTest {
     @Test
     void findByCode() {
         // Given
-        VideoCategory videoCategory = EntityBuilder.buildVideoCategory();
+        VideoCategory videoCategory = EntityBuilder.buildVideoCategory("fc.yoga", "Yoga");
         videoCategoryRepo.save(videoCategory);
 
         // When
-        Optional<VideoCategory> actual = videoCategoryService.findByCode(EntityDefault.VIDEO_CATEGORY_CODE);
+        Optional<VideoCategory> actual = videoCategoryService.findByCode("fc.yoga");
 
         // Then
         assertTrue(actual.isPresent());

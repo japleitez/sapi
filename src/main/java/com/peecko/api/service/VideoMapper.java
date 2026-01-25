@@ -27,7 +27,7 @@ public class VideoMapper {
     public CategoryDTO toCategoryDTO(VideoCategory videoCategory, List<Video> videos, Lang lang) {
         CategoryDTO dto = new CategoryDTO();
         dto.setCode(videoCategory.getCode());
-        dto.setTitle(labelService.getCachedLabel(LabelService.PREFIX_VIDEO_CATEGORY + videoCategory.getLabel(), lang));
+        dto.setTitle(labelService.getCachedLabel(videoCategory.getCode(), lang));
         if (videos != null && !videos.isEmpty()) {
             dto.setVideos(videos.stream().map(video -> toVideoDTO(video, lang)).toList());
         }

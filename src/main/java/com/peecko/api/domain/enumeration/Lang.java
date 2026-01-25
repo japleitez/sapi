@@ -1,6 +1,7 @@
 package com.peecko.api.domain.enumeration;
 
 public enum Lang {
+    AA,
     EN,
     FR,
     DE,
@@ -10,7 +11,7 @@ public enum Lang {
         try {
             return Lang.valueOf(langCode.toUpperCase());
         } catch (Exception e) {
-            return EN;
+            return AA;
         }
     }
 

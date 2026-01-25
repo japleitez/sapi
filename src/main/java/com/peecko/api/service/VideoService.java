@@ -4,7 +4,6 @@ import com.peecko.api.domain.*;
 import com.peecko.api.domain.dto.CategoryDTO;
 import com.peecko.api.domain.dto.VideoDTO;
 import com.peecko.api.domain.enumeration.Lang;
-import com.peecko.api.repository.TodayVideoRepo;
 import com.peecko.api.repository.UserFavoriteVideoRepo;
 import com.peecko.api.repository.VideoCategoryRepo;
 import com.peecko.api.repository.VideoRepo;
@@ -15,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class VideoService {
@@ -23,17 +23,22 @@ public class VideoService {
     final VideoRepo videoRepo;
     final LabelService labelService;
     final CacheManager cacheManager;
-    final TodayVideoRepo todayVideoRepo;
     final VideoCategoryRepo videoCategoryRepo;
     final UserFavoriteVideoRepo userFavoriteVideoRepo;
     public static final int CATEGORY_VIDEOS_MAX_SIZE = 4;
 
-    public VideoService(VideoMapper videoMapper, VideoRepo videoRepo, LabelService labelService, CacheManager cacheManager, TodayVideoRepo todayVideoRepo, VideoCategoryRepo videoCategoryRepo, UserFavoriteVideoRepo userFavoriteVideoRepo) {
+    List<String> todayCategoryCodes = List.of(
+            "fc.upper.body",
+            "fc.core.body",
+            "fc.lower.body",
+            "fc.stretch"
+    );
+
+    public VideoService(VideoMapper videoMapper, VideoRepo videoRepo, LabelService labelService, CacheManager cacheManager, VideoCategoryRepo videoCategoryRepo, UserFavoriteVideoRepo userFavoriteVideoRepo) {
         this.videoMapper = videoMapper;
         this.videoRepo = videoRepo;
         this.labelService = labelService;
         this.cacheManager = cacheManager;
-        this.todayVideoRepo = todayVideoRepo;
         this.videoCategoryRepo = videoCategoryRepo;
         this.userFavoriteVideoRepo = userFavoriteVideoRepo;
     }
@@ -48,11 +53,18 @@ public class VideoService {
 
     @Cacheable(value = "todayVideos", key = "#lang.name()")
     public List<Video> getCachedTodayVideos(Lang lang) {
-        TodayVideo latestTodayVideo = todayVideoRepo.findFirstByLanguageOrderByReleaseDateDesc(lang).orElse(null);
-        if (latestTodayVideo != null) {
-            return videoRepo.findByIdIn(latestTodayVideo.getVideoIds());
+        Set<Long> videoIds = new HashSet<>();
+        for (String code : todayCategoryCodes) {
+            videoCategoryRepo.findByCode(code)
+                    .map(category -> getCachedVideosByCategoryAndLang(category, lang))
+                    .filter(videos -> !videos.isEmpty())
+                    .map(videos -> videos.get(ThreadLocalRandom.current().nextInt(videos.size())))
+                    .ifPresent(video -> videoIds.add(video.getId()));
         }
-        return List.of();
+        if (videoIds.isEmpty()) {
+            return List.of();
+        }
+        return videoRepo.findByIdIn(videoIds);
     }
 
     @Cacheable(value = "videoLibrary", key = "#lang.name()")

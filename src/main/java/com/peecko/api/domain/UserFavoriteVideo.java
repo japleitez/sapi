@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "user_favorite_video")
+@Table(name = "video_fav")
 public class UserFavoriteVideo implements Serializable {
 
     private static final long serialVersionUID = 1L;

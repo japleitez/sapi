@@ -85,7 +85,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   mvc:
-    problemdetails:
+    problem-details:
       enabled: true
   task:
     execution:

@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "label")
+@Table(name = "label_translation")
 public class Label implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -18,7 +18,7 @@ public class Label implements Serializable {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "language", nullable = false)
+    @Column(name = "lang", nullable = false)
     private Lang lang;
 
     @Column(name = "code")

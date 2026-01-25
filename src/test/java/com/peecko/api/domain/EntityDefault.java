@@ -19,9 +19,6 @@ public abstract class EntityDefault {
     public static final Long CUSTOMER_ID = 1L;
     public static final String TITLE = "default-title";
     public static final String VIDEO_CATEGORY_TITLE = "default-video-category";
-
-    public static final String VIDEO_CATEGORY_LABEL = "video.category.default";
-
     public static final String LABEL = "default.label";
     public static final String MESSAGE = "default-message";
     public static final String VIDEO_CODE = "default-video-code";
@@ -35,10 +32,9 @@ public abstract class EntityDefault {
     public static final String VIDEO_TAG_RELAX = "relax";
     public static final String VIDEO_TAG_ENERGY  = "energy";
     public static final String VIDEO_TAGS = VIDEO_TAG_ALL + "," + VIDEO_TAG_RELAX + "," + VIDEO_TAG_ENERGY;
-    public static final String VIDEO_CATEGORY_CODE = "VC_CODE";
-    public static final String YOGA = "YOGA";
-    public static final String PILATES = "PILATES";
-    public static final String FLEXIBILITY = "FLEXIBILITY";
+    public static final String YOGA = "Yoga";
+    public static final String PILATES = "Pilates";
+    public static final String FLEXIBILITY = "Flexibility";
 
     public static final String COACH_NAME = "Chris Heria";
     public static final String COACH_RESUME = "default-resume";

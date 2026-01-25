@@ -74,9 +74,6 @@ class AuthResourceTest {
    CacheManager cacheManager;
 
    @Autowired
-   TodayVideoRepo todayVideoRepo;
-
-   @Autowired
    VideoCategoryRepo videoCategoryRepo;
 
    @Autowired
@@ -281,18 +278,6 @@ class AuthResourceTest {
    }
 
    @Test
-   @Order(5)
-   public void test05GetTodayVideos() throws Exception {
-      mockMvc.perform(get("/api/videos/today")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .header("Authorization", "Bearer " + token))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.greeting", notNullValue()))
-            .andExpect(jsonPath("$.tags.length()", not(empty())))
-            .andExpect(jsonPath("$.videos.length()", is(activeAllEnIds.size())));
-   }
-
-   @Test
    @Order(6)
    public void test06GetCategories() throws Exception {
       mockMvc.perform(get("/api/videos/categories")
@@ -300,23 +285,23 @@ class AuthResourceTest {
                   .header("Authorization", "Bearer " + token))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.categories.length()", is(2)))
-            .andExpect(jsonPath("$.categories[0].code").value(EntityDefault.PILATES))
-            .andExpect(jsonPath("$.categories[0].title").value(pilates.getText()))
+            .andExpect(jsonPath("$.categories[0].code").value("fc.pilates"))
+            .andExpect(jsonPath("$.categories[0].title").value("Pilates"))
             .andExpect(jsonPath("$.categories[0].videos.length()", is(activePilatesTopCap)))
-            .andExpect(jsonPath("$.categories[1].code").value(EntityDefault.YOGA))
-            .andExpect(jsonPath("$.categories[1].title").value(yoga.getText()))
+            .andExpect(jsonPath("$.categories[1].code").value("fc.yoga"))
+            .andExpect(jsonPath("$.categories[1].title").value("Yoga"))
             .andExpect(jsonPath("$.categories[1].videos.length()", is(activeYogaTopCap)));
    }
 
    @Test
    @Order(7)
    public void test07GetCategory() throws Exception {
-      mockMvc.perform(get("/api/videos/categories/{code}", EntityDefault.YOGA)
+      mockMvc.perform(get("/api/videos/categories/{code}", "fc.yoga")
                   .contentType(MediaType.APPLICATION_JSON)
                   .header("Authorization", "Bearer " + token))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.code").value(EntityDefault.YOGA))
-            .andExpect(jsonPath("$.title").value(yoga.getText()))
+            .andExpect(jsonPath("$.code").value("fc.yoga"))
+            .andExpect(jsonPath("$.title").value("Yoga"))
             .andExpect(jsonPath("$.videos.length()", is(activeYogaTopCap)));
    }
 
@@ -352,23 +337,23 @@ class AuthResourceTest {
             .andExpect(jsonPath("$.videos[?(@.code == '" + yoga1En.getCode() + "')]", hasSize(1)))
             .andExpect(jsonPath("$.videos[?(@.code == '" + pilates1En.getCode() + "')]", hasSize(1)));
 
-      // validate there 1 favorite vide in the yoga category
-      mockMvc.perform(get("/api/videos/categories/{code}", EntityDefault.YOGA)
+      // validate there 1 favorite video in the yoga category
+      mockMvc.perform(get("/api/videos/categories/{code}", "fc.yoga")
                   .contentType(MediaType.APPLICATION_JSON)
                   .header("Authorization", "Bearer " + token))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.code").value(EntityDefault.YOGA))
-            .andExpect(jsonPath("$.title").value(yoga.getText()))
+            .andExpect(jsonPath("$.code").value("fc.yoga"))
+            .andExpect(jsonPath("$.title").value("Yoga"))
             .andExpect(jsonPath("$.videos.length()", is(activeYogaEnIds.size())))
             .andExpect(jsonPath("$.videos[?(@.favorite == true)]", hasSize(1)));
 
       // validate there 1 favorite video in the pilates category
-      mockMvc.perform(get("/api/videos/categories/{code}", EntityDefault.PILATES)
+      mockMvc.perform(get("/api/videos/categories/{code}", "fc.pilates")
                   .contentType(MediaType.APPLICATION_JSON)
                   .header("Authorization", "Bearer " + token))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.code").value(EntityDefault.PILATES))
-            .andExpect(jsonPath("$.title").value(pilates.getText()))
+            .andExpect(jsonPath("$.code").value("fc.pilates"))
+            .andExpect(jsonPath("$.title").value("Pilates"))
             .andExpect(jsonPath("$.videos.length()", is(activePilatesEnIds.size())))
             .andExpect(jsonPath("$.videos[?(@.favorite == true)]", hasSize(1)));
 
@@ -637,9 +622,9 @@ class AuthResourceTest {
       videosPilates = new ArrayList<>();
 
       // Video Category Labels
-      yoga = labelRepo.save(new Label(Lang.EN, "video.category.yoga", "Yoga"));
-      pilates = labelRepo.save(new Label(Lang.EN, "video.category.pilates", "Pilates"));
-      flexibility = labelRepo.save(new Label(Lang.EN, "video.category.flexibility", "Flexibility"));
+      yoga = labelRepo.save(new Label(Lang.EN, "fc.yoga", "Yoga"));
+      pilates = labelRepo.save(new Label(Lang.EN, "fc.pilates", "Pilates"));
+      flexibility = labelRepo.save(new Label(Lang.EN, "fc.flexibility", "Flexibility"));
 
       // Video Tag Labels
       all = labelRepo.save(new Label(Lang.EN, "video.tag.all", "All"));
@@ -648,14 +633,13 @@ class AuthResourceTest {
       strength = labelRepo.save(new Label(Lang.EN, "video.tag.strength", "Strength"));
 
       // Video Categories
-      yogaCategory = createVideoCategory(EntityDefault.YOGA, "yoga");
+      yogaCategory = createVideoCategory("fc.yoga", "Yoga");
       videoCategoryRepo.save(yogaCategory);
 
-
-      pilatesCategory = createVideoCategory(EntityDefault.PILATES, "pilates");
+      pilatesCategory = createVideoCategory("fc.pilates", "Pilates");
       videoCategoryRepo.save(pilatesCategory);
 
-      flexibilityCategory = createVideoCategory(EntityDefault.FLEXIBILITY, "flexibility");
+      flexibilityCategory = createVideoCategory("fc.flexibility", "flexibility");
       flexibilityCategory.setArchived(archived);
       videoCategoryRepo.save(flexibilityCategory);
 
@@ -709,9 +693,6 @@ class AuthResourceTest {
       activePilatesEnIds = allVideos.stream()
             .filter(v -> v.getLanguage() == Lang.EN && v.getArchived() == null && v.getVideoCategory().getCode().equals(pilatesCategory.getCode()))
             .map(Video::getId).collect(Collectors.toSet());
-
-      TodayVideo todayVideoEn = new TodayVideo(Lang.EN, LocalDate.now(), activeAllEnIds);
-      todayVideoRepo.save(todayVideoEn);
 
    }
 
@@ -781,11 +762,10 @@ class AuthResourceTest {
       return language;
    }
 
-   private VideoCategory createVideoCategory(String code, String label) {
+   private VideoCategory createVideoCategory(String code, String title) {
       VideoCategory category = new VideoCategory();
       category.setCode(code);
-      category.setTitle(NameUtils.toCamelCase(code));
-      category.setLabel(label);
+      category.setTitle(title);
       category.setCreated(created);
       category.setReleased(released);
       category.setArchived(null);

@@ -51,11 +51,10 @@ public abstract class EntityBuilder {
         return notification;
     }
 
-    public static VideoCategory buildVideoCategory() {
+    public static VideoCategory buildVideoCategory(String code, String title) {
         VideoCategory category = new VideoCategory();
-        category.setCode(EntityDefault.VIDEO_CATEGORY_CODE);
-        category.setTitle(EntityDefault.TITLE);
-        category.setLabel(EntityDefault.LABEL);
+        category.setCode(code);
+        category.setTitle(title);
         return category;
     }
 

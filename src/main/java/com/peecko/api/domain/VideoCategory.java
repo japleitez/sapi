@@ -25,9 +25,6 @@ import java.util.Set;
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "label", nullable = false)
-    private String label;
-
     @Column(name = "released")
     private LocalDate released;
 
@@ -63,14 +60,6 @@ import java.util.Set;
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
     }
 
     public Instant getCreated() {

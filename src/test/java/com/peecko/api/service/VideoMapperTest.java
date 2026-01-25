@@ -54,8 +54,7 @@ class VideoMapperTest {
       // Given
       createLabels();
 
-      VideoCategory category = createBaseVideoCategory();
-      category.setLabel("yoga");
+      VideoCategory category = createBaseVideoCategory("fc.yoga", "Yoga");
 
       Coach coach = createBaseCoach();
 
@@ -67,8 +66,8 @@ class VideoMapperTest {
       CategoryDTO dto = videoMapper.toCategoryDTO(category, videos, Lang.EN);
 
       // Then
-      assertEquals(dto.getCode(), category.getCode());
-      assertEquals(dto.getTitle(), yoga.getText());
+      assertEquals(dto.getCode(), "fc.yoga");
+      assertEquals(dto.getTitle(), "Yoga");
       assertEquals(2, dto.getVideos().size());
    }
 
@@ -77,22 +76,22 @@ class VideoMapperTest {
       // Given
       createLabels();
 
-      VideoCategory category = createBaseVideoCategory();
-      category.setLabel("pilates");
+      VideoCategory category = createBaseVideoCategory("fc.yoga", "Yoga");
 
       // When
       CategoryDTO dto = videoMapper.toCategoryDTO(category, new ArrayList<>(), Lang.EN);
 
       // Then
-      assertEquals(dto.getCode(), category.getCode());
-      assertEquals(dto.getTitle(), pilates.getText());
+      assertEquals(dto.getCode(), "fc.yoga");
+      assertEquals(dto.getTitle(), "Yoga");
       assertTrue(dto.getVideos().isEmpty());
    }
 
    @Test
    void toVideoDtoNoTranslation() {
+      VideoCategory videoCategory = createBaseVideoCategory("fc.yoga", "Yoga");
       // Given
-      Video video = createBaseVideo(Lang.EN, createBaseCoach(), createBaseVideoCategory());
+      Video video = createBaseVideo(Lang.EN, createBaseCoach(), videoCategory);
 
       // When
       VideoDTO dto = videoMapper.toVideoDTO(video, Lang.EN);
@@ -121,7 +120,8 @@ class VideoMapperTest {
    void toVideoDTO() {
       // Given
       createLabels();
-      Video video = createBaseVideo(Lang.EN, createBaseCoach(), createBaseVideoCategory());
+      VideoCategory category = createBaseVideoCategory("fc.yoga", "Yoga");
+      Video video = createBaseVideo(Lang.EN, createBaseCoach(), category);
       // set fields that required label translation
       video.setIntensity(Intensity.LOW);
       video.setAudience("all");
@@ -155,7 +155,8 @@ class VideoMapperTest {
    @Test
    void toVideoDTOWithNullCoach() {
       // Given
-      Video video = createBaseVideo(Lang.FR, null, createBaseVideoCategory());
+      VideoCategory category = createBaseVideoCategory("fc.yoga", "Yoga");
+      Video video = createBaseVideo(Lang.FR, null, category);
 
       // When
       VideoDTO dto = videoMapper.toVideoDTO(video, Lang.FR);
@@ -171,7 +172,8 @@ class VideoMapperTest {
    @Test
    void toVideoDTOWithNullAudience() {
       // Given
-      Video video = createBaseVideo(Lang.FR, null, createBaseVideoCategory());
+      VideoCategory category = createBaseVideoCategory("fc.yoga", "Yoga");
+      Video video = createBaseVideo(Lang.FR, null, category);
       video.setAudience(null);
 
       // When
@@ -184,7 +186,8 @@ class VideoMapperTest {
    @Test
    void toVideoDTOWithNullIntensity() {
       // Given
-      Video video = createBaseVideo(Lang.FR, null, createBaseVideoCategory());
+      VideoCategory category = createBaseVideoCategory("fc.yoga", "Yoga");
+      Video video = createBaseVideo(Lang.FR, null, category);
       video.setIntensity(null);
 
       // When
@@ -197,7 +200,8 @@ class VideoMapperTest {
    @Test
    void toVideoDTOWithNullTags() {
       // Given
-      Video video = createBaseVideo(Lang.FR, null, createBaseVideoCategory());
+      VideoCategory category = createBaseVideoCategory("fc.yoga", "Yoga");
+      Video video = createBaseVideo(Lang.FR, null, category);
       video.setTags(null);
 
       // When
@@ -230,11 +234,10 @@ class VideoMapperTest {
       return video;
    }
 
-   private VideoCategory createBaseVideoCategory() {
+   private VideoCategory createBaseVideoCategory(String code, String title) {
       VideoCategory category = new VideoCategory();
-      category.setCode(EntityDefault.VIDEO_CATEGORY_CODE);
-      category.setTitle(EntityDefault.VIDEO_CATEGORY_TITLE);
-      category.setLabel(EntityDefault.VIDEO_CATEGORY_LABEL);
+      category.setCode(code);
+      category.setTitle(title);
       return category;
    }
 
@@ -249,8 +252,8 @@ class VideoMapperTest {
    }
 
    private void createLabels() {
-      yoga = labelRepo.save(new Label(Lang.EN, "video.category.yoga", "Yoga"));
-      pilates = labelRepo.save(new Label(Lang.EN, "video.category.pilates", "Pilates"));
+      yoga = labelRepo.save(new Label(Lang.EN, "fc.yoga", "Yoga"));
+      pilates = labelRepo.save(new Label(Lang.EN, "fc.pilates", "Pilates"));
 
       intensityLow = labelRepo.save(new Label(Lang.EN, "video.intensity.low", "Low"));
       audienceAll = labelRepo.save(new Label(Lang.EN, "video.audience.all", "All"));
