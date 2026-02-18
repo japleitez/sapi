@@ -46,10 +46,10 @@ public class VideoMapper {
         dto.setPlayer(video.getPlayer().name());
         dto.setFavorite(video.isFavorite());
         if (StringUtils.hasText(video.getAudience())) {
-            dto.setAudience(labelService.getCachedLabel(LabelService.resolveAudienceLabel(video.getAudience()), lang));
+            dto.setAudience(labelService.getCachedLabel(video.getAudience(), lang));
         }
         if (video.getIntensity() != null) {
-            dto.setIntensity(labelService.getCachedLabel(LabelService.resolveIntensityLabel(video.getIntensity()), lang));
+            dto.setIntensity(labelService.getCachedLabel(LabelService.INTENSITY_TAG + video.getIntensity().name(), lang));
         }
         if (StringUtils.hasText(video.getTags())) {
             dto.setTags(buildVideoTagsAsLabelList(video.getTags(), lang));

@@ -15,9 +15,9 @@ import java.util.List;
 public class LabelService {
 
     final LabelRepo labelRepo;
-    public static final String PREFIX_VIDEO_TAG = "video.tag.";
-    public static final String PREFIX_VIDEO_AUDIENCE = "video.audience.";
-    public static final String PREFIX_VIDEO_INTENSITY = "video.intensity.";
+    public static final String PREFIX_VIDEO_TAG = "fc.tag.";
+
+    public static final String INTENSITY_TAG = "intensity.";
 
     public LabelService(LabelRepo labelRepo) {
         this.labelRepo = labelRepo;
@@ -26,14 +26,6 @@ public class LabelService {
     @Cacheable(value = "labels", key = "#code + '-' + #lang.name()")
     public String getCachedLabel(String code, Lang lang) {
         return labelRepo.findByCodeAndLang(code, lang).map(Label::getText).orElse(code);
-    }
-
-    public static String resolveAudienceLabel(@NotNull String audience) {
-        return LabelService.PREFIX_VIDEO_AUDIENCE + audience.toLowerCase();
-    }
-
-    public static String resolveIntensityLabel(@NotNull Intensity intensity) {
-        return LabelService.PREFIX_VIDEO_INTENSITY + intensity.name().toLowerCase();
     }
 
     public static String resolveVideoTagLabel(@NotNull String tag) {

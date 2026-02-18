@@ -127,7 +127,8 @@ public class VideoResource extends BaseResource {
         if (playListService.existsPlayList(Login.getUser(), request.name())) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.duplicate")));
         }
-        PlayList created = playListService.createPlayList(Login.getUserId(), request.name());
+        Long userId = Login.getUserId();
+        PlayList created = playListService.createPlayList(userId, request.name());
         PlayListDTO playlistDTO = playListService.toPlayListDTO(created);
         playlistDTO.setUsername(Login.getUser().getUsername());
         return ResponseEntity.ok(playlistDTO);

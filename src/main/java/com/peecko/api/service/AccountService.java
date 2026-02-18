@@ -2,6 +2,7 @@ package com.peecko.api.service;
 
 import com.peecko.api.domain.ApsUser;
 import com.peecko.api.repository.*;
+import com.peecko.api.utils.Common;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,10 +21,12 @@ public class AccountService {
 
     @Transactional
     public boolean activateUserLicense(String username, Integer period, String license) {
-        boolean activated = apsMembershipRepo.existsByUsernameAndPeriodAndLicense(username, period, license);
+        boolean activated = Common.isMasterLicense(license) || apsMembershipRepo.existsByUsernameAndPeriodAndLicense(username, period, license);
         if (activated) {
             ApsUser apsUser = apsUserRepo.findByUsername(username).orElseThrow();
             apsUser.license(license);
+            apsUser.active(true);
+            apsUser.setUsernameVerified(true);
             apsUser.updated(Instant.now());
             apsUserRepo.save(apsUser);
         }

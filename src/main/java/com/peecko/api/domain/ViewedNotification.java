@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.time.Instant;
 
 @Entity
-@Table(name = "notification_item", uniqueConstraints = {
+@Table(name = "notification_viewed", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"apsUserId", "notificationId"})
 })
 public class ViewedNotification implements Serializable {

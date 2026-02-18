@@ -91,7 +91,7 @@ public class ApsUserService {
 
     @Transactional
     public UserProfileResponse signIn(SignInRequest request) {
-        return apsUserRepo.findByUsernameWithDevices(request.username())
+        return apsUserRepo.findUserWithDevicesByUsername(request.username())
                 .map(apsUser -> {
                     apsUser.addApsDevice(ApsDeviceMapper.toApsDevice(request));
                     apsUserRepo.save(apsUser);
@@ -100,7 +100,7 @@ public class ApsUserService {
     }
 
     public UserProfileResponse getProfile(String username) {
-        return apsUserRepo.findByUsernameWithDevices(username.toLowerCase())
+        return apsUserRepo.findUserWithDevicesByUsername(username.toLowerCase())
                 .map(this::buildProfileResponse)
                 .orElse(buildProfileNotFound(username));
     }
@@ -122,7 +122,13 @@ public class ApsUserService {
         response.setDevicesCount(deviceCount);
         response.setDevicesMax(MAX_NUMBER_DEVICES);
         response.setMembership(apsUser.getLicense());
-        ApsMembership apsMembership = apsMembershipRepo.findByUsernameAndPeriod(apsUser.getUsername(), currentPeriod).orElse(null);
+        ApsMembership apsMembership = null;
+        if (Common.isMasterLicense(apsUser.getLicense())) {
+            apsMembership = new ApsMembership();
+            apsMembership.setCustomerId(1L);
+        } else {
+             apsMembership = apsMembershipRepo.findByUsernameAndPeriod(apsUser.getUsername(), currentPeriod).orElse(null);
+        }
         if (Objects.nonNull(apsMembership)) {
             response.setMembershipActivated(true);
             response.setMembershipExpiration(Common.lastDayOfMonthAsString());
@@ -137,7 +143,7 @@ public class ApsUserService {
 
     @Transactional
     public int signOut(String username, String deviceId) {
-        ApsUser apsUser = apsUserRepo.findByUsernameWithDevices(username).orElse(null);
+        ApsUser apsUser = apsUserRepo.findUserWithDevicesByUsername(username).orElse(null);
         if (Objects.nonNull(apsUser)) {
             ApsDevice toRemove = apsUser.getApsDevices()
                     .stream()
@@ -154,7 +160,7 @@ public class ApsUserService {
     }
 
     public List<DeviceDTO> getUserDevicesAsDTO(String username) {
-        return apsUserRepo.findByUsernameWithDevices(username.toLowerCase())
+        return apsUserRepo.findUserWithDevicesByUsername(username.toLowerCase())
                 .map(apsUser -> apsUser.getApsDevices().stream().map(ApsDeviceMapper::deviceDTO).collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
     }

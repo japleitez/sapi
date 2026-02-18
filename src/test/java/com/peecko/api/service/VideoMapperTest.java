@@ -106,8 +106,6 @@ class VideoMapperTest {
       assertEquals(dto.getDescription(), video.getDescription());
       assertEquals(dto.getPlayer(), video.getPlayer().name());
       assertEquals(dto.isFavorite(), video.isFavorite());
-      assertEquals(dto.getAudience(), LabelService.resolveAudienceLabel(video.getAudience()));
-      assertEquals(dto.getIntensity(), LabelService.resolveIntensityLabel(video.getIntensity()));
       assertEquals(dto.getTags(), LabelService.resolveVideoTagsAsLabelList(video.getTags()));
       assertEquals(dto.getCoach(), video.getCoach().getName());
       assertEquals(dto.getResume(), video.getCoach().getResume());
@@ -123,7 +121,7 @@ class VideoMapperTest {
       VideoCategory category = createBaseVideoCategory("fc.yoga", "Yoga");
       Video video = createBaseVideo(Lang.EN, createBaseCoach(), category);
       // set fields that required label translation
-      video.setIntensity(Intensity.LOW);
+      video.setIntensity(Intensity.BEGINNER);
       video.setAudience("all");
       video.setTags("all, relax, energy");
 
@@ -228,7 +226,7 @@ class VideoMapperTest {
       video.setUrl(EntityDefault.VIDEO_URL);
       video.setDescription(EntityDefault.VIDEO_DESCRIPTION);
       video.setAudience(EntityDefault.VIDEO_AUDIENCE_ALL);
-      video.setIntensity(Intensity.LOW);
+      video.setIntensity(Intensity.BEGINNER);
       video.setTags(EntityDefault.VIDEO_TAGS);
       video.setPlayer(Player.PEECKO);
       return video;

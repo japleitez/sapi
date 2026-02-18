@@ -68,10 +68,6 @@ public class Video implements Serializable {
     @Column(name = "created")
     private Instant created;
 
-    LocalDate publicationDate;
-
-    public int selectionCount;
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "video_category_id")
     @JsonIgnoreProperties(value = { "videos" }, allowSetters = true)
@@ -235,12 +231,4 @@ public class Video implements Serializable {
         this.favorite = favorite;
     }
 
-
-    public void incrementSelectionCount() {
-        this.selectionCount++;
-    }
-
-    public long getDaysSincePublication() {
-        return ChronoUnit.DAYS.between(publicationDate, LocalDate.now());
-    }
 }

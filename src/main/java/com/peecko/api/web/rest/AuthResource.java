@@ -137,7 +137,7 @@ public class AuthResource extends BaseResource {
         if (apsUserService.doesNotExist(request.username())) {
             return ResponseEntity.badRequest().build();
         }
-        String requestId = pinCodeService.generatePinCode(request.username(), Verification.RESET_PASSWORD);
+        String requestId = pinCodeService.generatePinCode(request.username());
         return ResponseEntity.ok(new PinCodeResponse(requestId));
     }
 

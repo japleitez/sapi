@@ -11,7 +11,7 @@ public enum Lang {
         try {
             return Lang.valueOf(langCode.toUpperCase());
         } catch (Exception e) {
-            return AA;
+            return EN;
         }
     }
 

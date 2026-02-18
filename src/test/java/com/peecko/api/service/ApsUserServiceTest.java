@@ -182,7 +182,7 @@ class ApsUserServiceTest {
 
         //WHEN
         int deviceCount = apsUserService.signOut(signIn.username(), signIn.deviceId());
-        ApsUser apsUser = apsUserRepo.findByUsernameWithDevices(signIn.username()).orElseThrow();
+        ApsUser apsUser = apsUserRepo.findUserWithDevicesByUsername(signIn.username()).orElseThrow();
 
         //THEN
         assertEquals(0, deviceCount);

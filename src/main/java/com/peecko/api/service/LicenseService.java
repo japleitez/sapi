@@ -3,6 +3,7 @@ package com.peecko.api.service;
 import com.peecko.api.domain.ApsUser;
 import com.peecko.api.repository.ApsMembershipRepo;
 import com.peecko.api.repository.ApsUserRepo;
+import com.peecko.api.utils.Common;
 import com.peecko.api.utils.PeriodUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,6 +31,10 @@ public class LicenseService {
         ApsUser apsUser = apsUserRepo.findByUsername(username).orElse(null);
         if (apsUser == null) {
             return false;
+        }
+        // has master license
+        if (Common.isMasterLicense(apsUser.getLicense())) {
+            return true;
         }
         // if the user has a valid license in the current period, we return true
         if (apsMembershipRepo

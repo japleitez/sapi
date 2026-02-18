@@ -53,10 +53,11 @@ public class VideoService {
 
     @Cacheable(value = "todayVideos", key = "#lang.name()")
     public List<Video> getCachedTodayVideos(Lang lang) {
+        //TODO for the moment AA only
         Set<Long> videoIds = new HashSet<>();
         for (String code : todayCategoryCodes) {
             videoCategoryRepo.findByCode(code)
-                    .map(category -> getCachedVideosByCategoryAndLang(category, lang))
+                    .map(category -> getCachedVideosByCategoryAndLang(category, Lang.AA))
                     .filter(videos -> !videos.isEmpty())
                     .map(videos -> videos.get(ThreadLocalRandom.current().nextInt(videos.size())))
                     .ifPresent(video -> videoIds.add(video.getId()));
@@ -73,24 +74,38 @@ public class VideoService {
         List<VideoCategory> categories = videoCategoryRepo.findReleasedCategories(today);
         Map<VideoCategory, List<Video>> videoCategoryMap = new HashMap<>();
         for (VideoCategory category : categories) {
-            List<Video> latestVideos = videoRepo.findLatestByCategoryAndLang(category, lang, today, PageRequest.of(0, CATEGORY_VIDEOS_MAX_SIZE));
-            videoCategoryMap.put(category, latestVideos);
+            //TODO for the moment AA only
+            List<Video> latestVideos = videoRepo.findByCategoryAndLang(category, Lang.AA, today);
+            if (!latestVideos.isEmpty()) {
+                int endIndex = Math.min(4, latestVideos.size());
+                List<Video> topVideos = new ArrayList<>(latestVideos.subList(0, endIndex));
+                videoCategoryMap.put(category, latestVideos);
+            }
         }
         return videoCategoryMap;
     }
 
     @Cacheable(value = "videosByCategory", key = "#videoCategory.code + '-' + #lang.name()")
     public List<Video> getCachedVideosByCategoryAndLang(VideoCategory videoCategory, Lang lang) {
-        return videoRepo.findByCategoryAndLang(videoCategory, lang, LocalDate.now());
+        //TODO for the moment AA only
+        return videoRepo.findByCategoryAndLang(videoCategory, Lang.AA, LocalDate.now());
     }
 
     public List<String> getVideoTags(List<VideoDTO> videos, Lang lang) {
+        if (videos.isEmpty() || lang == null) {
+            return Collections.emptyList();
+        }
         return videos.stream()
+                .filter(Objects::nonNull) // filter null videos
                 .map(VideoDTO::getTags)
+                .filter(Objects::nonNull) // filter null tag lists
                 .flatMap(Collection::stream)
+                .filter(Objects::nonNull) // filter null tags
                 .distinct()
                 .map(tag -> labelService.getCachedLabel(tag, lang))
-                .sorted().toList();
+                .filter(Objects::nonNull) // filter null labels
+                .sorted()
+                .toList();
     }
 
     public List<VideoDTO> toVideoDTOs(List<Video> videos, Lang lang) {

@@ -66,7 +66,7 @@ public abstract class EntityBuilder {
         video.setLanguage(EntityDefault.USER_LANG);
         video.setUrl(EntityDefault.VIDEO_URL);
         video.setPlayer(Player.PEECKO);
-        video.setIntensity(Intensity.LOW);
+        video.setIntensity(Intensity.BEGINNER);
         video.setDuration(EntityDefault.VIDEO_DURATION);
         return video;
     }

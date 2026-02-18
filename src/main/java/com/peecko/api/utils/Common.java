@@ -12,6 +12,10 @@ public abstract class Common {
 
     public static final int MAX_DEVICES_ALLOWED = 3;
 
+    public static boolean isMasterLicense(String license) {
+        //TODO temporal master license
+        return "11112222333344445555".equals(license);
+    }
     private Common() {
        throw new IllegalStateException("Utility class");
     }

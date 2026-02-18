@@ -38,8 +38,6 @@ public class PinCode implements Serializable {
     @Column(name = "expire_at", nullable = false)
     LocalDateTime expireAt;
 
-    Verification verification;
-
     public UUID getRequestId() {
         return requestId;
     }
@@ -96,11 +94,4 @@ public class PinCode implements Serializable {
         this.expireAt = expireAt;
     }
 
-    public Verification getVerification() {
-        return verification;
-    }
-
-    public void setVerification(Verification verification) {
-        this.verification = verification;
-    }
 }

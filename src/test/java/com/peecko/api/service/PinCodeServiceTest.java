@@ -59,7 +59,7 @@ class PinCodeServiceTest {
         apsUserRepo.flush();
 
         // WHEN
-        String requestId = pinCodeService.generatePinCode(apsUser.getUsername(), Verification.RESET_PASSWORD);
+        String requestId = pinCodeService.generatePinCode(apsUser.getUsername());
 
         // THEN
         assertNotNull(requestId);
@@ -73,7 +73,6 @@ class PinCodeServiceTest {
         pinCode.setEmail(EntityDefault.USER_EMAIL);
         pinCode.setCode(PinUtils.randomDigitsAsString(4));
         pinCode.setExpireAt(LocalDateTime.now().plusMinutes(10));
-        pinCode.setVerification(Verification.RESET_PASSWORD);
         pinCodeRepo.save(pinCode);
 
         String requestId = pinCode.getRequestId().toString();
@@ -96,7 +95,6 @@ class PinCodeServiceTest {
         pinCode.setCode(code);
         pinCode.setLanguage(Lang.FR.name());
         pinCode.setExpireAt(LocalDateTime.now().plusMinutes(10));
-        pinCode.setVerification(Verification.RESET_PASSWORD);
         pinCodeRepo.save(pinCode);
 
         // WHEN

@@ -42,14 +42,13 @@ public class PinCodeService {
     }
 
     @Transactional
-    public String generatePinCode(String username, Verification verification) {
+    public String generatePinCode(String username) {
         ApsUser apsUser = apsUserRepo.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found " + username));
         PinCode pinCode = new PinCode();
         pinCode.setLanguage(apsUser.getLanguage().name());
         pinCode.setEmail(username);
         pinCode.setCode(PinUtils.randomDigitsAsString(4));
         pinCode.setExpireAt(LocalDateTime.now().plusMinutes(10));
-        pinCode.setVerification(verification);
         pinCodeRepo.save(pinCode);
         TransactionSynchronizationManager.registerSynchronization(new NotifyPinCode(pinCode));
         return pinCode.getRequestId().toString();
