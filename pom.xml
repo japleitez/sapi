@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.peecko</groupId>
 	<artifactId>api</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>api</name>
 	<description>Peecko API </description>
     <properties>
@@ -278,4 +278,24 @@
 		</plugins>
 	</build>
 
+	<profiles>
+		<profile>
+			<id>prod</id>
+			<properties>
+				<environment>production</environment>
+			</properties>
+			<build>
+				<!-- specific build configuration -->
+			</build>
+		</profile>
+		<profile>
+			<id>dev</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<environment>development</environment>
+			</properties>
+		</profile>
+	</profiles>
 </project>

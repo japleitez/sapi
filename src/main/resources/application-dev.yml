@@ -4,9 +4,13 @@
 # ===================================================================
 logging:
   level:
-    root: WARN
-    com.peecko.api: DEBUG
+    ROOT: WARN
+    com.peecko.api: INFO
     org.springframework: WARN
+    org.springframework.web: WARN
+    org.hibernate: WARN
+    org.hibernate.sql: WARN
+    org.hibernate.type.descriptor.sql: WARN
 
 server:
   port: 8080
@@ -22,13 +26,9 @@ spring:
     serialization:
       indent-output: true
   datasource:
-    type: com.zaxxer.hikari.HikariDataSource
     url: jdbc:postgresql://localhost:5432/admin
     username: admin
     password:
-    hikari:
-      poolName: Hikari
-      auto-commit: false
   mail:
     host: smtp.office365.com
     port: 587

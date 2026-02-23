@@ -2,6 +2,7 @@ package com.peecko.api.web.rest;
 
 import com.peecko.api.domain.*;
 import com.peecko.api.domain.dto.*;
+import com.peecko.api.domain.enumeration.Lang;
 import com.peecko.api.security.Login;
 import com.peecko.api.service.*;
 import com.peecko.api.security.Licensed;
@@ -48,7 +49,7 @@ public class VideoResource extends BaseResource {
     public ResponseEntity<TodayResponse> getTodayVideos() {
         ApsUser apsUser = Login.getUser();
         String greeting = labelService.getCachedLabel("greeting.today", apsUser.getLanguage());
-        List<Video> todayVideos = videoService.getCachedTodayVideos(apsUser.getLanguage());
+        List<Video> todayVideos = videoService.getCachedTodayVideos(Lang.AA);
         videoService.resolveFavorites(todayVideos, apsUser.getId());
         List<VideoDTO> videos = videoService.toVideoDTOs(todayVideos, apsUser.getLanguage());
         List<String> tags = videoService.getVideoTags(videos, apsUser.getLanguage());
@@ -62,7 +63,7 @@ public class VideoResource extends BaseResource {
     public ResponseEntity<LibraryResponse> getLibrary() {
         ApsUser apsUser = Login.getUser();
         String greeting = labelService.getCachedLabel("greeting.library", apsUser.getLanguage());
-        Map<VideoCategory, List<Video>>  latestVideos = videoService.getCachedLatestVideo(apsUser.getLanguage());
+        Map<VideoCategory, List<Video>>  latestVideos = videoService.getCachedLatestVideo(Lang.AA);
         videoService.resolveFavorites(latestVideos, apsUser.getId());
         List<CategoryDTO> categories = videoService.toCategoryDTOs(latestVideos, apsUser.getLanguage());
         return ResponseEntity.ok(new LibraryResponse(greeting, categories));
@@ -78,7 +79,7 @@ public class VideoResource extends BaseResource {
             return ResponseEntity.notFound().build();
         }
         ApsUser apsUser = Login.getUser();
-        List<Video> videos = videoService.getCachedVideosByCategoryAndLang(category, apsUser.getLanguage());
+        List<Video> videos = videoService.getCachedVideosByCategoryAndLang(category, Lang.AA);
         videoService.resolveFavorites(videos, apsUser.getId());
         CategoryDTO categoryDTO = videoService.toCategoryDTO(category, videos, apsUser.getLanguage());
         return ResponseEntity.ok(categoryDTO);
@@ -119,7 +120,7 @@ public class VideoResource extends BaseResource {
      * Create a new playlist with the given name.
      */
     @Licensed
-    @PostMapping("/playlists")
+    @PostMapping("/playlists/")
     public ResponseEntity<?> createPlaylist(@Valid @RequestBody CreatePlaylistRequest request) {
         if (!StringUtils.hasText(request.name())) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.name.required")));

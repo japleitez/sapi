@@ -81,11 +81,11 @@ public class ApsUserService {
         apsUser.name(NameUtils.toCamelCase(request.name()));
         apsUser.language(Lang.fromString(request.language()));
         apsUser.password(passwordEncoder.encode(request.password()));
-        apsUser.active(false);
+        apsUser.active(true);
         apsUser.license(null);
         apsUser.created(Instant.now());
         apsUser.updated(Instant.now());
-        apsUser.usernameVerified(false);
+        apsUser.usernameVerified(true);
         apsUserRepo.save(apsUser);
     }
 

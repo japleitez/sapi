@@ -53,11 +53,10 @@ public class VideoService {
 
     @Cacheable(value = "todayVideos", key = "#lang.name()")
     public List<Video> getCachedTodayVideos(Lang lang) {
-        //TODO for the moment AA only
         Set<Long> videoIds = new HashSet<>();
         for (String code : todayCategoryCodes) {
             videoCategoryRepo.findByCode(code)
-                    .map(category -> getCachedVideosByCategoryAndLang(category, Lang.AA))
+                    .map(category -> getCachedVideosByCategoryAndLang(category, lang))
                     .filter(videos -> !videos.isEmpty())
                     .map(videos -> videos.get(ThreadLocalRandom.current().nextInt(videos.size())))
                     .ifPresent(video -> videoIds.add(video.getId()));
@@ -74,12 +73,11 @@ public class VideoService {
         List<VideoCategory> categories = videoCategoryRepo.findReleasedCategories(today);
         Map<VideoCategory, List<Video>> videoCategoryMap = new HashMap<>();
         for (VideoCategory category : categories) {
-            //TODO for the moment AA only
-            List<Video> latestVideos = videoRepo.findByCategoryAndLang(category, Lang.AA, today);
+            List<Video> latestVideos = videoRepo.findByCategoryAndLang(category, lang, today);
             if (!latestVideos.isEmpty()) {
-                int endIndex = Math.min(4, latestVideos.size());
+                int endIndex = Math.min(3, latestVideos.size());
                 List<Video> topVideos = new ArrayList<>(latestVideos.subList(0, endIndex));
-                videoCategoryMap.put(category, latestVideos);
+                videoCategoryMap.put(category, topVideos);
             }
         }
         return videoCategoryMap;
@@ -87,8 +85,7 @@ public class VideoService {
 
     @Cacheable(value = "videosByCategory", key = "#videoCategory.code + '-' + #lang.name()")
     public List<Video> getCachedVideosByCategoryAndLang(VideoCategory videoCategory, Lang lang) {
-        //TODO for the moment AA only
-        return videoRepo.findByCategoryAndLang(videoCategory, Lang.AA, LocalDate.now());
+        return videoRepo.findByCategoryAndLang(videoCategory, lang, LocalDate.now());
     }
 
     public List<String> getVideoTags(List<VideoDTO> videos, Lang lang) {
