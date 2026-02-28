@@ -1,5 +1,6 @@
 package com.peecko.api.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
@@ -16,49 +17,48 @@ public class VideoItem implements Serializable {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "code")
-    private String code;
+    @ManyToOne
+    @JoinColumn(name = "code", referencedColumnName = "code", nullable = false)
+    private Video video;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "previous_video_item_id")
+    @OneToOne
+    @JoinColumn(name = "next_video_item_id")
+    @JsonIgnore // prevent recursion in potential serialization
     private VideoItem next;
 
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "next_video_item_id")
+    @OneToOne
+    @JoinColumn(name = "previous_video_item_id")
+    @JsonIgnore // prevent recursion in potential serialization
     private VideoItem previous;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "play_list_id", nullable = false)
-    @JsonIgnoreProperties(value = { "videoItems", "apsUser" }, allowSetters = true)
+    @JsonIgnore
     private PlayList playList;
 
     public VideoItem() {
     }
 
-    public VideoItem(String code, PlayList playList) {
-        this.code = code;
+    public VideoItem(PlayList playList, Video video) {
+        this.video = video;
         this.playList = playList;
     }
 
-    public VideoItem(String code) {
-        this.code = code;
+    public Long getId() {
+        return id;
     }
 
-    public String getCode() {
-        return code;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public Video getVideo() {
+        return video;
     }
 
-    public VideoItem getPrevious() {
-        return previous;
-    }
-
-    public void setPrevious(VideoItem previous) {
-        this.previous = previous;
+    public void setVideo(Video video) {
+        this.video = video;
     }
 
     public VideoItem getNext() {
@@ -69,6 +69,14 @@ public class VideoItem implements Serializable {
         this.next = next;
     }
 
+    public VideoItem getPrevious() {
+        return previous;
+    }
+
+    public void setPrevious(VideoItem previous) {
+        this.previous = previous;
+    }
+
     public PlayList getPlayList() {
         return playList;
     }
@@ -77,12 +85,8 @@ public class VideoItem implements Serializable {
         this.playList = playList;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public String getCode() {
+        return video.getCode();
     }
 
 }

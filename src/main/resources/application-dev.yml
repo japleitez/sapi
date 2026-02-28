@@ -9,8 +9,8 @@ logging:
     org.springframework: WARN
     org.springframework.web: WARN
     org.hibernate: WARN
-    org.hibernate.sql: WARN
-    org.hibernate.type.descriptor.sql: WARN
+    org.hibernate.sql: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
 
 server:
   port: 8080

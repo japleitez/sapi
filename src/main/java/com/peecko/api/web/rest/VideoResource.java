@@ -159,8 +159,7 @@ public class VideoResource extends BaseResource {
         if (videoItemService.existsByPlayListIdAndCode(playListId, videoCode)) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.video.added.already")));
         }
-        VideoItem newVideoItem = new VideoItem(videoCode);
-        playListService.addVideoItemToBottom(playListId, newVideoItem);
+        playListService.addVideoToPlaylist(playListId, videoCode);
         PlayListDTO playlistDTO = playListService.getPlayListAsDTO(playListId, Login.getUserId());
         return ResponseEntity.ok(playlistDTO);
     }
@@ -180,13 +179,11 @@ public class VideoResource extends BaseResource {
         if (!"top".equals(targetVideoCode) && !videoItemService.existsByPlayListIdAndCode(playListId, targetVideoCode)) {
             return ResponseEntity.ok(new Message(ERROR, message("video.item.new.previous.invalid")));
         }
-        /**
         if ("top".equals(targetVideoCode)) {
-            playListService.moveVideoItemToTop(playListId, videoCode);
+            playListService.moveVideoToTop(playListId, videoCode);
         } else  {
-            playListService.moveVideoItemBelowAnother(playListId, videoCode, targetVideoCode);
+            playListService.moveVideoBelowTarget(playListId, videoCode, targetVideoCode);
         }
-         */
         PlayListDTO playlistDTO = playListService.getPlayListAsDTO(playListId, Login.getUserId());
         return ResponseEntity.ok(playlistDTO);
     }
@@ -199,7 +196,7 @@ public class VideoResource extends BaseResource {
         if (playListService.existsById(playListId)) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.invalid")));
         }
-        playListService.removeVideoItems(playListId, codes);
+        playListService.removeVideosFromPlaylist(playListId, codes);
         PlayListDTO playlistDTO = playListService.getPlayListAsDTO(playListId, Login.getUserId());
         return ResponseEntity.ok(playlistDTO);
     }

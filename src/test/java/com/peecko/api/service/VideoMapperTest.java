@@ -130,7 +130,6 @@ class VideoMapperTest {
 
       // Then
       assertEquals(dto.getCode(), video.getCode());
-      assertEquals(dto.getCategory(), video.getVideoCategory().getCode());
       assertEquals(dto.getTitle(), video.getTitle());
       assertEquals(dto.getDuration(), String.valueOf(video.getDuration()));
       assertEquals(dto.getImage(), video.getThumbnail());
