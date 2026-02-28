@@ -37,7 +37,7 @@ public class VideoMapper {
     public VideoDTO toVideoDTO(Video video, Lang lang) {
         VideoDTO dto  = new VideoDTO();
         dto.setCode(video.getCode());
-        dto.setCategory(video.getVideoCategory().getCode());
+        dto.setCategory(labelService.getCachedLabel(video.getVideoCategory().getCode(), lang));
         dto.setTitle(video.getTitle());
         dto.setDuration(String.valueOf(video.getDuration()));
         dto.setImage(video.getThumbnail());

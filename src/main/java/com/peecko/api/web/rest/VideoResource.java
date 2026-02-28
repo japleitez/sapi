@@ -180,11 +180,13 @@ public class VideoResource extends BaseResource {
         if (!"top".equals(targetVideoCode) && !videoItemService.existsByPlayListIdAndCode(playListId, targetVideoCode)) {
             return ResponseEntity.ok(new Message(ERROR, message("video.item.new.previous.invalid")));
         }
+        /**
         if ("top".equals(targetVideoCode)) {
             playListService.moveVideoItemToTop(playListId, videoCode);
         } else  {
             playListService.moveVideoItemBelowAnother(playListId, videoCode, targetVideoCode);
         }
+         */
         PlayListDTO playlistDTO = playListService.getPlayListAsDTO(playListId, Login.getUserId());
         return ResponseEntity.ok(playlistDTO);
     }
