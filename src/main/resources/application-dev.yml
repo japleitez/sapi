@@ -26,9 +26,10 @@ spring:
     serialization:
       indent-output: true
   datasource:
-    url: jdbc:postgresql://192.168.178.125:5432/admin   # use localhost if DB is running locally
-    username: admin
-    password:
+    url: jdbc:postgresql://pwa-rds-dev.cvswuu602c9n.eu-central-1.rds.amazonaws.com:5432/postgres?currentSchema=pwa
+    username: pwa_app
+    password: pwa-app-100$
+    driver-class-name: org.postgresql.Driver
   mail:
     host: smtp.office365.com
     port: 587
@@ -46,6 +47,12 @@ spring:
   thymeleaf:
     cache: false
 
+# ===================================================================
+    #datasource:
+    #url: jdbc:postgresql://192.168.178.125:5432/admin   # use localhost if DB is running locally
+    #username: admin
+    #password:
+# ===================================================================
 
 # ===================================================================
 # Application specific properties

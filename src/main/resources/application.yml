@@ -24,9 +24,10 @@ spring:
   application:
     name: sapi
   cache:
-    type: caffeine
+    type: caffeine # optional — auto-detected anyway
+    cache-names: labels, videoTagLabels, intensityLabels, audienceLabels, todayVideos, videoLibrary, videosByCategory # pre-create cache(s) at startup
     caffeine:
-      spec: maximumSize=500,expireAfterAccess=600s,recordStats
+      spec: maximumSize=1000, expireAfterWrite=1h # global default
   profiles:
     # The commented value for `active` can be replaced with valid Spring profiles to load.
     # Otherwise, it will be filled in by maven when building the JAR file
@@ -60,8 +61,8 @@ spring:
       hibernate.timezone.default_storage: NORMALIZE
       hibernate.type.preferred_instant_jdbc_type: TIMESTAMP
       hibernate.id.new_generator_mappings: true
-      hibernate.cache.use_second_level_cache: false
-      hibernate.cache.use_query_cache: false
+      hibernate.cache.use_second_level_cache: false # disables second-level cache
+      hibernate.cache.use_query_cache: false # optional but recommended — also disables query cache
       hibernate.generate_statistics: false
       hibernate.format_sql: true
       # modify batch size as necessary

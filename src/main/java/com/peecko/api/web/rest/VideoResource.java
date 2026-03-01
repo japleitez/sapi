@@ -193,7 +193,7 @@ public class VideoResource extends BaseResource {
      */
     @DeleteMapping("/playlists/{playListId}/bulk-delete")
     public ResponseEntity<?> removePlaylistVideoItems(@PathVariable Long playListId, @RequestBody List<String> codes) {
-        if (playListService.existsById(playListId)) {
+        if (!playListService.existsById(playListId)) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.invalid")));
         }
         playListService.removeVideosFromPlaylist(playListId, codes);

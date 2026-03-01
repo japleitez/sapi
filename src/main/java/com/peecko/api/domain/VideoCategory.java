@@ -85,4 +85,10 @@ import java.util.Set;
     public void setArchived(LocalDate archived) {
         this.archived = archived;
     }
+
+    /** shortcut for cache keys */
+    public String code() {
+        return code;
+    }
+
 }

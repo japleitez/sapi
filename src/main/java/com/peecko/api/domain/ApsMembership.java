@@ -11,7 +11,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  */
 @Entity
 @Table(name = "aps_membership")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ApsMembership implements Serializable {
     private static final long serialVersionUID = 1L;
 

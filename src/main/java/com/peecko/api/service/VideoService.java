@@ -10,7 +10,6 @@ import com.peecko.api.repository.VideoRepo;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.*;
@@ -51,7 +50,7 @@ public class VideoService {
         }
     }
 
-    @Cacheable(value = "todayVideos", key = "#lang.name()")
+    @Cacheable(value = "todayVideos", key = "#lang")
     public List<Video> getCachedTodayVideos(Lang lang) {
         Set<Long> videoIds = new HashSet<>();
         for (String code : todayCategoryCodes) {
@@ -67,7 +66,7 @@ public class VideoService {
         return videoRepo.findByIdIn(videoIds);
     }
 
-    @Cacheable(value = "videoLibrary", key = "#lang.name()")
+    @Cacheable(value = "videoLibrary", key = "#lang")
     public Map<VideoCategory, List<Video>> getCachedLatestVideo(Lang lang) {
         LocalDate today = LocalDate.now();
         List<VideoCategory> categories = videoCategoryRepo.findReleasedCategories(today);
@@ -83,7 +82,7 @@ public class VideoService {
         return videoCategoryMap;
     }
 
-    @Cacheable(value = "videosByCategory", key = "#videoCategory.code + '-' + #lang.name()")
+    @Cacheable(value = "videosByCategory", key = "{#videoCategory.code(), #lang}")
     public List<Video> getCachedVideosByCategoryAndLang(VideoCategory videoCategory, Lang lang) {
         return videoRepo.findByCategoryAndLang(videoCategory, lang, LocalDate.now());
     }
@@ -99,7 +98,7 @@ public class VideoService {
                 .flatMap(Collection::stream)
                 .filter(Objects::nonNull) // filter null tags
                 .distinct()
-                .map(tag -> labelService.getCachedLabel(tag, lang))
+                .map(tag -> labelService.getCachedVideoTagLabel(tag, lang))
                 .filter(Objects::nonNull) // filter null labels
                 .sorted()
                 .toList();

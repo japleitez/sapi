@@ -10,9 +10,7 @@ import com.peecko.api.utils.TagUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class VideoMapper {
@@ -34,10 +32,10 @@ public class VideoMapper {
         return dto;
     }
 
-    public VideoDTO toVideoDTO(Video video, Lang lang) {
+    public VideoDTO toVideoDTO(Video video, Lang labelLang) {
         VideoDTO dto  = new VideoDTO();
         dto.setCode(video.getCode());
-        dto.setCategory(labelService.getCachedLabel(video.getVideoCategory().getCode(), lang));
+        dto.setCategory(labelService.getCachedLabel(video.getVideoCategory().getCode(), labelLang));
         dto.setTitle(video.getTitle());
         dto.setDuration(String.valueOf(video.getDuration()));
         dto.setImage(video.getThumbnail());
@@ -46,13 +44,13 @@ public class VideoMapper {
         dto.setPlayer(video.getPlayer().name());
         dto.setFavorite(video.isFavorite());
         if (StringUtils.hasText(video.getAudience())) {
-            dto.setAudience(labelService.getCachedLabel(video.getAudience(), lang));
+            dto.setAudience(labelService.getCachedAudienceLabel(video.getAudience(), labelLang));
         }
         if (video.getIntensity() != null) {
-            dto.setIntensity(labelService.getCachedLabel(LabelService.INTENSITY_TAG + video.getIntensity().name(), lang));
+            dto.setIntensity(labelService.getCachedIntensityLabel(video.getIntensity().name(), labelLang));
         }
         if (StringUtils.hasText(video.getTags())) {
-            dto.setTags(buildVideoTagsAsLabelList(video.getTags(), lang));
+            dto.setTags(buildVideoTagsAsLabelList(video.getTags(), labelLang));
         }
         if (video.getCoach() != null) {
             Coach coach = video.getCoach();
@@ -68,7 +66,7 @@ public class VideoMapper {
     private List<String> buildVideoTagsAsLabelList(String tags, Lang lang) {
         return TagUtils.convertToList(tags)
               .stream()
-              .map(tag -> labelService.getCachedLabel(LabelService.resolveVideoTagLabel(tag), lang)).toList();
+              .map(tag -> labelService.getCachedVideoTagLabel(tag, lang)).toList();
     }
 
 }
