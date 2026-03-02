@@ -125,7 +125,7 @@ public class VideoResource extends BaseResource {
         if (!StringUtils.hasText(request.name())) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.name.required")));
         }
-        if (playListService.existsPlayList(Login.getUser(), request.name())) {
+        if (playListService.existsPlayListByName(Login.getUser(), request.name())) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.duplicate")));
         }
         Long userId = Login.getUserId();

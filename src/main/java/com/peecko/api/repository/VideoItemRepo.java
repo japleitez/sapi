@@ -26,4 +26,7 @@ public interface VideoItemRepo extends JpaRepository<VideoItem, String> {
     @Query(value = "SELECT * FROM video_item v WHERE v.play_list_id = :playlistId AND v.next_video_item_id IS NULL LIMIT 1", nativeQuery = true)
     Optional<VideoItem> findLastVideoItemOfPlaylist(@Param("playlistId") Long playlistId);
 
+    @Query("SELECT COUNT(vi) FROM VideoItem vi WHERE vi.playList.id = :playlistId")
+    long countByPlaylist(@Param("playlistId") Long playlistId);
+
 }

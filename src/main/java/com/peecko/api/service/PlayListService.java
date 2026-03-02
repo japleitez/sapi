@@ -57,6 +57,9 @@ public class PlayListService {
             insertBelow(newVideoItem, bottomVideoItem);
         }
         videoItemRepo.save(newVideoItem);
+        int counter = Math.toIntExact(videoItemRepo.countByPlaylist(playlistId));
+        playList.setCounter(counter);
+        playListRepo.save(playList);
     }
 
     @Transactional
@@ -90,8 +93,8 @@ public class PlayListService {
     }
 
     @Transactional
-    public void moveVideoBelowTarget(Long playListId, String codeToMove, String codeTarget) {
-        PlayList playlist = playListRepo.findById(playListId).orElseThrow(() -> new RuntimeException("Playlist not found"));
+    public void moveVideoBelowTarget(Long playlistId, String codeToMove, String codeTarget) {
+        PlayList playlist = playListRepo.findById(playlistId).orElseThrow(() -> new RuntimeException("Playlist not found"));
         Video videoToMove = videoRepo.findByCode(codeToMove).orElseThrow(() -> new RuntimeException("Video(toMove) not found"));
         Video videoTarget = videoRepo.findByCode(codeTarget).orElseThrow(() -> new RuntimeException("Video(target) not found") );
         VideoItem itemToMove = videoItemRepo.findByPlayListAndVideo(playlist, videoToMove).orElseThrow(() -> new RuntimeException("Video Item not found"));
@@ -102,11 +105,11 @@ public class PlayListService {
         videoItemRepo.save(itemTarget);
     }
 
-    public void removeVideosFromPlaylist(Long playListId, List<String> videoCodes) {
+    public void removeVideosFromPlaylist(Long playlistId, List<String> videoCodes) {
         if (videoCodes == null || videoCodes.isEmpty()) {
             return;
         }
-        PlayList playList = playListRepo.findById(playListId).orElseThrow(() -> new RuntimeException("Playlist not found " + playListId));
+        PlayList playList = playListRepo.findById(playlistId).orElseThrow(() -> new RuntimeException("Playlist not found " + playlistId));
         List<VideoItem> itemsToRemove = videoItemRepo.findByPlayListAndVideoCodeIn(playList, videoCodes);
         if (itemsToRemove.isEmpty()) {
             return;
@@ -115,13 +118,15 @@ public class PlayListService {
             detachNode(item);
         }
         videoItemRepo.deleteAll(itemsToRemove);
+        int counter = Math.toIntExact(videoItemRepo.countByPlaylist(playlistId));
+        playList.setCounter(counter);
     }
 
-    public boolean existsById(Long id) {
-        return playListRepo.existsById(id);
+    public boolean existsById(Long playlistId) {
+        return playListRepo.existsById(playlistId);
     }
 
-    public boolean existsPlayList(ApsUser apsUser, String name) {
+    public boolean existsPlayListByName(ApsUser apsUser, String name) {
         return playListRepo.findByApsUserAndName(apsUser, name).isPresent();
     }
 
