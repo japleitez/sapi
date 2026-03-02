@@ -120,6 +120,7 @@ public class PlayListService {
         videoItemRepo.deleteAll(itemsToRemove);
         int counter = Math.toIntExact(videoItemRepo.countByPlaylist(playlistId));
         playList.setCounter(counter);
+        playListRepo.save(playList);
     }
 
     public boolean existsById(Long playlistId) {
