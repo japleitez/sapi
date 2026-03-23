@@ -70,7 +70,7 @@ public class VideoService {
     public Map<VideoCategory, List<Video>> getCachedLatestVideo(Lang lang) {
         LocalDate today = LocalDate.now();
         List<VideoCategory> categories = videoCategoryRepo.findReleasedCategories(today);
-        Map<VideoCategory, List<Video>> videoCategoryMap = new HashMap<>();
+        Map<VideoCategory, List<Video>> videoCategoryMap = new LinkedHashMap<>();
         for (VideoCategory category : categories) {
             List<Video> latestVideos = videoRepo.findByCategoryAndLang(category, lang, today);
             if (!latestVideos.isEmpty()) {
@@ -128,7 +128,7 @@ public class VideoService {
 
     public List<CategoryDTO> toCategoryDTOs(Map<VideoCategory, List<Video>> categoryVideos, Lang lang) {
         return categoryVideos.entrySet().stream()
-                .map(entry -> videoMapper.toCategoryDTO(entry.getKey(), entry.getValue(), lang)).sorted(Comparator.comparing(CategoryDTO::getCode)).toList();
+                .map(entry -> videoMapper.toCategoryDTO(entry.getKey(), entry.getValue(), lang)).sorted(Comparator.comparing(CategoryDTO::getPos)).toList();
     }
 
     public CategoryDTO toCategoryDTO(VideoCategory category, List<Video> videos, Lang lang) {

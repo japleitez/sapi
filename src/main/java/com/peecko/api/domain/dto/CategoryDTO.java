@@ -9,6 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategoryDTO {
+    private Integer pos;
     private String code;
     private String title;
     private List<VideoDTO> videos = new ArrayList<>();
