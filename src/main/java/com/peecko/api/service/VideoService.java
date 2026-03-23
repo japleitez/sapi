@@ -26,12 +26,7 @@ public class VideoService {
     final UserFavoriteVideoRepo userFavoriteVideoRepo;
     public static final int CATEGORY_VIDEOS_MAX_SIZE = 4;
 
-    List<String> todayCategoryCodes = List.of(
-            "fc.upper.body",
-            "fc.core.body",
-            "fc.lower.body",
-            "fc.stretch"
-    );
+    List<String> todayCategoryCodes = List.of("fc.full.body");
 
     public VideoService(VideoMapper videoMapper, VideoRepo videoRepo, LabelService labelService, CacheManager cacheManager, VideoCategoryRepo videoCategoryRepo, UserFavoriteVideoRepo userFavoriteVideoRepo) {
         this.videoMapper = videoMapper;
