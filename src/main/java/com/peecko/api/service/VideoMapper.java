@@ -41,7 +41,7 @@ public class VideoMapper {
         dto.setDuration(String.valueOf(video.getDuration()));
         dto.setImage(video.getThumbnail());
         dto.setUrl(video.getUrl());
-        dto.setDescription(video.getDescription());
+        dto.setDescription(resolveVideoDescription(video, labelLang));
         dto.setPlayer(video.getPlayer().name());
         dto.setFavorite(video.isFavorite());
         if (StringUtils.hasText(video.getAudience())) {
@@ -62,6 +62,18 @@ public class VideoMapper {
             dto.setCoachInstagram(coach.getInstagram());
         }
         return dto;
+    }
+
+    private String resolveVideoDescription(Video video, Lang labelLang) {
+        String code1 = video.getCode();
+        String code2 = video.getVideoCategory().getCode() + ".all";
+        for (String candidate : List.of(code1, code2)) {
+            String label = labelService.getCachedLabel(candidate, labelLang);
+            if (!candidate.equals(label)) {
+                return label;
+            }
+        }
+        return video.getDescription();
     }
 
     private List<String> buildVideoTagsAsLabelList(String tags, Lang lang) {
