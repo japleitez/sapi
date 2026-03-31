@@ -15,9 +15,6 @@ public interface PlayListItemRepo extends JpaRepository<PlayListItem, String> {
     @Query("select count(pi) > 0 from PlayListItem pi where pi.playList.id = :playListId and pi.code = :videoCode")
     boolean existsVideoItem(@Param("playListId") Long playListId, @Param("videoCode") String videoCode);
 
-    @Query("SELECT COUNT(pi) FROM PlayListItem pi WHERE pi.playList.id = :playlistId")
-    long countByPlaylist(@Param("playlistId") Long playlistId);
-
     List<PlayListItem> findByPlayListIdOrderByPositionAsc(Long playListId);
 
     @Query("SELECT pi FROM PlayListItem pi WHERE pi.playList.id = :playListId AND pi.video.code = :videoCode")
