@@ -92,7 +92,7 @@ public class PlayListService {
 
     private PlayListItem findItemByCode(List<PlayListItem> items, String videoCode) {
         return items.stream()
-                .filter(item -> item.getVideo().getCode().equals(videoCode))
+                .filter(item -> item.getCode().equals(videoCode))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Video with code " + videoCode + " not found in this PlayList"));
     }
@@ -103,6 +103,7 @@ public class PlayListService {
         }
     }
 
+    @Transactional
     public void removeVideoFromPlayList(Long playListId, String videoCode) {
         List<PlayListItem> items = playListItemRepo.findByPlayListIdOrderByPositionAsc(playListId);
         if (items.isEmpty()) {
@@ -119,6 +120,7 @@ public class PlayListService {
         playListRepo.updateCounter(playListId, items.size());
     }
 
+    @Transactional
     public void removeVideosFromPlaylist(Long playListId, List<String> videoCodes) {
         if (videoCodes == null || videoCodes.isEmpty()) {
             return;
@@ -140,7 +142,7 @@ public class PlayListService {
 
         // Filter out items to be removed
         List<PlayListItem> remainingItems = items.stream()
-                .filter(item -> !codesToRemove.contains(item.getVideo().getCode()))
+                .filter(item -> !codesToRemove.contains(item.getCode()))
                 .collect(Collectors.toList());
 
         // If nothing changed, do nothing
@@ -153,7 +155,7 @@ public class PlayListService {
 
         // Delete items that should be removed
         List<PlayListItem> itemsToDelete = items.stream()
-                .filter(item -> codesToRemove.contains(item.getVideo().getCode()))
+                .filter(item -> codesToRemove.contains(item.getCode()))
                 .collect(Collectors.toList());
 
         playListItemRepo.deleteAll(itemsToDelete);
@@ -173,6 +175,7 @@ public class PlayListService {
         return playListRepo.findByApsUserAndName(apsUser, name).isPresent();
     }
 
+    @Transactional
     public PlayList createPlayList(Long apsUserId, String name) {
         Instant now = Instant.now();
         PlayList playList = new PlayList();
@@ -188,6 +191,7 @@ public class PlayListService {
         return PlayListMapper.toPlayListDTO(playList);
     }
 
+    @Transactional
     public void deletePlayList(Long playlistId) {
         playListRepo.deleteById(playlistId);
     }
@@ -221,7 +225,7 @@ public class PlayListService {
      * @return the doubly-linked list representation of the PlayList
      */
     private List<VideoItemDTO> buildVideoItemDTOs(Long playListId, Set<Long> favIds) {
-        List<PlayListItem> items = playListItemRepo.findByPlayListIdOrderByPositionAsc(playListId);
+        List<PlayListItem> items = playListItemRepo.findByPlayListIdWithVideoOrderByPositionAsc(playListId);
         if (items.isEmpty()) {
             return List.of();
         }
@@ -229,11 +233,12 @@ public class PlayListService {
         for (int i = 0; i < items.size(); i++) {
             PlayListItem currentItem = items.get(i);
             Video video = currentItem.getVideo();
-            String prevVideoCode = (i > 0) ? items.get(i - 1).getVideo().getCode() : null;
-            String nextVideoCode = (i < items.size() - 1) ? items.get(i + 1).getVideo().getCode() : null;
+            String prevCode = (i > 0) ? items.get(i - 1).getCode() : null;
+            String nextCode = (i < items.size() - 1) ? items.get(i + 1).getCode() : null;
+
             video.setFavorite(favIds.contains(video.getId()));
             VideoDTO videoDTO = videoMapper.toVideoDTO(video, Login.getUserLanguage());
-            VideoItemDTO node = new VideoItemDTO(i, prevVideoCode, video.getCode(), nextVideoCode, videoDTO);
+            VideoItemDTO node = new VideoItemDTO(i, prevCode, video.getCode(), nextCode, videoDTO);
             nodes.add(node);
         }
         return nodes;
