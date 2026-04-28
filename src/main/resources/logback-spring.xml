@@ -28,7 +28,7 @@
         <springProperty name="LOG_S3_REGION" source="logging.s3.region" defaultValue="eu-central-1"/>
 
         <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>/var/log/api/peecko-api-staging.log</file>
+            <file>/var/log/peecko_api/peecko-api-staging.log</file>
             <encoder>
                 <pattern>${FILE_LOG_PATTERN}</pattern>
                 <charset>UTF-8</charset>
@@ -56,7 +56,7 @@
         <springProperty name="LOG_S3_REGION" source="logging.s3.region" defaultValue="eu-central-1"/>
 
         <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>/var/log/api/peecko-api-prod.log</file>
+            <file>/var/log/peecko_api/peecko-api-prod.log</file>
             <encoder>
                 <pattern>${FILE_LOG_PATTERN}</pattern>
                 <charset>UTF-8</charset>
