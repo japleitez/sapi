@@ -28,16 +28,16 @@ public class VideoResource extends BaseResource {
     final VideoService videoService;
     final MessageSource messageSource;
     final PlayListService playListService;
-    final VideoItemService videoItemService;
+    final PlayListItemService playListItemService;
     final VideoCategoryService videoCategoryService;
 
 
-    public VideoResource(LabelService labelService, VideoService videoService, MessageSource messageSource, PlayListService playListService, VideoItemService videoItemService, VideoCategoryService videoCategoryService) {
+    public VideoResource(LabelService labelService, VideoService videoService, MessageSource messageSource, PlayListService playListService, PlayListItemService playListItemService, VideoCategoryService videoCategoryService) {
         this.labelService = labelService;
         this.videoService = videoService;
         this.messageSource = messageSource;
         this.playListService = playListService;
-        this.videoItemService = videoItemService;
+        this.playListItemService = playListItemService;
         this.videoCategoryService = videoCategoryService;
     }
 
@@ -125,7 +125,7 @@ public class VideoResource extends BaseResource {
         if (!StringUtils.hasText(request.name())) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.name.required")));
         }
-        if (playListService.existsPlayList(Login.getUser(), request.name())) {
+        if (playListService.existsPlayListByName(Login.getUser(), request.name())) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.duplicate")));
         }
         Long userId = Login.getUserId();
@@ -156,11 +156,10 @@ public class VideoResource extends BaseResource {
         if (!videoService.existsByCode(videoCode)) {
             return ResponseEntity.ok(new Message(ERROR, message("video.invalid")));
         }
-        if (videoItemService.existsByPlayListIdAndCode(playListId, videoCode)) {
+        if (playListItemService.existsByPlayListIdAndCode(playListId, videoCode)) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.video.added.already")));
         }
-        VideoItem newVideoItem = new VideoItem(videoCode);
-        playListService.addVideoItemToBottom(playListId, newVideoItem);
+        playListService.addVideoAtBottom(playListId, videoCode);
         PlayListDTO playlistDTO = playListService.getPlayListAsDTO(playListId, Login.getUserId());
         return ResponseEntity.ok(playlistDTO);
     }
@@ -174,19 +173,17 @@ public class VideoResource extends BaseResource {
         if (!playListService.existsById(playListId)) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.invalid")));
         }
-        if (!videoItemService.existsByPlayListIdAndCode(playListId, videoCode)) {
+        if (!playListItemService.existsByPlayListIdAndCode(playListId, videoCode)) {
             return ResponseEntity.ok(new Message(ERROR, message("video.item.invalid")));
         }
-        if (!"top".equals(targetVideoCode) && !videoItemService.existsByPlayListIdAndCode(playListId, targetVideoCode)) {
+        if (!"top".equals(targetVideoCode) && !playListItemService.existsByPlayListIdAndCode(playListId, targetVideoCode)) {
             return ResponseEntity.ok(new Message(ERROR, message("video.item.new.previous.invalid")));
         }
-        /**
         if ("top".equals(targetVideoCode)) {
-            playListService.moveVideoItemToTop(playListId, videoCode);
+            playListService.moveVideoToTop(playListId, videoCode);
         } else  {
-            playListService.moveVideoItemBelowAnother(playListId, videoCode, targetVideoCode);
+            playListService.dragVideoAfter(playListId, videoCode, targetVideoCode);
         }
-         */
         PlayListDTO playlistDTO = playListService.getPlayListAsDTO(playListId, Login.getUserId());
         return ResponseEntity.ok(playlistDTO);
     }
@@ -196,10 +193,10 @@ public class VideoResource extends BaseResource {
      */
     @DeleteMapping("/playlists/{playListId}/bulk-delete")
     public ResponseEntity<?> removePlaylistVideoItems(@PathVariable Long playListId, @RequestBody List<String> codes) {
-        if (playListService.existsById(playListId)) {
+        if (!playListService.existsById(playListId)) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.invalid")));
         }
-        playListService.removeVideoItems(playListId, codes);
+        playListService.removeVideosFromPlaylist(playListId, codes);
         PlayListDTO playlistDTO = playListService.getPlayListAsDTO(playListId, Login.getUserId());
         return ResponseEntity.ok(playlistDTO);
     }

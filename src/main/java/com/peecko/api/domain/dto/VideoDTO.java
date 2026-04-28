@@ -8,6 +8,7 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class VideoDTO {
+    private Integer pos;
     @EqualsAndHashCode.Include
     private String code;
     private String category;

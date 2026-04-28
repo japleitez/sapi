@@ -10,7 +10,6 @@ import com.peecko.api.repository.VideoRepo;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.*;
@@ -27,12 +26,7 @@ public class VideoService {
     final UserFavoriteVideoRepo userFavoriteVideoRepo;
     public static final int CATEGORY_VIDEOS_MAX_SIZE = 4;
 
-    List<String> todayCategoryCodes = List.of(
-            "fc.upper.body",
-            "fc.core.body",
-            "fc.lower.body",
-            "fc.stretch"
-    );
+    List<String> todayCategoryCodes = List.of("fc.full.body");
 
     public VideoService(VideoMapper videoMapper, VideoRepo videoRepo, LabelService labelService, CacheManager cacheManager, VideoCategoryRepo videoCategoryRepo, UserFavoriteVideoRepo userFavoriteVideoRepo) {
         this.videoMapper = videoMapper;
@@ -51,7 +45,7 @@ public class VideoService {
         }
     }
 
-    @Cacheable(value = "todayVideos", key = "#lang.name()")
+    @Cacheable(value = "todayVideos", key = "#lang")
     public List<Video> getCachedTodayVideos(Lang lang) {
         Set<Long> videoIds = new HashSet<>();
         for (String code : todayCategoryCodes) {
@@ -67,11 +61,11 @@ public class VideoService {
         return videoRepo.findByIdIn(videoIds);
     }
 
-    @Cacheable(value = "videoLibrary", key = "#lang.name()")
+    @Cacheable(value = "videoLibrary", key = "#lang")
     public Map<VideoCategory, List<Video>> getCachedLatestVideo(Lang lang) {
         LocalDate today = LocalDate.now();
         List<VideoCategory> categories = videoCategoryRepo.findReleasedCategories(today);
-        Map<VideoCategory, List<Video>> videoCategoryMap = new HashMap<>();
+        Map<VideoCategory, List<Video>> videoCategoryMap = new LinkedHashMap<>();
         for (VideoCategory category : categories) {
             List<Video> latestVideos = videoRepo.findByCategoryAndLang(category, lang, today);
             if (!latestVideos.isEmpty()) {
@@ -83,7 +77,7 @@ public class VideoService {
         return videoCategoryMap;
     }
 
-    @Cacheable(value = "videosByCategory", key = "#videoCategory.code + '-' + #lang.name()")
+    @Cacheable(value = "videosByCategory", key = "{#videoCategory.code(), #lang}")
     public List<Video> getCachedVideosByCategoryAndLang(VideoCategory videoCategory, Lang lang) {
         return videoRepo.findByCategoryAndLang(videoCategory, lang, LocalDate.now());
     }
@@ -99,7 +93,7 @@ public class VideoService {
                 .flatMap(Collection::stream)
                 .filter(Objects::nonNull) // filter null tags
                 .distinct()
-                .map(tag -> labelService.getCachedLabel(tag, lang))
+                .map(tag -> labelService.getCachedVideoTagLabel(tag, lang))
                 .filter(Objects::nonNull) // filter null labels
                 .sorted()
                 .toList();
@@ -129,7 +123,7 @@ public class VideoService {
 
     public List<CategoryDTO> toCategoryDTOs(Map<VideoCategory, List<Video>> categoryVideos, Lang lang) {
         return categoryVideos.entrySet().stream()
-                .map(entry -> videoMapper.toCategoryDTO(entry.getKey(), entry.getValue(), lang)).sorted(Comparator.comparing(CategoryDTO::getCode)).toList();
+                .map(entry -> videoMapper.toCategoryDTO(entry.getKey(), entry.getValue(), lang)).sorted(Comparator.comparing(CategoryDTO::getPos)).toList();
     }
 
     public CategoryDTO toCategoryDTO(VideoCategory category, List<Video> videos, Lang lang) {

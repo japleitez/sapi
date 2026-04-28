@@ -18,6 +18,7 @@ public class PlayListMapper {
         PlayListDTO dto =  new PlayListDTO();
         dto.setId(playList.getId());
         dto.setName(playList.getName());
+        dto.setCounter(playList.getCounter());
         return dto;
     }
 

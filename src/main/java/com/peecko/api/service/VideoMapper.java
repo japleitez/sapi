@@ -10,9 +10,7 @@ import com.peecko.api.utils.TagUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class VideoMapper {
@@ -26,6 +24,7 @@ public class VideoMapper {
 
     public CategoryDTO toCategoryDTO(VideoCategory videoCategory, List<Video> videos, Lang lang) {
         CategoryDTO dto = new CategoryDTO();
+        dto.setPos(videoCategory.getPos());
         dto.setCode(videoCategory.getCode());
         dto.setTitle(labelService.getCachedLabel(videoCategory.getCode(), lang));
         if (videos != null && !videos.isEmpty()) {
@@ -34,25 +33,25 @@ public class VideoMapper {
         return dto;
     }
 
-    public VideoDTO toVideoDTO(Video video, Lang lang) {
+    public VideoDTO toVideoDTO(Video video, Lang labelLang) {
         VideoDTO dto  = new VideoDTO();
         dto.setCode(video.getCode());
-        dto.setCategory(labelService.getCachedLabel(video.getVideoCategory().getCode(), lang));
+        dto.setCategory(labelService.getCachedLabel(video.getVideoCategory().getCode(), labelLang));
         dto.setTitle(video.getTitle());
         dto.setDuration(String.valueOf(video.getDuration()));
         dto.setImage(video.getThumbnail());
         dto.setUrl(video.getUrl());
-        dto.setDescription(video.getDescription());
+        dto.setDescription(resolveVideoDescription(video, labelLang));
         dto.setPlayer(video.getPlayer().name());
         dto.setFavorite(video.isFavorite());
         if (StringUtils.hasText(video.getAudience())) {
-            dto.setAudience(labelService.getCachedLabel(video.getAudience(), lang));
+            dto.setAudience(labelService.getCachedAudienceLabel(video.getAudience(), labelLang));
         }
         if (video.getIntensity() != null) {
-            dto.setIntensity(labelService.getCachedLabel(LabelService.INTENSITY_TAG + video.getIntensity().name(), lang));
+            dto.setIntensity(labelService.getCachedIntensityLabel(video.getIntensity().name(), labelLang));
         }
         if (StringUtils.hasText(video.getTags())) {
-            dto.setTags(buildVideoTagsAsLabelList(video.getTags(), lang));
+            dto.setTags(buildVideoTagsAsLabelList(video.getTags(), labelLang));
         }
         if (video.getCoach() != null) {
             Coach coach = video.getCoach();
@@ -65,10 +64,22 @@ public class VideoMapper {
         return dto;
     }
 
+    private String resolveVideoDescription(Video video, Lang labelLang) {
+        String code1 = video.getCode();
+        String code2 = video.getVideoCategory().getCode() + ".all";
+        for (String candidate : List.of(code1, code2)) {
+            String label = labelService.getCachedLabel(candidate, labelLang);
+            if (!candidate.equals(label)) {
+                return label;
+            }
+        }
+        return video.getDescription();
+    }
+
     private List<String> buildVideoTagsAsLabelList(String tags, Lang lang) {
         return TagUtils.convertToList(tags)
               .stream()
-              .map(tag -> labelService.getCachedLabel(LabelService.resolveVideoTagLabel(tag), lang)).toList();
+              .map(tag -> labelService.getCachedVideoTagLabel(tag, lang)).toList();
     }
 
 }

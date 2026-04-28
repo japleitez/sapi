@@ -43,7 +43,7 @@ public class PlayList implements Serializable {
 
     @OneToMany(mappedBy = "playList", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonIgnoreProperties(value = { "playList" }, allowSetters = true)
-    private List<VideoItem> videoItems = new ArrayList<>();
+    private List<PlayListItem> playListItems = new ArrayList<>();
 
 
     public PlayList() {
@@ -133,24 +133,6 @@ public class PlayList implements Serializable {
     public PlayList apsUser(ApsUser apsUser) {
         this.setApsUser(apsUser);
         return this;
-    }
-
-    public List<VideoItem> getVideoItems() {
-        return videoItems;
-    }
-
-    public void setVideoItems(List<VideoItem> videoItems) {
-        this.videoItems = videoItems;
-    }
-
-    public void addVideoItem(VideoItem videoItem) {
-        videoItems.add(videoItem);
-        videoItem.setPlayList(this);
-    }
-
-    public void removeVideoItem(VideoItem videoItem) {
-        videoItems.remove(videoItem);
-        videoItem.setPlayList(null);
     }
 
 }

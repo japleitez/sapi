@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface VideoCategoryRepo extends JpaRepository<VideoCategory, Long> {
 
     Optional<VideoCategory> findByCode(String code);
-    @Query("SELECT vc FROM VideoCategory vc WHERE vc.released <= :today AND (vc.archived IS NULL OR vc.archived > :today)")
+    @Query("SELECT vc FROM VideoCategory vc WHERE vc.released <= :today AND (vc.archived IS NULL OR vc.archived > :today) ORDER BY vc.pos ASC")
     List<VideoCategory> findReleasedCategories(LocalDate today);
 
 }

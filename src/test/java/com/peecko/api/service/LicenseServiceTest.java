@@ -66,7 +66,7 @@ class LicenseServiceTest {
     void isNotAuthorizedWithoutMembership() {
         // given
         ApsUser apsUser = EntityBuilder.buildApsUser();
-        apsUser.license(EntityDefault.LICENSE);
+        apsUser.license("NotAuthorizedLicense");
         apsUserRepo.save(apsUser);
         apsUserRepo.flush();
 

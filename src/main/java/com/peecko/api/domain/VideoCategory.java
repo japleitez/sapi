@@ -19,6 +19,9 @@ import java.util.Set;
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "pos")
+    private Integer pos;
+
     @Column(name = "code", nullable = false)
     private String code;
 
@@ -85,4 +88,18 @@ import java.util.Set;
     public void setArchived(LocalDate archived) {
         this.archived = archived;
     }
+
+    /** shortcut for cache keys */
+    public String code() {
+        return code;
+    }
+
+    public Integer getPos() {
+        return pos;
+    }
+
+    public void setPos(Integer pos) {
+        this.pos = pos;
+    }
+
 }

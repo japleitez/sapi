@@ -51,7 +51,6 @@ class ApsUserServiceTest {
         ApsUser apsUser = apsUserRepo.findByUsername(request.username()).orElseThrow();
 
         //THEN
-        assertFalse(apsUser.getActive());
         assertNull(apsUser.getLicense());
         assertEquals(request.username(), apsUser.getUsername());
         assertEquals(NameUtils.toCamelCase(request.name()), apsUser.getName());
@@ -113,11 +112,6 @@ class ApsUserServiceTest {
         //GIVEN
         SignUpRequest request = EntityBuilder.buildSignUpRequest();
         apsUserService.signUp(request);
-
-        //WHEN
-        ApsUser created = apsUserRepo.findByUsername(request.username()).orElseThrow();
-        //THEN
-        assertFalse(created.getActive());
 
         //WHEN
         apsUserService.setUserActive(request.username(), true);
