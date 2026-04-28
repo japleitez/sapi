@@ -4,6 +4,10 @@
 # ===================================================================
 
 logging:
+  s3:
+    bucket: peecko-api-logs-435496007267-eu-central-1-an
+    prefix: staging/
+    region: eu-central-1
   level:
     ROOT: INFO
     com.peecko.api: DEBUG
@@ -33,9 +37,9 @@ spring:
       hibernate:
         default_schema: pwa
   datasource:
-    url: jdbc:postgresql://<staging-db-host>:5432/postgres?currentSchema=pwa
+    url: jdbc:postgresql://pwa-rds-dev.cvswuu602c9n.eu-central-1.rds.amazonaws.com:5432/postgres?currentSchema=pwa
     username: pwa_app
-    password: <staging-db-password>
+    password: pwa-app-100$
     driver-class-name: org.postgresql.Driver
   mail:
     host: smtp.office365.com

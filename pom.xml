@@ -231,6 +231,12 @@
 			<artifactId>spring-security-core</artifactId>
 			<version>6.5.4</version>
 		</dependency>
+		<!-- AWS SDK v2 S3 (staging log shipping) -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<version>2.25.0</version>
+		</dependency>
 		<!-- JAXB -->
 		<dependency>
 			<groupId>jakarta.xml.bind</groupId>
