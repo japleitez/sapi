@@ -7,11 +7,6 @@ logging:
   level:
     ROOT: WARN
     com.peecko.api: INFO
-    org.springframework: WARN
-    org.springframework.web: WARN
-    org.hibernate: WARN
-    org.hibernate.sql: WARN
-    org.hibernate.type.descriptor.sql: WARN
 
 management:
   prometheus:
