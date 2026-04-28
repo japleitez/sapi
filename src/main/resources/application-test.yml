@@ -6,6 +6,13 @@
 # ===================================================================
 
 logging:
+  file:
+    name: logs/peecko-api-test.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 7
+      total-size-cap: 100MB
   level:
     ROOT: INFO
     com.peecko.api: DEBUG
@@ -15,11 +22,14 @@ logging:
     org.hibernate.sql: DEBUG
     org.hibernate.type.descriptor.sql: WARN
 
-management:
-  prometheus:
-    metrics:
-      export:
-        enabled: false
+server:
+  port: 8081
+  address: 127.0.0.1
+  shutdown: graceful
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,application/javascript,application/json,image/svg+xml
+    min-response-size: 1024
 
 spring:
   devtools:
@@ -36,9 +46,9 @@ spring:
         default_schema: pwa
     show-sql: true
   datasource:
-    url: jdbc:postgresql://<test-db-host>:5432/postgres?currentSchema=pwa
+    url: jdbc:postgresql://pwa-rds-dev.cvswuu602c9n.eu-central-1.rds.amazonaws.com:5432/postgres?currentSchema=pwa
     username: pwa_app
-    password: <test-db-password>
+    password: pwa-app-100$
     driver-class-name: org.postgresql.Driver
   mail:
     host: smtp.office365.com
@@ -58,15 +68,6 @@ spring:
     resources:
       cache:
         period: 0
-
-server:
-  port: 8081
-  address: 127.0.0.1
-  shutdown: graceful
-  compression:
-    enabled: true
-    mime-types: text/html,text/xml,text/plain,text/css,application/javascript,application/json,image/svg+xml
-    min-response-size: 1024
 
 app:
   api:

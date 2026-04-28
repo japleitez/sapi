@@ -4,6 +4,10 @@
 # ===================================================================
 
 logging:
+  s3:
+    bucket: peecko-api-logs-435496007267-eu-central-1-an
+    prefix: staging/
+    region: eu-central-1
   level:
     ROOT: INFO
     com.peecko.api: DEBUG
