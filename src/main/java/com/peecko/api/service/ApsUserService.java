@@ -11,6 +11,7 @@ import com.peecko.api.repository.ApsDeviceRepo;
 import com.peecko.api.repository.ApsMembershipRepo;
 import com.peecko.api.repository.ApsUserRepo;
 import com.peecko.api.repository.CustomerRepo;
+import com.peecko.api.repository.TrialLicenseRepository;
 import com.peecko.api.utils.PeriodUtils;
 import com.peecko.api.web.payload.response.UserProfileResponse;
 import com.peecko.api.utils.Common;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,15 +35,17 @@ public class ApsUserService {
     final CustomerRepo customerRepo;
     final ApsMembershipRepo apsMembershipRepo;
     final PasswordEncoder passwordEncoder;
+    final TrialLicenseRepository trialLicenseRepository;
 
     public static final int MAX_NUMBER_DEVICES = 3;
 
-    public ApsUserService(ApsUserRepo apsUserRepo, ApsDeviceRepo apsDeviceRepo, CustomerRepo customerRepo, ApsMembershipRepo apsMembershipRepo, PasswordEncoder passwordEncoder) {
+    public ApsUserService(ApsUserRepo apsUserRepo, ApsDeviceRepo apsDeviceRepo, CustomerRepo customerRepo, ApsMembershipRepo apsMembershipRepo, PasswordEncoder passwordEncoder, TrialLicenseRepository trialLicenseRepository) {
         this.apsUserRepo = apsUserRepo;
         this.apsDeviceRepo = apsDeviceRepo;
         this.customerRepo = customerRepo;
         this.apsMembershipRepo = apsMembershipRepo;
         this.passwordEncoder = passwordEncoder;
+        this.trialLicenseRepository = trialLicenseRepository;
     }
 
     @Transactional(readOnly = true)
@@ -123,7 +127,7 @@ public class ApsUserService {
         response.setDevicesMax(MAX_NUMBER_DEVICES);
         response.setMembership(apsUser.getLicense());
         ApsMembership apsMembership = null;
-        if (Common.isMasterLicense(apsUser.getLicense())) {
+        if (trialLicenseRepository.isNotExpired(apsUser.getLicense(), LocalDate.now())) {
             apsMembership = new ApsMembership();
             apsMembership.setCustomerId(1L);
         } else {

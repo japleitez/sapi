@@ -3,7 +3,7 @@ package com.peecko.api.service;
 import com.peecko.api.domain.ApsUser;
 import com.peecko.api.repository.ApsMembershipRepo;
 import com.peecko.api.repository.ApsUserRepo;
-import com.peecko.api.utils.Common;
+import com.peecko.api.repository.TrialLicenseRepository;
 import com.peecko.api.utils.PeriodUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,11 +15,13 @@ import java.time.LocalDate;
 public class LicenseService {
     final ApsUserRepo apsUserRepo;
     final ApsMembershipRepo apsMembershipRepo;
+    final TrialLicenseRepository trialLicenseRepository;
     public static final int GRACE_PERIOD_IN_DAYS = 10;
 
-    public LicenseService(ApsUserRepo apsUserRepo, ApsMembershipRepo apsMembershipRepo) {
+    public LicenseService(ApsUserRepo apsUserRepo, ApsMembershipRepo apsMembershipRepo, TrialLicenseRepository trialLicenseRepository) {
         this.apsUserRepo = apsUserRepo;
         this.apsMembershipRepo = apsMembershipRepo;
+        this.trialLicenseRepository = trialLicenseRepository;
     }
 
     public boolean isAuthorized() {
@@ -32,8 +34,7 @@ public class LicenseService {
         if (apsUser == null) {
             return false;
         }
-        // has master license
-        if (Common.isMasterLicense(apsUser.getLicense())) {
+        if (trialLicenseRepository.isNotExpired(apsUser.getLicense(), LocalDate.now())) {
             return true;
         }
         // if the user has a valid license in the current period, we return true
