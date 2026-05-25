@@ -41,6 +41,9 @@ spring:
     username: pwa_app
     password: pwa-app-100$
     driver-class-name: org.postgresql.Driver
+    hikari:
+      schema: pwa
+      connection-init-sql: SET search_path TO pwa
   mail:
     host: smtp.office365.com
     port: 587

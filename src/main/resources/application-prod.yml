@@ -32,10 +32,13 @@ spring:
       hibernate:
         default_schema: pwa
   datasource:
-    url: jdbc:postgresql://pwa-rds-dev.cvswuu602c9n.eu-central-1.rds.amazonaws.com:5432/postgres?currentSchema=pwa
-    username: pwa_app
-    password: pwa-app-100$
+    url: jdbc:postgresql://prod-peecko-db.cvswuu602c9n.eu-central-1.rds.amazonaws.com:5432/postgres
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      schema: pwa
+      connection-init-sql: SET search_path TO pwa
   mail:
     host: smtp.office365.com
     port: 587

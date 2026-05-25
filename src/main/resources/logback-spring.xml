@@ -51,7 +51,7 @@
 
     <!-- PROD: console + rolling file uploaded to S3 on each daily roll -->
     <springProfile name="prod">
-        <springProperty name="LOG_S3_BUCKET" source="logging.s3.bucket"/>
+        <springProperty name="LOG_S3_BUCKET" source="logging.s3.bucket" defaultValue="peecko-api-logs-435496007267-eu-central-1-an"/>
         <springProperty name="LOG_S3_PREFIX" source="logging.s3.prefix" defaultValue="prod/"/>
         <springProperty name="LOG_S3_REGION" source="logging.s3.region" defaultValue="eu-central-1"/>
 
