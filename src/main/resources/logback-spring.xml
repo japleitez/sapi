@@ -62,7 +62,7 @@
                 <charset>UTF-8</charset>
             </encoder>
             <rollingPolicy class="com.peecko.api.logging.S3RollingPolicy">
-                <fileNamePattern>/var/log/api/archived/peecko-api-prod.%d{yyyy-MM-dd}.log</fileNamePattern>
+                <fileNamePattern>/var/log/peecko_api/archived/peecko-api-prod.%d{yyyy-MM-dd}.log</fileNamePattern>
                 <maxHistory>7</maxHistory>
                 <totalSizeCap>500MB</totalSizeCap>
                 <s3BucketName>${LOG_S3_BUCKET}</s3BucketName>

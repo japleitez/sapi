@@ -32,13 +32,19 @@ spring:
       hibernate:
         default_schema: pwa
   datasource:
-    url: jdbc:postgresql://prod-peecko-db.cvswuu602c9n.eu-central-1.rds.amazonaws.com:5432/postgres
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://${DB_HOST:prod-peecko-db.cvswuu602c9n.eu-central-1.rds.amazonaws.com}:${DB_PORT:5432}/${DB_NAME:postgres}
+    username: ${DB_USER}
+    password: ${DB_PASS}
     driver-class-name: org.postgresql.Driver
     hikari:
       schema: pwa
       connection-init-sql: SET search_path TO pwa
+      pool-name: PeeckoPool
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
   mail:
     host: smtp.office365.com
     port: 587
