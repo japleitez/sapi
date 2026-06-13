@@ -5,19 +5,83 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.1.5</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<version>3.2.0</version>
+		<relativePath/>
 	</parent>
 	<groupId>com.peecko</groupId>
 	<artifactId>api</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>api</name>
 	<description>Peecko API </description>
     <properties>
         <java.version>17</java.version>
-        <maven.compiler.target>17</maven.compiler.target>
+		<maven.version>3.2.5</maven.version>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<start-class>com.peecko.api.ApiApplication</start-class>
+		<argLine>-Djava.security.egd=file:/dev/./urandom -Xmx1G</argLine>
+		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
+		<run.addResources>false</run.addResources>
+		<spring-boot.version>3.2.0</spring-boot.version>
+		<archunit-junit5.version>1.2.1</archunit-junit5.version>
+		<checkstyle.version>10.12.5</checkstyle.version>
+		<checksum-maven-plugin.version>1.11</checksum-maven-plugin.version>
+		<frontend-maven-plugin.version>1.15.0</frontend-maven-plugin.version>
+		<git-commit-id-maven-plugin.version>7.0.0</git-commit-id-maven-plugin.version>
+		<hibernate.version>6.3.1.Final</hibernate.version>
+		<jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
+		<jaxb-runtime.version>4.0.4</jaxb-runtime.version>
+		<jib-maven-plugin.architecture>amd64</jib-maven-plugin.architecture>
+		<jib-maven-plugin.image>eclipse-temurin:17-jre-focal</jib-maven-plugin.image>
+		<jib-maven-plugin.version>3.4.0</jib-maven-plugin.version>
+		<lifecycle-mapping.version>1.0.0</lifecycle-mapping.version>
+		<liquibase-plugin.password/>
+		<liquibase-plugin.url/>
+		<liquibase-plugin.username/>
+		<liquibase.version>4.24.0</liquibase.version>
+		<mapstruct.version>1.5.5.Final</mapstruct.version>
+		<maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
+		<maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
+		<maven-clean-plugin.version>3.3.2</maven-clean-plugin.version>
+		<maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+		<maven-eclipse-plugin.version>2.1</maven-eclipse-plugin.version>
+		<maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
+		<maven-failsafe-plugin.version>3.2.2</maven-failsafe-plugin.version>
+		<maven-idea-plugin.version>2.2.1</maven-idea-plugin.version>
+		<maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+		<maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
+		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+		<maven-site-plugin.version>3.12.1</maven-site-plugin.version>
+		<maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
+		<maven-war-plugin.version>3.4.0</maven-war-plugin.version>
+		<modernizer-maven-plugin.version>2.7.0</modernizer-maven-plugin.version>
+		<nohttp-checkstyle.version>0.0.11</nohttp-checkstyle.version>
+		<profile.api-docs/>
+		<profile.e2e/>
+		<profile.no-liquibase/>
+		<profile.test/>
+		<profile.tls/>
+		<properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
+		<spotless-maven-plugin.version>2.41.1</spotless-maven-plugin.version>
+		<validation-api.version>3.0.2</validation-api.version>
     </properties>
+
 	<dependencies>
+		<!-- DE Auto-completion -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<!-- The build-time tool that creates the executable JAR -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-loader-tools</artifactId>
+		</dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
@@ -25,11 +89,42 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.tomcat</groupId>
+					<artifactId>tomcat-native</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>jcache</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -52,30 +147,109 @@
 			<optional>true</optional>
 		</dependency>
         <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
-            <version>0.9.1</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
-            <version>1.9</version>
+            <version>1.10.0</version>
         </dependency>
-        <dependency>
-            <groupId>jakarta.xml.bind</groupId>
-            <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>2.3.2</version>
-        </dependency>
+		<!-- JWT -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.11.2</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.11.2</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.11.2</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- Hibernate -->
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>${hibernate.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-jcache</artifactId>
+			<version>${hibernate.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-jpamodelgen</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.7.7</version>
+		</dependency>
+		<!-- H2 Database Test -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>2.2.220</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Spring Boot Starter Test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- For mocking MVC in tests -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- Optional: For JSON path assertions in tests -->
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+			<version>2.9.0</version>
+			<scope>test</scope>
+		</dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
+			<version>6.3.0</version>
             <scope>test</scope>
         </dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-core</artifactId>
+			<version>6.5.4</version>
+		</dependency>
+		<!-- AWS SDK v2 S3 (staging log shipping) -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<version>2.25.0</version>
+		</dependency>
+		<!-- JAXB -->
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+		</dependency>
     </dependencies>
 
 	<build>
@@ -100,7 +274,34 @@
 					<target>17</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<parallel>none</parallel> <!-- Disable parallel execution -->
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
+	<profiles>
+		<profile>
+			<id>prod</id>
+			<properties>
+				<environment>production</environment>
+			</properties>
+			<build>
+				<!-- specific build configuration -->
+			</build>
+		</profile>
+		<profile>
+			<id>dev</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<environment>development</environment>
+			</properties>
+		</profile>
+	</profiles>
 </project>

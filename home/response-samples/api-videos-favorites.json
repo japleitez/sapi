@@ -1,0 +1,31 @@
+{
+    "greeting": "Here is your list of favorite videos, we are glad to know you keep up the good work!",
+    "tags": [
+        "energy",
+        "endurance"
+    ],
+    "videos": [
+        {
+            "code": "YG002",
+            "category": "YOGA",
+            "title": "Yoga Leg Stretching 2",
+            "duration": "12:30",
+            "coach": "Julia Hernandez",
+            "image": "https://i.ytimg.com/vi/FbmLx-PahO4/hqdefault.jpg",
+            "url": "https://www.youtube.com/embed/FbmLx-PahO4",
+            "audience": "Women",
+            "intensity": "Beginner, Intermediate",
+            "tags": [
+                "energy",
+                "endurance"
+            ],
+            "description": "This is a quick routine that is focused mainly on hips and hamstrings. Perfect for recovery/sore muscles and working on your flexibility",
+            "resume": "She is a LA-based yoga trainer who specialises in yoga therapeutics for scoliosis, stress, anxiety, depression, and many other modern day imbalances and health issues",
+            "player": "youtube",
+            "favorite": true,
+            "coach-website": "https://peecko.com/",
+            "coach-email": "julia.hernandez@gmail.com",
+            "coach-instagram": "julialux"
+        }
+    ]
+}

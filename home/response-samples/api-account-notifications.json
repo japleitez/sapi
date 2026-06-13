@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1,
+        "title": "Weloner Marathon Luxembourg ",
+        "message": "The Weloner Marathon is an annual marathon by night in Luxembourg which was held for the first time in 2006",
+        "image": "http://path/filename.jpg",
+        "video": "http://path/filename.jpg",
+        "date": "07 Dec 2023",
+        "viewed": true
+    },
+    {
+        "id": 2,
+        "title": "Meet Matheo, New Health Coach, We are boarding!",
+        "message": "Matheo is a Wellness Coach Certified, Matheo is specialized in Healing from chronic health issues and Healing Nutrition",
+        "image": "http://path/filename.jpg",
+        "video": "http://path/filename.jpg",
+        "date": "05 Dec 2023",
+        "viewed": true
+    }
+]

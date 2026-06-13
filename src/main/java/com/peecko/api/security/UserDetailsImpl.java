@@ -1,22 +1,15 @@
 package com.peecko.api.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.peecko.api.domain.User;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class UserDetailsImpl implements UserDetails {
 
     private final String name;
-
     private final String username;
-
     @JsonIgnore
     private final String password;
 
@@ -27,13 +20,6 @@ public class UserDetailsImpl implements UserDetails {
         this.username = username;
         this.password = password;
         this.authorities = authorities;
-    }
-
-    public static UserDetailsImpl build(User user) {
-        List<GrantedAuthority> authorities = user.roles().stream()
-            .map(role -> new SimpleGrantedAuthority(role.name()))
-            .collect(Collectors.toList());
-        return new UserDetailsImpl(user.name(), user.username(), user.password(), authorities);
     }
 
     public String getName() {
@@ -84,6 +70,11 @@ public class UserDetailsImpl implements UserDetails {
             return false;
         }
         return Objects.equals(name, ((UserDetailsImpl) o).name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 
 }

@@ -1,88 +1,50 @@
 package com.peecko.api.utils;
 
-import com.peecko.api.domain.Device;
-import com.peecko.api.domain.Video;
-import com.peecko.api.web.payload.request.SignInRequest;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 
 public abstract class Common {
 
-    private static final int MAX = 9;
-
-    private static final int MIN = 0;
-
-    public static final int MAX_ALLOWED = 3;
-
     public static final String OK = "OK";
-
     public static final String ERROR = "ERROR";
+    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final String USER_DATE_FORMAT = "dd-MM-yyyy";
 
-    private static final Random RANDOM = new Random();
+    public static final int MAX_DEVICES_ALLOWED = 3;
 
-    public static void main(String[] args) {
-        for(int i = 0; i < 10; i++) {
-            System.out.println(generateDigit());
-        }
+    private Common() {
+       throw new IllegalStateException("Utility class");
     }
 
-    public static int generateDigit() {
-        return RANDOM.nextInt((MAX - MIN) + 1) + MIN;
+    public static String instantAsString(Instant time) {
+        ZoneId zoneId = ZoneId.systemDefault();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(time, zoneId);
+        return localDateTime.format(formatter);
     }
 
-    public static String generatePinCode() {
-        StringBuilder pin = new StringBuilder();
-        for (int i = 0; i < 4; i++) {
-            pin.append(generateDigit());
-        }
-        return pin.toString();
+    public static Instant endOfDay() {
+        return LocalDate.now().atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant();
     }
 
-    public static void sleep(long seconds) {
-        try {
-            TimeUnit.SECONDS.sleep(seconds);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    public static String localDateAsString(LocalDate localDate) {
+        LocalDateTime localDateTime = localDate.atTime(LocalTime.MIDNIGHT);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(USER_DATE_FORMAT);
+        return localDateTime.format(formatter);
     }
 
-    public static List<String> getVideoTags(List<Video> videos) {
-        Set<String> set = new LinkedHashSet<>();
-        for(Video v: videos) {
-            set.addAll(v.getTags());
-        }
-        return set.stream().toList();
+    public static String lastDayOfMonthAsString() {
+        LocalDate lastDayOfMonth = lastDayOfMonth();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(USER_DATE_FORMAT);
+        return lastDayOfMonth.format(formatter);
     }
 
-    public static Video clone(Video v) {
-        Video nv = new Video();
-        nv.setCode(v.getCode());
-        nv.setCategory(v.getCategory());
-        nv.setTitle(v.getTitle());
-        nv.setDuration(v.getDuration());
-        nv.setCoach(v.getCoach());
-        nv.setCoachWebsite(v.getCoachWebsite());
-        nv.setCoachInstagram(v.getCoachInstagram());
-        nv.setCoachEmail(v.getCoachEmail());
-        nv.setImage(v.getImage());
-        nv.setUrl(v.getUrl());
-        nv.setAudience(v.getAudience());
-        nv.setIntensity(v.getIntensity());
-        nv.setTags(v.getTags());
-        nv.setDescription(v.getDescription());
-        nv.setResume(v.getResume());
-        nv.setPlayer(v.getPlayer());
-        nv.setFavorite(v.isFavorite());
-        return nv;
+    public static LocalDate lastDayOfMonth() {
+        LocalDate today = LocalDate.now();
+        YearMonth yearMonth = YearMonth.of(today.getYear(), today.getMonth());
+        return yearMonth.atEndOfMonth();
     }
 
-    public static Device mapToDevice(SignInRequest r) {
-        Device d = new Device();
-        d.setDeviceId(r.getDeviceId());
-        d.setPhoneModel(r.getPhoneModel());
-        d.setOsVersion(r.getOsVersion());
-        return d;
-    }
+
 
 }

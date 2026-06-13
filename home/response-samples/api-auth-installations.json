@@ -1,0 +1,17 @@
+{
+    "installations": [
+        {
+            "device-id": "C99FAE0E-1A09-4A2F-ACE2-49D021F6B2C3",
+            "phone-model": "iPhone",
+            "os-version": "iOS 17.1",
+            "installed-on": "2024-01-13 02:47:21"
+        },
+        {
+            "device-id": "1CB06F3D-1E11-4608-9349-D54DDC75CA0B",
+            "phone-model": "iPhone",
+            "os-version": "iOS 16.7.2",
+            "installed-on": "2023-11-28 16:43:54"
+        }
+    ],
+    "max-allowed": 3
+}

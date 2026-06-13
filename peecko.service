@@ -10,4 +10,4 @@ User=root
 Environment="videos.dir=/home/videos"
 ExecStart=/usr/bin/java -jar /artifact/api-0.0.1-SNAPSHOT.jar
 [Install]
-WantedBy=multi-user.target
+WantedBy=multi-userDTO.target

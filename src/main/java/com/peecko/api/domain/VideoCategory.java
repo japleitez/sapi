@@ -1,0 +1,105 @@
+package com.peecko.api.domain;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
+
+import java.io.Serializable;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+
+@Entity
+@Table(name = "video_category")
+ public class VideoCategory implements Serializable {
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
+    @SequenceGenerator(name = "sequenceGenerator")
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "pos")
+    private Integer pos;
+
+    @Column(name = "code", nullable = false)
+    private String code;
+
+    @Column(name = "title", nullable = false)
+    private String title;
+
+    @Column(name = "released")
+    private LocalDate released;
+
+    @Column(name = "archived")
+    private LocalDate archived;
+
+    @Column(name = "created")
+    private Instant created;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "videoCategory")
+    @JsonIgnoreProperties(value = { "videoCategory", "coach" }, allowSetters = true)
+    private Set<Video> videos = new HashSet<>();
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Instant getCreated() {
+        return created;
+    }
+
+    public void setCreated(Instant created) {
+        this.created = created;
+    }
+
+    public LocalDate getReleased() {
+        return released;
+    }
+
+    public void setReleased(LocalDate released) {
+        this.released = released;
+    }
+
+    public LocalDate getArchived() {
+        return archived;
+    }
+
+    public void setArchived(LocalDate archived) {
+        this.archived = archived;
+    }
+
+    /** shortcut for cache keys */
+    public String code() {
+        return code;
+    }
+
+    public Integer getPos() {
+        return pos;
+    }
+
+    public void setPos(Integer pos) {
+        this.pos = pos;
+    }
+
+}

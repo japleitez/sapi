@@ -1,0 +1,77 @@
+# ===================================================================
+# Spring Boot configuration for the "dev" profile.
+# This configuration overrides the application.yml file.
+# ===================================================================
+logging:
+  file:
+    name: logs/peecko-api-dev.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 7
+      total-size-cap: 100MB
+  level:
+    ROOT: WARN
+    com.peecko.api: INFO
+    org.springframework: WARN
+    org.springframework.web: WARN
+    org.hibernate: WARN
+    org.hibernate.sql: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
+
+server:
+  port: 8080
+  address: 127.0.0.1
+  shutdown: graceful
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,application/javascript,application/json,image/svg+xml
+    min-response-size: 1024
+
+spring:
+  devtools:
+    restart:
+      enabled: true
+      additional-exclude: static/**
+    livereload:
+      enabled: false # we use Webpack dev server + BrowserSync for livereload
+  jackson:
+    serialization:
+      indent-output: true
+  datasource:
+    url: jdbc:postgresql://pwa-rds-dev.cvswuu602c9n.eu-central-1.rds.amazonaws.com:5432/postgres?currentSchema=pwa
+    username: pwa_app
+    password: pwa-app-100$
+    driver-class-name: org.postgresql.Driver
+  mail:
+    host: smtp.office365.com
+    port: 587
+    username: info@peecko.com
+    password: InfoPeecko@2022
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
+  messages:
+    cache-duration: PT1S # 1 second, see the ISO 8601 standard
+  thymeleaf:
+    cache: false
+
+# ===================================================================
+    #datasource:
+    #url: jdbc:postgresql://192.168.178.125:5432/admin   # use localhost if DB is running locally
+    #username: admin
+    #password:
+# ===================================================================
+
+# ===================================================================
+# Application specific properties
+# ===================================================================
+app:
+  api:
+    jwtSecret: peeckoSecretKey
+    jwtExpirationMs: 36000000
+

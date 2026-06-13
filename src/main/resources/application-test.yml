@@ -1,0 +1,75 @@
+# ===================================================================
+# Spring Boot configuration for the "test" profile.
+# This configuration overrides the application.yml file.
+# Intended for a deployed test/QA environment (not JUnit tests —
+# those use src/test/resources/application-test.yml with H2).
+# ===================================================================
+
+logging:
+  file:
+    name: logs/peecko-api-test.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 7
+      total-size-cap: 100MB
+  level:
+    ROOT: INFO
+    com.peecko.api: DEBUG
+    org.springframework: INFO
+    org.springframework.web: INFO
+    org.hibernate: INFO
+    org.hibernate.sql: DEBUG
+    org.hibernate.type.descriptor.sql: WARN
+
+server:
+  port: 8081
+  address: 127.0.0.1
+  shutdown: graceful
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,application/javascript,application/json,image/svg+xml
+    min-response-size: 1024
+
+spring:
+  devtools:
+    restart:
+      enabled: false
+    livereload:
+      enabled: false
+  jackson:
+    serialization:
+      indent-output: true
+  jpa:
+    properties:
+      hibernate:
+        default_schema: pwa
+    show-sql: true
+  datasource:
+    url: jdbc:postgresql://pwa-rds-dev.cvswuu602c9n.eu-central-1.rds.amazonaws.com:5432/postgres?currentSchema=pwa
+    username: pwa_app
+    password: pwa-app-100$
+    driver-class-name: org.postgresql.Driver
+  mail:
+    host: smtp.office365.com
+    port: 587
+    username: info@peecko.com
+    password: InfoPeecko@2022
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
+  thymeleaf:
+    cache: true
+  web:
+    resources:
+      cache:
+        period: 0
+
+app:
+  api:
+    jwtSecret: peeckoSecretKey
+    jwtExpirationMs: 36000000
