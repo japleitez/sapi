@@ -295,6 +295,15 @@
 			</build>
 		</profile>
 		<profile>
+			<id>staging</id>
+			<properties>
+				<environment>staging</environment>
+			</properties>
+			<build>
+				<!-- specific build configuration -->
+			</build>
+		</profile>
+		<profile>
 			<id>dev</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
