@@ -34,6 +34,7 @@ public class MembershipResource extends BaseResource {
      */
     @PutMapping("/activate")
     public ResponseEntity<?> activate(@Valid @RequestBody ActivationRequest activationRequest) {
+        log.info("activate: license={}", activationRequest.license());
         String license = activationRequest.license();
         if (!StringUtils.hasLength(license) && license.length() != 20) {
             return ResponseEntity.ok(new Message(ERROR, message("membership.valid.nok")));

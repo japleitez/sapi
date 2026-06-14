@@ -10,7 +10,7 @@ logging:
     region: eu-central-1
   level:
     ROOT: INFO
-    com.peecko.api: DEBUG
+    com.peecko.api: INFO
     org.springframework: WARN
     org.springframework.web: WARN
     org.hibernate: WARN

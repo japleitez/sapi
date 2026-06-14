@@ -36,6 +36,7 @@ public class AccountResource extends BaseResource {
      */
     @GetMapping("/languages")
     public ResponseEntity<LanguageResponse> getLanguages() {
+        log.info("getLanguages");
         List<LanguageDTO> languages = languageService.findActiveLanguages();
         return ResponseEntity.ok(new LanguageResponse(Login.getUserLanguage().name(), languages));
     }
@@ -45,6 +46,7 @@ public class AccountResource extends BaseResource {
      */
     @PutMapping("/languages/{lang}")
     public ResponseEntity<Void> setUserLanguage(@PathVariable("lang")  String lang) {
+        log.info("setUserLanguage: lang={}", lang);
         apsUserService.setUserLanguage(getUsername(), Lang.fromString(lang));
         return ResponseEntity.ok().build();
     }
@@ -54,6 +56,7 @@ public class AccountResource extends BaseResource {
      */
     @GetMapping("/notifications")
     public ResponseEntity<List<NotificationDTO>> getNotifications() {
+        log.info("getNotifications");
         List<NotificationDTO> list = notificationService.getNotificationsForUserAndPeriod(Login.getUser(), PeriodUtils.current());
         return ResponseEntity.ok(list);
     }
@@ -63,6 +66,7 @@ public class AccountResource extends BaseResource {
      */
     @PutMapping("/notifications/{id}")
     public ResponseEntity<Void> addViewedNotification(@PathVariable Long id) {
+        log.info("addViewedNotification: id={}", id);
         notificationService.addViewedNotification(Login.getUserId(), id);
         return ResponseEntity.ok().build();
     }
@@ -72,6 +76,7 @@ public class AccountResource extends BaseResource {
      */
     @GetMapping("/help")
     public ResponseEntity<List<Help>> getHelp() {
+        log.info("getHelp");
         List<Help> helpList = helpService.findByLang(Login.getUserLanguage());
         return ResponseEntity.ok(helpList);
     }

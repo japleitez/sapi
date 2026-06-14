@@ -47,6 +47,7 @@ public class VideoResource extends BaseResource {
     @Licensed
     @GetMapping("/today")
     public ResponseEntity<TodayResponse> getTodayVideos() {
+        log.info("getTodayVideos");
         ApsUser apsUser = Login.getUser();
         String greeting = labelService.getCachedLabel("greeting.today", apsUser.getLanguage());
         List<Video> todayVideos = videoService.getCachedTodayVideos(Lang.AA);
@@ -61,6 +62,7 @@ public class VideoResource extends BaseResource {
      */
     @GetMapping("/categories")
     public ResponseEntity<LibraryResponse> getLibrary() {
+        log.info("getLibrary");
         ApsUser apsUser = Login.getUser();
         String greeting = labelService.getCachedLabel("greeting.library", apsUser.getLanguage());
         Map<VideoCategory, List<Video>>  latestVideos = videoService.getCachedLatestVideo(Lang.AA);
@@ -74,6 +76,7 @@ public class VideoResource extends BaseResource {
      */
     @GetMapping("/categories/{code}")
     public ResponseEntity<CategoryDTO> getCategory(@PathVariable String code) {
+        log.info("getCategory: code={}", code);
         VideoCategory category = videoCategoryService.findByCode(code).orElse(null);
         if (category == null) {
             return ResponseEntity.notFound().build();
@@ -90,6 +93,7 @@ public class VideoResource extends BaseResource {
      */
     @GetMapping("/favorites")
     public ResponseEntity<?> getFavorites() {
+        log.info("getFavorites");
         ApsUser apsUser = Login.getUser();
         String greeting = labelService.getCachedLabel("greeting.favorites", apsUser.getLanguage());
         List<Video> favoriteVideos = videoService.findUserFavoriteVideos(apsUser.getId());
@@ -103,6 +107,7 @@ public class VideoResource extends BaseResource {
      */
     @GetMapping("/playlists")
     public ResponseEntity<?> getPlaylists() {
+        log.info("getPlaylists");
         List<IdName> listIdNames = playListService.getPlayListsAsIdNames(Login.getUser());
         return ResponseEntity.ok(listIdNames);
     }
@@ -112,6 +117,7 @@ public class VideoResource extends BaseResource {
      */
     @GetMapping("/playlists/{id}")
     public ResponseEntity<?> getPlaylist(@PathVariable Long id) {
+        log.info("getPlaylist: id={}", id);
         PlayListDTO playlist = playListService.getPlayListAsDTO(id, Login.getUserId());
         return ResponseEntity.ok(Objects.requireNonNullElseGet(playlist, () -> new Message(ERROR, message("playlist.invalid"))));
     }
@@ -122,6 +128,7 @@ public class VideoResource extends BaseResource {
     @Licensed
     @PostMapping("/playlists/")
     public ResponseEntity<?> createPlaylist(@Valid @RequestBody CreatePlaylistRequest request) {
+        log.info("createPlaylist: name={}", request.name());
         if (!StringUtils.hasText(request.name())) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.name.required")));
         }
@@ -140,6 +147,7 @@ public class VideoResource extends BaseResource {
      */
     @DeleteMapping("/playlists/{id}")
     public ResponseEntity<List<IdName>> deletePlaylist(@PathVariable Long id) {
+        log.info("deletePlaylist: id={}", id);
         playListService.deletePlayList(id);
         List<IdName> listIdNames = playListService.getPlayListsAsIdNames(Login.getUser());
         return ResponseEntity.ok(listIdNames);
@@ -150,6 +158,7 @@ public class VideoResource extends BaseResource {
      */
     @PutMapping("/playlists/{playListId}/{videoCode}")
     public ResponseEntity<?> addVideoToPlayList(@PathVariable Long playListId, @PathVariable String videoCode) {
+        log.info("addVideoToPlayList: playListId={}, videoCode={}", playListId, videoCode);
         if (!playListService.existsById(playListId)) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.invalid")));
         }
@@ -170,6 +179,7 @@ public class VideoResource extends BaseResource {
      */
     @PutMapping("/playlists/{playListId}/{videoCode}/drag-beneath/{targetVideoCode}")
     public  ResponseEntity<?> moveVideoItemBelowAnother(@PathVariable Long playListId, @PathVariable String videoCode, @PathVariable String targetVideoCode) {
+        log.info("moveVideoItemBelowAnother: playListId={}, videoCode={}, targetVideoCode={}", playListId, videoCode, targetVideoCode);
         if (!playListService.existsById(playListId)) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.invalid")));
         }
@@ -193,6 +203,7 @@ public class VideoResource extends BaseResource {
      */
     @DeleteMapping("/playlists/{playListId}/bulk-delete")
     public ResponseEntity<?> removePlaylistVideoItems(@PathVariable Long playListId, @RequestBody List<String> codes) {
+        log.info("removePlaylistVideoItems: playListId={}, codes={}", playListId, codes);
         if (!playListService.existsById(playListId)) {
             return ResponseEntity.ok(new Message(ERROR, message("playlist.invalid")));
         }
@@ -206,6 +217,7 @@ public class VideoResource extends BaseResource {
      */
     @PutMapping("/favorites/{videoCode}")
     public ResponseEntity<?> addFavorite(@PathVariable String videoCode) {
+        log.info("addFavorite: videoCode={}", videoCode);
         videoService.addUserFavoriteVideo(Login.getUserId(), videoCode);
         return ResponseEntity.ok().build();
     }
@@ -215,6 +227,7 @@ public class VideoResource extends BaseResource {
      */
     @DeleteMapping("/favorites/{videoCode}")
     public ResponseEntity<?> removeFavorite(@PathVariable String videoCode) {
+        log.info("removeFavorite: videoCode={}", videoCode);
         videoService.removeUserFavoriteVideo(Login.getUserId(), videoCode);
         return ResponseEntity.ok().build();
     }
@@ -224,6 +237,7 @@ public class VideoResource extends BaseResource {
      */
     @DeleteMapping("/favorites")
     public ResponseEntity<?> removeFavorites() {
+        log.info("removeFavorites");
         videoService.deleteFavoriteVideosForUser(Login.getUserId());
         return ResponseEntity.ok().build();
     }

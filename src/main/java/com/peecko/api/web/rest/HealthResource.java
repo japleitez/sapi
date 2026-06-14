@@ -1,5 +1,7 @@
 package com.peecko.api.web.rest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/health")
 public class HealthResource {
 
+    private static final Logger log = LoggerFactory.getLogger(HealthResource.class);
+
     /**
      * Simple health check endpoint
      * Returns 200 OK with "ok" message
@@ -22,6 +26,7 @@ public class HealthResource {
      */
     @GetMapping
     public ResponseEntity<String> health() {
+        log.info("health");
         return ResponseEntity.status(HttpStatus.OK).body("ok");
     }
 
