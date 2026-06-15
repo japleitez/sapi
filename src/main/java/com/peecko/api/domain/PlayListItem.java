@@ -6,13 +6,14 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 
 @Entity
+@Table(name = "play_list_item")
 public class PlayListItem implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    @SequenceGenerator(name = "sequenceGenerator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "play_list_item_gen")
+    @SequenceGenerator(name = "play_list_item_gen", sequenceName = "play_list_item_seq")
     @Column(name = "id")
     private Long id;
 

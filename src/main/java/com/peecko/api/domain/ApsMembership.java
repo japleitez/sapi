@@ -12,11 +12,12 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Entity
 @Table(name = "aps_membership")
 public class ApsMembership implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    @SequenceGenerator(name = "sequenceGenerator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "aps_membership_gen")
+    @SequenceGenerator(name = "aps_membership_gen", sequenceName = "aps_membership_seq")
     @Column(name = "id")
     private Long id;
 
