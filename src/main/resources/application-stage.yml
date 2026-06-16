@@ -6,7 +6,7 @@
 logging:
   s3:
     bucket: peecko-api-logs-435496007267-eu-central-1-an
-    prefix: staging/
+    prefix: stage/
     region: eu-central-1
   level:
     ROOT: INFO

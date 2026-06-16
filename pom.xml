@@ -295,9 +295,9 @@
 			</build>
 		</profile>
 		<profile>
-			<id>staging</id>
+			<id>stage</id>
 			<properties>
-				<environment>staging</environment>
+				<environment>stage</environment>
 			</properties>
 			<build>
 				<!-- specific build configuration -->
