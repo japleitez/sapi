@@ -78,7 +78,7 @@
     </springProfile>
 
     <!-- ALL OTHER PROFILES: console only -->
-    <springProfile name="!dev,!staging,!prod,!test">
+    <springProfile name="!dev,!stage,!prod,!test">
         <root level="WARN">
             <appender-ref ref="CONSOLE"/>
         </root>
