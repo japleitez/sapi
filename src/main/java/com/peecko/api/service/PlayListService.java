@@ -46,7 +46,7 @@ public class PlayListService {
             throw new RuntimeException("Video already exists in the PlayList");
         }
         int nextPosition = playListItemRepo.findMaxPositionByPlayListId(playListId).orElse(-1) + 1;
-        PlayListItem item = new PlayListItem(playList, video).code(videoCode).position(nextPosition);
+        PlayListItem item = new PlayListItem(playList, video).position(nextPosition);
         playListItemRepo.save(item);
         playListRepo.updateCounter(playListId, nextPosition + 1);
     }
@@ -92,7 +92,7 @@ public class PlayListService {
 
     private PlayListItem findItemByCode(List<PlayListItem> items, String videoCode) {
         return items.stream()
-                .filter(item -> item.getCode().equals(videoCode))
+                .filter(item -> item.getVideo().getCode().equals(videoCode))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Video with code " + videoCode + " not found in this PlayList"));
     }
@@ -142,7 +142,7 @@ public class PlayListService {
 
         // Filter out items to be removed
         List<PlayListItem> remainingItems = items.stream()
-                .filter(item -> !codesToRemove.contains(item.getCode()))
+                .filter(item -> !codesToRemove.contains(item.getVideo().getCode()))
                 .collect(Collectors.toList());
 
         // If nothing changed, do nothing
@@ -155,7 +155,7 @@ public class PlayListService {
 
         // Delete items that should be removed
         List<PlayListItem> itemsToDelete = items.stream()
-                .filter(item -> codesToRemove.contains(item.getCode()))
+                .filter(item -> codesToRemove.contains(item.getVideo().getCode()))
                 .collect(Collectors.toList());
 
         playListItemRepo.deleteAll(itemsToDelete);
@@ -233,8 +233,8 @@ public class PlayListService {
         for (int i = 0; i < items.size(); i++) {
             PlayListItem currentItem = items.get(i);
             Video video = currentItem.getVideo();
-            String prevCode = (i > 0) ? items.get(i - 1).getCode() : null;
-            String nextCode = (i < items.size() - 1) ? items.get(i + 1).getCode() : null;
+            String prevCode = (i > 0) ? items.get(i - 1).getVideo().getCode() : null;
+            String nextCode = (i < items.size() - 1) ? items.get(i + 1).getVideo().getCode() : null;
 
             video.setFavorite(favIds.contains(video.getId()));
             VideoDTO videoDTO = videoMapper.toVideoDTO(video, Login.getUserLanguage());

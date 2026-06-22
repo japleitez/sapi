@@ -9,7 +9,7 @@ logging:
     prefix: prod/
     region: eu-central-1
   level:
-    ROOT: WARN
+    ROOT: INFO
     com.peecko.api: INFO
 
 management:
