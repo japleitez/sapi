@@ -11,11 +11,12 @@ import java.util.Objects;
 @Entity
 @Table(name = "aps_device")
 public class ApsDevice implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    @SequenceGenerator(name = "sequenceGenerator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "aps_device_gen")
+    @SequenceGenerator(name = "aps_device_gen", sequenceName = "aps_device_seq")
     @Column(name = "id")
     private Long id;
 

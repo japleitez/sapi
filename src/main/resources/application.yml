@@ -103,3 +103,8 @@ spring:
 springdoc:
   show-actuator: true
 
+# ===================================================================
+# Application specific properties
+# ===================================================================
+app:
+  version: @project.version@

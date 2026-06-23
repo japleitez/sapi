@@ -22,19 +22,19 @@
     </springProfile>
 
     <!-- STAGING: console + rolling file uploaded to S3 on each daily roll -->
-    <springProfile name="staging">
+    <springProfile name="stage">
         <springProperty name="LOG_S3_BUCKET" source="logging.s3.bucket"/>
         <springProperty name="LOG_S3_PREFIX" source="logging.s3.prefix" defaultValue="staging/"/>
         <springProperty name="LOG_S3_REGION" source="logging.s3.region" defaultValue="eu-central-1"/>
 
         <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>/var/log/peecko_api/peecko-api-staging.log</file>
+            <file>/var/log/peecko_api/peecko-api-stage.log</file>
             <encoder>
                 <pattern>${FILE_LOG_PATTERN}</pattern>
                 <charset>UTF-8</charset>
             </encoder>
             <rollingPolicy class="com.peecko.api.logging.S3RollingPolicy">
-                <fileNamePattern>/var/log/api/archived/peecko-api-staging.%d{yyyy-MM-dd}.log</fileNamePattern>
+                <fileNamePattern>/var/log/peecko_api/archived/peecko-api-stage.%d{yyyy-MM-dd}.log</fileNamePattern>
                 <maxHistory>7</maxHistory>
                 <totalSizeCap>500MB</totalSizeCap>
                 <s3BucketName>${LOG_S3_BUCKET}</s3BucketName>
@@ -78,7 +78,7 @@
     </springProfile>
 
     <!-- ALL OTHER PROFILES: console only -->
-    <springProfile name="!dev,!staging,!prod,!test">
+    <springProfile name="!dev,!stage,!prod,!test">
         <root level="WARN">
             <appender-ref ref="CONSOLE"/>
         </root>

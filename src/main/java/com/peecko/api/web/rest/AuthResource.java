@@ -62,6 +62,7 @@ public class AuthResource extends BaseResource {
      */
     @PostMapping("/signup")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest request) {
+        log.info("signUp: username={}, language={}", request.username(), request.language());
         String language = request.language();
         if (EmailValidator.isNotValid(request.username())) {
             return ResponseEntity.ok(message(ERROR,"email.valid.nok", language));
@@ -84,6 +85,7 @@ public class AuthResource extends BaseResource {
      */
     @PostMapping("/signin")
     public ResponseEntity<UserProfileResponse> signIn(@Valid @RequestBody SignInRequest request) {
+        log.info("signIn: username={}", request.username());
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.username(), request.password()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
@@ -97,6 +99,7 @@ public class AuthResource extends BaseResource {
      */
     @PostMapping("/signout")
     public ResponseEntity<?> signOut(@Valid @RequestBody SignOutRequest request, @RequestHeader("Authorization") String authHeader) {
+        log.info("signOut: username={}, deviceId={}", request.username(), request.deviceId());
         String jti = jwtUtils.getJtiFromAuthHeader(authHeader);
         if (jti != null) {
             invalidJwtService.invalidateJwt(jti);
@@ -110,6 +113,7 @@ public class AuthResource extends BaseResource {
      */
     @GetMapping("/installations")
     public ResponseEntity<?> getDevices() {
+        log.info("getDevices");
         List<DeviceDTO> list = apsUserService.getUserDevicesAsDTO(getUsername());
         return ResponseEntity.ok(new InstallationsResponse(MAX_DEVICES_ALLOWED, list));
     }
@@ -119,6 +123,7 @@ public class AuthResource extends BaseResource {
      */
     @GetMapping("/active/{username}")
     public ResponseEntity<?> activateUser(@PathVariable String username) {
+        log.info("activateUser: username={}", username);
         if (!StringUtils.hasText(username)) {
             return ResponseEntity.ok(message(ERROR,"email.required"));
         }
@@ -134,6 +139,7 @@ public class AuthResource extends BaseResource {
      */
     @PostMapping("/pincode")
     public ResponseEntity<?> generatePinCode(@Valid @RequestBody PinCodeRequest request) {
+        log.info("generatePinCode: username={}", request.username());
         if (apsUserService.doesNotExist(request.username())) {
             return ResponseEntity.badRequest().build();
         }
@@ -146,6 +152,7 @@ public class AuthResource extends BaseResource {
      */
     @PutMapping("/pincode/{requestId}")
     public ResponseEntity<?> isPinCodeValid(@PathVariable String requestId, @Valid @RequestBody PinValidationRequest request) {
+        log.info("isPinCodeValid: requestId={}", requestId);
         if (pinCodeService.isPinCodeValid(requestId, request.code())) {
             return ResponseEntity.ok(message(OK,"pin.valid.ok"));
         } else {
@@ -159,6 +166,7 @@ public class AuthResource extends BaseResource {
      */
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        log.info("resetPassword: requestId={}", request.requestId());
         if (PasswordValidator.isNotValid(request.password())) {
             return ResponseEntity.ok(message(ERROR,"password.valid.nok"));
         }
@@ -181,6 +189,7 @@ public class AuthResource extends BaseResource {
      */
     @PostMapping("/change-password")
     public ResponseEntity<?> updateUserPassword(@Valid @RequestBody UpdatePasswordRequest request) {
+        log.info("updateUserPassword: username={}", request.username());
         String username = request.username();
         if (!StringUtils.hasText(username)) {
             return ResponseEntity.ok(message(ERROR,"email.required"));
@@ -203,6 +212,7 @@ public class AuthResource extends BaseResource {
      */
     @PostMapping("/change-personal-info")
     public ResponseEntity<?> updateUserInfo(@Valid @RequestBody UpdateUserRequest request) {
+        log.info("updateUserInfo: username={}, name={}", request.username(), request.name());
         if (!StringUtils.hasText(request.username())) {
             return ResponseEntity.ok(message(ERROR,"email.required"));
         }
@@ -221,6 +231,7 @@ public class AuthResource extends BaseResource {
      */
     @PostMapping("/password/validate")
     public ResponseEntity<?> validatePassword(@Valid @RequestBody PasswordValidationRequest request) {
+        log.info("validatePassword");
         if (PasswordValidator.isValid(request.password())) {
             return ResponseEntity.ok(message(OK,"password.valid.ok"));
         } else {
@@ -233,6 +244,7 @@ public class AuthResource extends BaseResource {
      */
     @PostMapping("/username/validate")
     public ResponseEntity<?> validateUsername(@Valid @RequestBody EmailValidationRequest request) {
+        log.info("validateUsername: username={}", request.username());
         if (EmailValidator.isValid(request.username())) {
             return ResponseEntity.ok(message(OK,"email.valid.ok"));
         } else {
@@ -245,6 +257,7 @@ public class AuthResource extends BaseResource {
      */
     @PostMapping("/name/validate")
     public ResponseEntity<?> validateName(@Valid @RequestBody NameValidationRequest request) {
+        log.info("validateName: name={}", request.name());
         if (NameValidator.isValid(request.name())) {
             return ResponseEntity.ok(message(OK,"name.valid.ok"));
         } else {
@@ -257,6 +270,7 @@ public class AuthResource extends BaseResource {
      */
     @PostMapping("/profile")
     public ResponseEntity<?> getProfile(@Valid @RequestBody EmailValidationRequest request) {
+        log.info("getProfile: username={}", request.username());
         UserProfileResponse response = apsUserService.getProfile(request.username());
         return ResponseEntity.ok(response);
     }

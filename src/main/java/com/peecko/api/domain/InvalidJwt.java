@@ -8,11 +8,12 @@ import java.time.Instant;
 @Entity
 @Table(name = "invalid_jwt")
 public class InvalidJwt implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    @SequenceGenerator(name = "sequenceGenerator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "invalid_jwt_gen")
+    @SequenceGenerator(name = "invalid_jwt_gen", sequenceName = "invalid_jwt_seq")
     @Column(name = "id")
     private Long id;
 

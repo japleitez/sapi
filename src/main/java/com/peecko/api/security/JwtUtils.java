@@ -17,7 +17,7 @@ public class JwtUtils {
 
     /** 10 hours expiration = 36000000 = 1000 * 60 * 60 * 10 */
     @Value("${app.api.jwtExpirationMs:36000000}")
-    private int jwtExpirationMs;
+    private long jwtExpirationMs;
 
     private static final String JWT_SECRET = "Calcium.Copper.Iodine.Iron.Magnesium.Phosphorus.Potassium.Selenium.Sodium.Zinc";
 
@@ -58,14 +58,14 @@ public class JwtUtils {
 
     public String getJtiFromAuthToken(String authToken) {
         try {
-            return Jwts.parserBuilder().setSigningKey(getSecretKey()).build().parseClaimsJws(authToken).getBody().getId();
+            return Jwts.parserBuilder().setSigningKey(getSecretKey()).setAllowedClockSkewSeconds(60).build().parseClaimsJws(authToken).getBody().getId();
         } catch (Exception e) {
             return null;
         }
     }
 
     public Claims validateAuthToken(String authToken) {
-        return Jwts.parserBuilder().setSigningKey(getSecretKey()).build().parseClaimsJws(authToken).getBody();
+        return Jwts.parserBuilder().setSigningKey(getSecretKey()).setAllowedClockSkewSeconds(60).build().parseClaimsJws(authToken).getBody();
     }
 
 }

@@ -12,8 +12,8 @@ public class HelpItem implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    @SequenceGenerator(name = "sequenceGenerator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "help_item_gen")
+    @SequenceGenerator(name = "help_item_gen", sequenceName = "help_item_seq")
     @Column(name = "id")
     private Long id;
 

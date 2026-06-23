@@ -12,11 +12,12 @@ import java.util.List;
 @Entity
 @Table(name = "play_list")
 public class PlayList implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    @SequenceGenerator(name = "sequenceGenerator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "play_list_gen")
+    @SequenceGenerator(name = "play_list_gen", sequenceName = "play_list_seq")
     @Column(name = "id")
     private Long id;
 

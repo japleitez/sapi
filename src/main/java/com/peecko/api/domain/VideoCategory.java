@@ -12,10 +12,12 @@ import java.util.Set;
 @Entity
 @Table(name = "video_category")
  public class VideoCategory implements Serializable {
+
     private static final long serialVersionUID = 1L;
+
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    @SequenceGenerator(name = "sequenceGenerator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "video_category_gen")
+    @SequenceGenerator(name = "video_category_gen", sequenceName = "video_category_seq")
     @Column(name = "id")
     private Long id;
 
